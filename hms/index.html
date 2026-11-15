@@ -1,0 +1,953 @@
+<!doctype html>
+<html lang="nb">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Første skift</title>
+<meta name="description" content="HMS for truckførere, modul 1: finn farene på lageret, ta imot farlig gods og avgjør hva som er lov.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: faner for tre stasjoner og en skiftrapport. Scene til venstre, oppgavepanel til høyre. */
+:root{
+  --bg:#E8EBE9; --sheet:#F6F7F5; --ink:#17201D; --muted:#56625D; --line:#C7CFCB;
+  --accent:#D49500; --accent-soft:rgba(212,149,0,.16); --badge-ink:#1a1300;
+  --ok:#1D7A4C; --ok-soft:rgba(29,122,76,.12); --bad:#C0352B; --bad-soft:rgba(192,53,43,.10);
+  --s-wall:#DCE1DE; --s-wallline:#C8CFCB; --s-floor:#B7BEBA; --s-floorline:#A6AEA9;
+  --s-rack:#2F5D8A; --s-beam:#D9641E; --s-pallet:#9C7449; --s-box:#C9A26B; --s-boxline:#9A7A4D;
+  --s-truck:#E2A40A; --s-dark:#2B3236; --s-dark2:#4A555B; --s-tire:#16191B; --s-hub:#A3AEB3;
+  --s-skin:#DDAE8A; --s-vest:#C2DA2A; --s-pants:#34404A; --s-helmet:#F4F4EE; --s-hair:#3A2A1E;
+  --s-door:#8C979C; --s-dooropen:#3A4245; --s-green:#1E8A4F; --s-red:#C8332A;
+  --s-smoke:rgba(70,76,80,.42); --s-oil:#16181A; --s-chem:#6E8F3A; --s-paper:#FFFFFF;
+  --f-display:'Barlow Condensed','Arial Narrow',sans-serif;
+  --f-body:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F1312; --sheet:#161B1A; --ink:#E3E8E5; --muted:#95A19C; --line:#2A3230;
+    --accent:#F0B21A; --accent-soft:rgba(240,178,26,.14);
+    --ok:#4CC38A; --ok-soft:rgba(76,195,138,.13); --bad:#FF6B5E; --bad-soft:rgba(255,107,94,.12);
+    --s-wall:#222A28; --s-wallline:#2C3532; --s-floor:#191E1D; --s-floorline:#262D2B;
+    --s-rack:#4A7BAA; --s-beam:#D9702E; --s-pallet:#8A6640; --s-box:#A88553; --s-boxline:#6F5734;
+    --s-dark:#4B565C; --s-dark2:#6A777D; --s-hub:#6E7B81; --s-door:#5A666B; --s-dooropen:#0B0E0F;
+    --s-smoke:rgba(170,176,180,.30); --s-oil:#000; --s-paper:#E9ECEA;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F1312; --sheet:#161B1A; --ink:#E3E8E5; --muted:#95A19C; --line:#2A3230;
+  --accent:#F0B21A; --accent-soft:rgba(240,178,26,.14);
+  --ok:#4CC38A; --ok-soft:rgba(76,195,138,.13); --bad:#FF6B5E; --bad-soft:rgba(255,107,94,.12);
+  --s-wall:#222A28; --s-wallline:#2C3532; --s-floor:#191E1D; --s-floorline:#262D2B;
+  --s-rack:#4A7BAA; --s-beam:#D9702E; --s-pallet:#8A6640; --s-box:#A88553; --s-boxline:#6F5734;
+  --s-dark:#4B565C; --s-dark2:#6A777D; --s-hub:#6E7B81; --s-door:#5A666B; --s-dooropen:#0B0E0F;
+  --s-smoke:rgba(170,176,180,.30); --s-oil:#000; --s-paper:#E9ECEA;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{background:var(--bg)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:calc(20px + env(safe-area-inset-top,0px)) calc(40px + env(safe-area-inset-bottom,0px))}
+.wrap{max-width:1400px;margin:0 auto}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 24px;margin-bottom:16px}
+header .t{display:grid;gap:4px}
+h1{font-family:var(--f-display);font-weight:700;font-size:clamp(30px,4vw,40px);letter-spacing:.01em;margin:0;text-transform:uppercase;line-height:1}
+h1 span{color:var(--accent)}
+header p{margin:0;color:var(--muted);max-width:70ch}
+a.back{color:var(--muted);font-size:13px;text-decoration:none}
+a.back:hover{color:var(--ink)}
+h2{font-family:var(--f-display);font-weight:600;font-size:15px;letter-spacing:.08em;text-transform:uppercase;margin:0;color:var(--muted)}
+h3{font-family:var(--f-display);font-weight:700;font-size:26px;line-height:1.05;text-transform:uppercase;margin:0;letter-spacing:.01em}
+
+/* Lagkamp */
+.teams{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.team{display:flex;align-items:center;gap:8px;padding:6px 12px;border:1px solid var(--line);border-radius:4px;background:var(--sheet);font-weight:600}
+.team b{font-family:var(--f-display);font-size:24px;line-height:1;min-width:2ch;text-align:right}
+.team.turn{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);background:var(--accent-soft)}
+.solo{display:flex;align-items:center;gap:10px;padding:6px 12px;border:1px solid var(--line);border-radius:4px;background:var(--sheet);font-weight:600}
+.solo b{font-family:var(--f-display);font-size:24px;line-height:1}
+
+button{font:inherit;color:inherit}
+.btn{cursor:pointer;font-weight:600;font-size:14px;padding:8px 14px;border-radius:4px;border:1px solid var(--line);background:var(--sheet)}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--ink);color:var(--sheet);border-color:var(--ink)}
+.btn.primary:hover{background:var(--accent);border-color:var(--accent);color:var(--badge-ink)}
+.btn:focus-visible,.tab:focus-visible,.opt:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn:disabled{opacity:.5;cursor:default}
+
+nav.tabs{display:flex;gap:6px;overflow-x:auto;margin-bottom:14px;padding-bottom:2px}
+.tab{all:unset;cursor:pointer;flex:none;display:flex;align-items:center;gap:10px;padding:8px 14px 8px 8px;border:1px solid var(--line);border-radius:4px;background:var(--sheet)}
+.tab .code{font-family:var(--f-display);font-weight:700;font-size:18px;line-height:1;padding:6px 6px;min-width:34px;text-align:center;border-radius:3px;background:var(--ink);color:var(--sheet)}
+.tab .nm{font-weight:600;font-size:14px;line-height:1.15}
+.tab .nm small{display:block;font-weight:400;color:var(--muted);font-size:12px}
+.tab[aria-selected="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.tab[aria-selected="true"] .code{background:var(--accent);color:var(--badge-ink)}
+
+.station{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,380px);gap:16px;align-items:start}
+@media (max-width:980px){.station{grid-template-columns:minmax(0,1fr)}}
+.stage{background:var(--sheet);border:1px solid var(--line);border-radius:4px;padding:10px;min-width:0}
+.stagebar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 14px;padding:2px 4px 10px}
+.stagebar .stat{font-size:14px;color:var(--muted)}
+.stagebar .stat b{color:var(--ink);font-family:var(--f-display);font-size:20px}
+.panel{background:var(--sheet);border:1px solid var(--line);border-radius:4px;padding:16px;display:grid;gap:12px;min-width:0}
+.panel .ref{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.panel p{margin:0}
+.rule{border-left:3px solid var(--accent);background:var(--accent-soft);padding:8px 12px;border-radius:0 4px 4px 0;font-size:14px}
+.q{font-weight:600}
+.opts{display:grid;gap:8px}
+.opt{all:unset;cursor:pointer;display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start;padding:10px 12px;border:1px solid var(--line);border-radius:4px;background:var(--bg);font-size:14.5px}
+.opt .k{font-family:var(--f-display);font-weight:700;font-size:17px;line-height:1.2;width:20px}
+.opt:hover:not([disabled]){border-color:var(--muted)}
+.opt[disabled]{cursor:default}
+.opt.right{border-color:var(--ok);background:var(--ok-soft)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.opt.dim{opacity:.55}
+.fb{padding:10px 12px;border-radius:4px;font-size:14px}
+.fb.ok{background:var(--ok-soft);border:1px solid var(--ok)}
+.fb.no{background:var(--bad-soft);border:1px solid var(--bad)}
+.fb b{display:block}
+.muted{color:var(--muted)}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+
+/* Scene */
+svg.scene{display:block;width:100%;height:auto;border-radius:3px;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+.wall{fill:var(--s-wall)} .wl{stroke:var(--s-wallline);stroke-width:2} .floor{fill:var(--s-floor)} .fl{stroke:var(--s-floorline);stroke-width:2}
+.rack{fill:var(--s-rack)} .beam{fill:var(--s-beam)} .pal{fill:var(--s-pallet)}
+.box{fill:var(--s-box);stroke:var(--s-boxline);stroke-width:1.5}
+.tb{fill:var(--s-truck)} .td{fill:var(--s-dark)} .td2{fill:var(--s-dark2)} .tire{fill:var(--s-tire)} .hub{fill:var(--s-hub)}
+.skin{fill:var(--s-skin)} .vest{fill:var(--s-vest)} .pants{fill:var(--s-pants)} .helmet{fill:var(--s-helmet);stroke:rgba(0,0,0,.25);stroke-width:1} .hair{fill:var(--s-hair)}
+.shoe{fill:#1E2326} .sneak{fill:#F2F2F2;stroke:#888;stroke-width:1}
+.door{fill:var(--s-door);stroke:rgba(0,0,0,.25);stroke-width:1.5} .dooropen{fill:var(--s-dooropen)}
+.sg{fill:var(--s-green)} .sr{fill:var(--s-red)} .wh{fill:#fff} .paper{fill:var(--s-paper);stroke:var(--s-wallline);stroke-width:1.5}
+.smoke{fill:var(--s-smoke)} .oil{fill:var(--s-oil)} .chem{fill:var(--s-chem);opacity:.75}
+.lamp{fill:#FFF6D8;opacity:.9}
+.stxt{font-family:var(--f-display);font-weight:700;fill:#fff}
+.hit{fill:transparent;cursor:pointer}
+.hit:focus{outline:none}
+.hit:focus-visible{stroke:var(--accent);stroke-width:3;stroke-dasharray:6 4}
+.found-ring{fill:none;stroke:var(--ok);stroke-width:5}
+.found-num{fill:var(--ok)} .found-txt{font-family:var(--f-display);font-weight:700;fill:#fff;font-size:22px}
+.miss{stroke:var(--bad);stroke-width:5;stroke-linecap:round;animation:fade 1.1s ease-out forwards}
+.hint{fill:none;stroke:var(--accent);stroke-width:5;stroke-dasharray:10 8;animation:pulse 1s ease-in-out 3}
+@keyframes fade{0%{opacity:1}70%{opacity:1}100%{opacity:0}}
+@keyframes pulse{50%{opacity:.25}}
+@media (prefers-reduced-motion:reduce){.miss,.hint{animation:none}}
+
+/* Godsmottak */
+.cargo{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:14px;align-items:start}
+@media (max-width:640px){.cargo{grid-template-columns:minmax(0,1fr)}}
+.cargo svg{display:block;width:100%;height:auto;background:var(--bg);border-radius:3px}
+.papers{display:grid;gap:6px;font-size:14px}
+.papers dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:4px 12px}
+.papers dt{color:var(--muted)} .papers dd{margin:0;font-weight:600}
+.doc{display:flex;gap:8px;align-items:center}
+.doc i{font-style:normal;font-weight:700;width:20px;height:20px;display:inline-grid;place-items:center;border-radius:50%;font-size:13px;color:#fff}
+.doc i.y{background:var(--ok)} .doc i.n{background:var(--bad)}
+.say{font-style:italic;color:var(--muted);font-size:14px}
+.progress{display:flex;gap:4px}
+.progress span{width:22px;height:6px;border-radius:3px;background:var(--line)}
+.progress span.done{background:var(--ok)} .progress span.cur{background:var(--accent)}
+
+/* Scenariokort */
+.card{background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:18px;display:grid;gap:12px}
+.card .who{font-family:var(--f-display);font-weight:700;font-size:15px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+.card .sit{font-size:18px;line-height:1.45;margin:0;max-width:62ch}
+
+/* Rapport */
+.report{display:grid;gap:16px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:10px}
+.tile{background:var(--sheet);border:1px solid var(--line);border-radius:4px;padding:12px 14px}
+.tile .v{font-family:var(--f-display);font-weight:700;font-size:34px;line-height:1}
+.tile .l{font-size:13px;color:var(--muted)}
+.rep{background:var(--sheet);border:1px solid var(--line);border-radius:4px;padding:16px}
+.rep ul{margin:8px 0 0;padding-left:20px;display:grid;gap:6px}
+.rep li small{color:var(--muted)}
+.teach{font-size:14px;color:var(--muted);max-width:75ch}
+.teach b{color:var(--ink)}
+/* Språk */
+.hright{display:grid;gap:8px;justify-items:end}
+.langbox{display:grid;gap:6px;justify-items:end}
+.lang{display:flex;gap:4px}
+.lang button{cursor:pointer;font-family:var(--f-display);font-weight:700;font-size:15px;letter-spacing:.04em;padding:6px 10px;border-radius:4px;border:1px solid var(--line);background:var(--sheet);min-width:44px;min-height:36px}
+.lang button[aria-pressed="true"]{background:var(--ink);color:var(--sheet);border-color:var(--ink)}
+.lang button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.shownb{font-size:13px;color:var(--muted);display:flex;gap:6px;align-items:center;cursor:pointer}
+.langnote{font-size:13.5px;border-left:3px solid var(--accent);padding-left:10px}
+.nbt{display:block;font-size:.8em;font-weight:400;color:var(--muted);font-style:italic;margin-top:2px;line-height:1.3;text-transform:none;letter-spacing:0}
+
+/* Telefon */
+.scenewrap{overflow-x:auto;overscroll-behavior-x:contain;border-radius:3px}
+.swipe{display:none;margin:8px 4px 0;font-size:13px}
+@media (max-width:700px){
+  svg.scene{width:880px;max-width:none}
+  .swipe{display:block}
+}
+@media (max-width:560px){
+  .hright,.langbox{justify-items:start}
+  .panel{padding:14px}
+  .card{padding:14px}
+  .card .sit{font-size:16.5px}
+  .stage{padding:8px}
+  h3{font-size:22px}
+}
+@media print{
+  body{background:#fff;padding:0} nav.tabs,.teams,.solo,.noprint,a.back{display:none!important}
+  .rep,.tile{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="t">
+      <a class="back" href="../index.html" data-i18n="back">← Transport og logistikk</a>
+      <h1 data-i18n-html="title">Første <span>skift</span></h1>
+      <p data-i18n="intro">HMS for truckførere, modul 1. Gjør vernerunden, ta imot farlig gods og avgjør hva som er lov. Hvert svar viser hvilken leksjon det hører til.</p>
+      <p class="langnote" data-i18n="langNote" hidden></p>
+    </div>
+    <div class="hright">
+      <div class="langbox">
+        <div class="lang" role="group" aria-label="Språk / Language / Мова">
+          <button data-lang="nb" lang="nb">NO</button><button data-lang="en" lang="en">EN</button><button data-lang="uk" lang="uk">УКР</button>
+        </div>
+        <label class="shownb" hidden><input type="checkbox" id="showNo" checked> <span data-i18n="showNo">Vis norsk tekst</span></label>
+      </div>
+      <div class="row">
+        <div id="solo" class="solo"><span data-i18n="points">Poeng</span> <b id="soloScore">0</b></div>
+        <div id="teams" class="teams" hidden>
+          <div class="team" data-t="0"><span data-i18n="team1">Lag 1</span> <b>0</b></div>
+          <div class="team" data-t="1"><span data-i18n="team2">Lag 2</span> <b>0</b></div>
+        </div>
+        <button class="btn" id="teamToggle" aria-pressed="false">Lagkamp</button>
+      </div>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist" data-i18n-label="tablist" aria-label="Stasjoner">
+    <button class="tab" role="tab" aria-selected="true" data-tab="vern"><span class="code">1</span><span class="nm"><span data-i18n="tab1">Vernerunden</span><small data-i18n="tab1s">Leksjon 3, 4, 5, 6</small></span></button>
+    <button class="tab" role="tab" aria-selected="false" data-tab="gods"><span class="code">2</span><span class="nm"><span data-i18n="tab2">Godsmottaket</span><small data-i18n="tab2s">Leksjon 6 farlig gods</small></span></button>
+    <button class="tab" role="tab" aria-selected="false" data-tab="rett"><span class="code">3</span><span class="nm"><span data-i18n="tab3">Hva er riktig?</span><small data-i18n="tab3s">Leksjon 1, 2, 3, 5</small></span></button>
+    <button class="tab" role="tab" aria-selected="false" data-tab="rapport"><span class="code">R</span><span class="nm"><span data-i18n="tab4">Skiftrapport</span><small data-i18n="tab4s">Resultat og repetisjon</small></span></button>
+  </nav>
+
+  <!-- Stasjon 1 -->
+  <section id="tab-vern" class="station">
+    <div class="stage">
+      <div class="stagebar">
+        <div class="stat"><span data-i18n="found">Funnet</span> <b id="vFound">0</b> <span data-i18n="of">av</span> <b id="vTotal">0</b> &nbsp;·&nbsp; <span data-i18n="miss">Bom</span> <b id="vMiss">0</b></div>
+        <div class="row"><button class="btn" id="vHint" data-i18n="hint">Hint (−3)</button><button class="btn" id="vReset" data-i18n="restart">Start på nytt</button></div>
+      </div>
+      <div class="scenewrap"><svg class="scene" id="scene" viewBox="0 0 1320 640" role="img" data-i18n-label="sceneLabel" aria-label="Lagerhall med trucker, reoler, nødutgang og godsmottak"></svg></div>
+      <p class="swipe muted" data-i18n="swipe">Sveip sideveis for å se hele lageret.</p>
+    </div>
+    <aside class="panel" id="vPanel" aria-live="polite"></aside>
+  </section>
+
+  <!-- Stasjon 2 -->
+  <section id="tab-gods" class="station" hidden>
+    <div class="stage">
+      <div class="stagebar">
+        <div class="stat"><span data-i18n="shipment">Forsendelse</span> <b id="gNo">1</b> <span data-i18n="of">av</span> <b id="gTotal">0</b></div>
+        <div class="progress" id="gProg"></div>
+      </div>
+      <div class="cargo">
+        <svg id="gArt" viewBox="0 0 520 380" role="img" data-i18n-label="cargoLabel" aria-label="Forsendelsen"></svg>
+        <div class="papers" id="gPapers"></div>
+      </div>
+    </div>
+    <aside class="panel" id="gPanel" aria-live="polite"></aside>
+  </section>
+
+  <!-- Stasjon 3 -->
+  <section id="tab-rett" class="station" hidden>
+    <div class="stage">
+      <div class="stagebar">
+        <div class="stat"><span data-i18n="card">Kort</span> <b id="rNo">1</b> <span data-i18n="of">av</span> <b id="rTotal">0</b></div>
+        <div class="progress" id="rProg"></div>
+      </div>
+      <div class="card" id="rCard"></div>
+    </div>
+    <aside class="panel" id="rPanel" aria-live="polite"></aside>
+  </section>
+
+  <!-- Rapport -->
+  <section id="tab-rapport" class="report" hidden></section>
+</div>
+
+<script src="i18n.js"></script>
+<script>
+// ---------- Felles poeng og lagkamp ----------
+const state = { teamMode: false, turn: 0, team: [0, 0], solo: 0, station: { vern: 0, gods: 0, rett: 0 }, wrong: [] };
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const LETTERS = 'ABCDEF';
+function hash(s) { let h = 0; for (const c of s) h = (h * 31 + c.charCodeAt(0)) | 0; return 'q' + (h >>> 0).toString(36); }
+
+// ---------- Språk ----------
+// Innholdet er skrevet på norsk. Oversettelsene slås opp på hash av den norske teksten,
+// så en endret norsk tekst faller tilbake til norsk til den er oversatt på nytt.
+const LANG_KEY = 'truck-lang';
+let LANG = 'nb', showNo = true;
+try { const l = localStorage.getItem(LANG_KEY); if (['nb', 'en', 'uk'].includes(l)) LANG = l; showNo = localStorage.getItem(LANG_KEY + '-no') !== '0'; } catch (e) {}
+function t(key, v = {}, lang = LANG) {
+  const e = I18N.ui[key]; const s = e ? (e[lang] ?? e.nb) : key;
+  return s.replace(/\{(\w+)\}/g, (_, k) => v[k] ?? '');
+}
+const tr = s => (LANG === 'nb' || s == null) ? s : (I18N[LANG][hash(String(s))] ?? s);
+// Oversatt tekst med den norske under i liten skrift
+function bi(s) { const x = tr(s); return esc(x) + (x !== s && showNo ? `<span class="nbt" lang="nb">${esc(s)}</span>` : ''); }
+function applyLang() {
+  document.documentElement.lang = LANG;
+  document.querySelectorAll('[data-i18n]').forEach(el => el.textContent = t(el.dataset.i18n));
+  document.querySelectorAll('[data-i18n-html]').forEach(el => el.innerHTML = t(el.dataset.i18nHtml));
+  document.querySelectorAll('[data-i18n-label]').forEach(el => el.setAttribute('aria-label', t(el.dataset.i18nLabel)));
+  document.querySelectorAll('.hit').forEach(el => el.setAttribute('aria-label', t('examine')));
+  document.querySelectorAll('[data-lang]').forEach(b => b.setAttribute('aria-pressed', b.dataset.lang === LANG));
+  $('.langnote').hidden = LANG === 'nb';
+  $('.shownb').hidden = LANG === 'nb';
+  $('#showNo').checked = showNo;
+  $('#teamToggle').textContent = t(state.teamMode ? 'soloBtn' : 'teamBtn');
+}
+function redrawAll() {
+  vRenderStats(); vRender(); gRender(); rRender(); renderScore();
+  if (!$('#tab-rapport').hidden) renderReport();
+}
+document.querySelectorAll('[data-lang]').forEach(b => b.addEventListener('click', () => {
+  LANG = b.dataset.lang;
+  try { localStorage.setItem(LANG_KEY, LANG); } catch (e) {}
+  applyLang(); redrawAll();
+}));
+$('#showNo').addEventListener('change', e => {
+  showNo = e.target.checked;
+  try { localStorage.setItem(LANG_KEY + '-no', showNo ? '1' : '0'); } catch (err) {}
+  redrawAll();
+});
+
+function award(station, pts) {
+  state.station[station] = Math.max(0, state.station[station] + pts);
+  if (state.teamMode) state.team[state.turn] = Math.max(0, state.team[state.turn] + pts);
+  else state.solo = Math.max(0, state.solo + pts);
+  renderScore();
+}
+function endTurn() { if (state.teamMode) { state.turn = 1 - state.turn; renderScore(); } }
+function renderScore() {
+  $('#soloScore').textContent = state.solo;
+  document.querySelectorAll('.team').forEach(el => {
+    const i = +el.dataset.t;
+    el.querySelector('b').textContent = state.team[i];
+    el.classList.toggle('turn', state.turn === i);
+  });
+}
+$('#teamToggle').addEventListener('click', e => {
+  state.teamMode = !state.teamMode;
+  e.currentTarget.setAttribute('aria-pressed', state.teamMode);
+  e.currentTarget.textContent = t(state.teamMode ? 'soloBtn' : 'teamBtn');
+  $('#teams').hidden = !state.teamMode;
+  $('#solo').hidden = state.teamMode;
+  renderScore();
+});
+
+// Svaralternativer: rekkefølgen trekkes én gang og huskes, så visningen kan tegnes på nytt på et annet språk
+const newOrder = n => shuffle([...Array(n).keys()]);
+function optionsHTML(texts, order) {
+  return '<div class="opts">' + order.map((i, n) =>
+    `<button class="opt" data-i="${i}"><span class="k">${LETTERS[n]}</span><span>${bi(texts[i])}</span></button>`).join('') + '</div>';
+}
+function markOpts(box, chosen, answer) {
+  box.querySelectorAll('.opt').forEach(b => {
+    const i = +b.dataset.i;
+    b.disabled = true;
+    if (i === answer) b.classList.add('right');
+    else if (i === chosen) b.classList.add('wrong');
+    else b.classList.add('dim');
+  });
+}
+// På smale skjermer ligger panelet under scenen, så vi ruller dit
+const isNarrow = () => matchMedia('(max-width: 980px)').matches;
+function reveal(el) { if (isNarrow()) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+
+// ---------- Stasjon 1: Vernerunden ----------
+const HAZARDS = [
+  { id: 'nod', hit: [25, 288, 172, 242], c: [110, 420], r: 105,
+    title: 'Blokkert nødutgang', ref: 'Leksjon 3 · Brannvern og evakuering',
+    why: 'Paller står foran nødutgangen. Ved brann og kraftig røyk må alle kunne komme seg raskt ut korteste vei.',
+    rule: 'Rømningsveier skal holdes ryddige og må aldri blokkeres.',
+    q: 'Hva gjør du?', opts: ['Flytter pallene med en gang og sier fra til leder så det ikke skjer igjen', 'Lar dem stå, de skal hentes før skiftet er slutt', 'Henger opp en lapp om at døra er sperret'], a: 0 },
+  { id: 'brdor', hit: [995, 292, 145, 248], c: [1065, 420], r: 100,
+    title: 'Branndør kilt opp', ref: 'Leksjon 3 · Brannforebyggende tiltak',
+    why: 'Branndøra står åpen med en kile. Da kan brann og røyk spre seg fritt til resten av bygget.',
+    rule: 'Branndører skal være lukket. Når brannalarmen går, skal alle påse at åpne branndører lukkes.',
+    q: 'Det er tungvint å kjøre truck gjennom døra. Hva er riktig?', opts: ['Fjerne kilen og foreslå en dørholder som slipper når brannalarmen går', 'Kilen kan stå så lenge noen er i nærheten', 'Ta av dørpumpa så døra går lettere'], a: 0 },
+  { id: 'olje', hit: [640, 508, 125, 34], c: [700, 528], r: 58,
+    title: 'Oljesøl under trucken', ref: 'Leksjon 4 · Oljesøl og ytre miljø',
+    why: 'Hydraulikkolje drypper fra trucken. Gulvet blir glatt, og olje som når et sluk forurenser vann og jord.',
+    rule: 'Ha utstyr for førsteinnsats ved oljesøl, for eksempel absorberende matter. Slangebrudd er en vanlig årsak.',
+    q: 'Hva gjør du?', opts: ['Stopper trucken, legger ut absorbent og melder feilen', 'Spyler oljen ned i sluket', 'Kjører videre, det er bare noen dråper'], a: 0 },
+  { id: 'eksos', hit: [568, 296, 100, 112], c: [618, 350], r: 58,
+    title: 'Dieseltruck på tomgang inne', ref: 'Leksjon 4 · Forurensning fra drivstoff',
+    why: 'Eksos fra forbrenningsmotor forurenser lufta innendørs og er helseskadelig.',
+    rule: 'I rom uten eller med liten luftveksling er forbrenningsmotor ikke tillatt. Unngå unødvendig tomgang, både inne og ute.',
+    q: 'Hva er riktig?', opts: ['Slå av motoren når trucken står, og bruk eltruck innendørs når det går', 'Åpne et vindu, så går det fint', 'Det er greit så lenge det ikke lukter'], a: 0 },
+  { id: 'person', hit: [915, 168, 80, 140], c: [955, 240], r: 72,
+    title: 'Person løftes på pall', ref: 'Leksjon 3 og 5 · Personløft',
+    why: 'Gaflene er ikke laget for å løfte folk. Personen kan falle, og det finnes ingen sikring eller nødsenking.',
+    rule: 'Personer skal bare løftes med arbeidsutstyr og plattform som er beregnet for det. Personløft uten typegodkjent og CE-merket sikkerhetsutstyr er forbudt.',
+    q: 'En kollega ber deg løfte ham opp «bare et øyeblikk». Hva svarer du?', opts: ['Nei. Vi henter personløfter eller godkjent arbeidsplattform', 'Greit hvis han holder seg godt fast', 'Greit hvis jeg kjører helt rolig'], a: 0 },
+  { id: 'pvu', hit: [478, 382, 58, 145], c: [507, 455], r: 70,
+    title: 'Mangler verneutstyr', ref: 'Leksjon 5 · Personlig verneutstyr',
+    why: 'Personen står i reolgangen uten hjelm og i joggesko. Gods kan falle ned, og trucker kjører tett forbi.',
+    rule: 'Arbeidstaker plikter å bruke påbudt verneutstyr (aml. § 2-3). Arbeidsgiver skal stille det til rådighet og gi opplæring i bruken.',
+    q: 'Hva gjør du?', opts: ['Sier fra til personen, og til leder dersom utstyret mangler', 'Ingenting, det er personens eget valg', 'Kjører bare litt forsiktigere forbi'], a: 0 },
+  { id: 'kl8', hit: [1150, 428, 115, 108], c: [1210, 482], r: 62,
+    title: 'Lekk kartong med etsende stoff', ref: 'Leksjon 6 · Farlig gods',
+    why: 'Kartongen er merket med fareseddel klasse 8 (etsende) og lekker. Etsende stoff skader hud, øyne og materialer.',
+    rule: 'Skadet gods skal alltid avvises. Sikkerhetsdatabladet forteller hvilke vernetiltak som gjelder.',
+    q: 'Hva gjør du?', opts: ['Rører den ikke uten verneutstyr, sperrer av, varsler og sjekker sikkerhetsdatabladet', 'Teiper kartongen og setter den på lager', 'Tørker opp med papir og kaster det i restavfallet'], a: 0 },
+  { id: 'klatre', hit: [328, 190, 66, 145], c: [361, 262], r: 72,
+    title: 'Klatrer i reolen', ref: 'Leksjon 5 · Arbeid i høyden',
+    why: 'Reolen er ingen stige. Han kan falle, eller dra gods ned over seg.',
+    rule: 'Arbeid der det er fare for fall krever risikovurdering. Bruk utstyr laget for arbeid i høyden, for eksempel personløfter. Stige er bare til kortvarig arbeid og adkomst.',
+    q: 'Hva gjør du?', opts: ['Ber ham komme ned og henter egnet utstyr', 'Greit så lenge det er nederste bjelke', 'Holder i reolen så den ikke vipper'], a: 0 },
+  { id: 'slukker', hit: [216, 322, 64, 136], c: [248, 392], r: 64,
+    title: 'Brannslukkeren mangler', ref: 'Leksjon 3 · Brannvern',
+    why: 'Skiltet viser hvor slukkeren skal henge, men braketten er tom. Ved brann taper man verdifulle sekunder.',
+    rule: 'Alle skal kunne bruke håndslukkere og brannslanger. Brannvern er lovpålagt.',
+    q: 'Hva gjør du?', opts: ['Melder fra med en gang så den blir satt tilbake eller erstattet', 'Ingenting, det finnes en slukker i nabohallen', 'Tar ned skiltet så ingen leter der'], a: 0 },
+  { id: 'kontroll', hit: [660, 440, 62, 50], c: [691, 466], r: 40,
+    title: 'Sakkyndig kontroll er gått ut', ref: 'Leksjon 5 · Kontroll av arbeidsutstyr',
+    why: 'Kontrollmerket viser at siste sakkyndige kontroll var i mars 2025. Det er mer enn 12 måneder siden.',
+    rule: 'Sakkyndig kontroll skal gjøres minst hver 12. måned av en sakkyndig virksomhet, og føres i kontrollbok eller kontrollskjema.',
+    q: 'Hva gjør du?', opts: ['Bruker ikke trucken og melder fra til arbeidsgiver', 'Kjører, jeg tok jo kontroll før bruk i dag', 'Skriver ny dato på merket'], a: 0 },
+  { id: 'stabel', hit: [432, 105, 150, 118], c: [508, 168], r: 76,
+    title: 'Skjev last på øverste hylle', ref: 'Truck ABC · Stabling i reol',
+    why: 'Pallen henger utenfor bjelken og lasten heller. Den kan falle ned i gangen der folk går.',
+    rule: 'Last skal stå stabilt og hvile på begge bjelkene. Dårlig stablet gods skal rettes opp eller tas ned.',
+    q: 'Hva gjør du?', opts: ['Sperrer av under og tar pallen forsiktig ned med truck', 'Dytter den på plass med et kosteskaft fra gulvet', 'Lar den stå til noen andre oppdager det'], a: 0 }
+];
+const DECOYS = [
+  { id: 'instruks', hit: [208, 152, 80, 100], title: 'Branninstruks', text: 'I orden. Branninstruksen skal henge godt synlig, og alle skal kjenne den.' },
+  { id: 'melder', hit: [220, 258, 56, 54], title: 'Manuell brannmelder', text: 'I orden. Gjør deg kjent med hvor brannmelderne og rømningsveiene er.' },
+  { id: 'oye', hit: [1252, 272, 58, 112], title: 'Øyeskyllestasjon', text: 'I orden. Viktig nær godsmottaket, der det kan komme kjemikalier og etsende stoffer.' }
+];
+const vState = { found: {}, miss: 0, view: {}, answered: {} };
+
+// Tegnehjelpere
+const R = (x, y, w, h, c, ex = '') => `<rect x="${x}" y="${y}" width="${w}" height="${h}" class="${c}" ${ex}/>`;
+const C = (x, y, r, c) => `<circle cx="${x}" cy="${y}" r="${r}" class="${c}"/>`;
+function pallet(x, y, w) {
+  return R(x, y, w, 4, 'pal') + R(x + 2, y + 4, 12, 8, 'pal') + R(x + w / 2 - 6, y + 4, 12, 8, 'pal') + R(x + w - 14, y + 4, 12, 8, 'pal');
+}
+function boxes(x, y, w, h, cols = 2, rows = 2) {
+  let s = ''; const bw = w / cols, bh = h / rows;
+  for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) s += R(x + c * bw, y + r * bh, bw, bh, 'box');
+  return s;
+}
+function load(x, top, w, h, cols, rows) { return pallet(x, top + h, w) + boxes(x + 2, top, w - 4, h, cols, rows); }
+function person(x, foot, o = {}) {
+  let s = '';
+  s += R(x - 9, foot - 50, 8, 47, 'pants') + R(x + 1, foot - 50, 8, 47, 'pants');
+  const sh = o.sneakers ? 'sneak' : 'shoe';
+  s += R(x - 12, foot - 5, 12, 6, sh, 'rx="2"') + R(x + 1, foot - 5, 12, 6, sh, 'rx="2"');
+  s += R(x - 13, foot - 98, 26, 52, 'vest', 'rx="6"');
+  if (o.arms === 'up') s += R(x - 19, foot - 134, 7, 42, 'vest', 'rx="3"') + R(x + 12, foot - 134, 7, 42, 'vest', 'rx="3"') + C(x - 15.5, foot - 136, 4.5, 'skin') + C(x + 15.5, foot - 136, 4.5, 'skin');
+  else s += R(x - 19, foot - 94, 7, 40, 'vest', 'rx="3"') + R(x + 12, foot - 94, 7, 40, 'vest', 'rx="3"') + C(x - 15.5, foot - 52, 4.5, 'skin') + C(x + 15.5, foot - 52, 4.5, 'skin');
+  s += C(x, foot - 110, 11, 'skin');
+  if (o.helmet === false) s += `<path d="M${x - 11} ${foot - 111} a11 11 0 0 1 22 0 q-11 -5 -22 0z" class="hair"/>`;
+  else s += `<path d="M${x - 13} ${foot - 113} a13 13 0 0 1 26 0z" class="helmet"/>` + R(x - 16, foot - 114, 32, 4, 'helmet', 'rx="2"');
+  return s;
+}
+function seated(x, seatY) {
+  return R(x - 11, seatY - 46, 22, 44, 'vest', 'rx="6"') + R(x - 2, seatY - 8, 28, 9, 'pants', 'rx="3"') + C(x, seatY - 58, 10, 'skin') +
+    `<path d="M${x - 12} ${seatY - 60} a12 12 0 0 1 24 0z" class="helmet"/>` + R(x - 14, seatY - 61, 28, 4, 'helmet', 'rx="2"') +
+    R(x + 6, seatY - 40, 22, 6, 'vest', 'rx="3"');
+}
+function wheel(x, y, r) { return C(x, y, r, 'tire') + C(x, y, r * .45, 'hub'); }
+
+function drawScene() {
+  let s = '';
+  // Hall
+  s += R(0, 0, 1320, 520, 'wall');
+  for (let x = 165; x < 1320; x += 165) s += `<line x1="${x}" y1="0" x2="${x}" y2="520" class="wl"/>`;
+  s += `<line x1="0" y1="96" x2="1320" y2="96" class="wl"/>`;
+  for (let x = 120; x < 1320; x += 260) s += R(x, 22, 110, 10, 'lamp', 'rx="5"');
+  s += R(0, 520, 1320, 120, 'floor');
+  s += `<line x1="0" y1="520" x2="1320" y2="520" class="fl"/>`;
+  s += `<line x1="0" y1="582" x2="1320" y2="582" stroke="var(--accent)" stroke-width="6" stroke-dasharray="40 24" opacity=".75"/>`;
+  s += `<text x="1205" y="620" class="stxt" font-size="22" fill-opacity=".45" style="fill:var(--muted)">MOTTAK</text>`;
+
+  // Nødutgang med paller foran
+  s += R(40, 330, 100, 190, 'door') + R(52, 420, 76, 7, 'td2', 'rx="3"');
+  s += R(40, 296, 100, 26, 'sg', 'rx="2"') + `<text x="90" y="315" text-anchor="middle" class="stxt" font-size="15">NØDUTGANG</text>`;
+  s += load(28, 440, 92, 68, 2, 2) + load(34, 380, 80, 48, 2, 1) + load(104, 462, 82, 46, 2, 1);
+
+  // Vegg: branninstruks, brannmelder, tom slukkerbrakett
+  s += R(215, 160, 64, 84, 'paper') + R(215, 160, 64, 16, 'sr') + `<text x="247" y="172" text-anchor="middle" class="stxt" font-size="9">BRANNINSTRUKS</text>`;
+  for (let i = 0; i < 6; i++) s += R(222, 184 + i * 9, i % 3 === 2 ? 30 : 50, 3, 'td2', 'opacity=".5"');
+  s += R(228, 265, 38, 38, 'sr', 'rx="3"') + C(247, 284, 11, 'wh') + C(247, 284, 6, 'sr');
+  s += R(226, 330, 42, 42, 'sr', 'rx="3"') + R(242, 341, 11, 25, 'wh', 'rx="4"') + R(244, 336, 7, 6, 'wh') + `<path d="M251 339 l10 4" stroke="#fff" stroke-width="3"/>`;
+  s += R(238, 384, 18, 5, 'td2', 'rx="2"') + `<rect x="235" y="392" width="24" height="60" rx="8" fill="none" stroke="var(--muted)" stroke-width="2" stroke-dasharray="5 4"/>`;
+
+  // Reol
+  [300, 432, 564].forEach(x => s += R(x, 110, 9, 410, 'rack'));
+  for (let x = 304; x < 568; x += 132) for (let y = 130; y < 510; y += 28) s += R(x + 1, y, 2, 2, 'wall');
+  [220, 330, 440].forEach(y => s += R(300, y, 273, 10, 'beam'));
+  s += load(314, 160, 110, 48, 2, 1);
+  s += `<g transform="rotate(-8 520 208)">` + load(470, 150, 108, 46, 2, 1) + R(500, 118, 44, 32, 'box', 'transform="rotate(14 522 134)"') + `</g>`;
+  s += load(314, 270, 110, 48, 3, 1) + load(446, 262, 110, 56, 2, 1);
+  s += load(314, 380, 110, 48, 2, 1) + load(446, 380, 110, 48, 3, 1);
+  s += load(314, 460, 110, 48, 2, 1) + load(446, 470, 110, 38, 2, 1);
+  s += person(361, 330, { arms: 'up' });
+  s += person(507, 524, { helmet: false, sneakers: true });
+
+  // Truck A: diesel, tomgang, oljelekkasje, utgått kontroll
+  [[600, 360, 15], [618, 338, 20], [644, 314, 24], [612, 318, 13], [664, 300, 16]].forEach(([x, y, r]) => s += C(x, y, r, 'smoke'));
+  s += R(597, 374, 6, 36, 'td');
+  s += R(585, 405, 62, 96, 'td', 'rx="16"') + `<text x="616" y="440" text-anchor="middle" class="stxt" font-size="12">DIESEL</text>`;
+  s += R(605, 440, 125, 60, 'tb', 'rx="4"');
+  s += R(640, 328, 6, 114, 'td') + R(714, 328, 6, 114, 'td') + R(632, 324, 96, 8, 'td', 'rx="2"');
+  s += R(650, 408, 26, 32, 'td2', 'rx="4"') + seated(668, 440);
+  s += R(730, 276, 10, 226, 'td') + R(744, 276, 6, 226, 'td2');
+  s += R(748, 494, 72, 7, 'td') + load(752, 440, 66, 42, 2, 1);
+  s += wheel(628, 500, 22) + wheel(710, 498, 25);
+  s += R(666, 448, 50, 34, 'paper', 'rx="2"') + `<text x="691" y="460" text-anchor="middle" font-size="8" font-weight="700" fill="#333">KONTROLL</text><text x="691" y="476" text-anchor="middle" font-size="13" font-weight="700" fill="#C0352B">03/2025</text>`;
+  s += `<ellipse cx="702" cy="530" rx="48" ry="7" class="oil"/><ellipse cx="690" cy="528" rx="16" ry="2" fill="#fff" opacity=".18"/>` + C(698, 512, 2.6, 'oil') + C(701, 520, 2.2, 'oil');
+
+  // Truck B: personløft på gaflene
+  s += R(818, 430, 86, 70, 'tb', 'rx="6"') + R(806, 452, 20, 48, 'td', 'rx="6"');
+  s += R(834, 338, 6, 94, 'td') + R(888, 338, 6, 94, 'td') + R(828, 334, 72, 7, 'td', 'rx="2"');
+  s += seated(858, 432);
+  s += R(906, 196, 10, 306, 'td') + R(919, 196, 6, 306, 'td2');
+  s += R(925, 286, 8, 30, 'td') + R(925, 310, 74, 6, 'td') + pallet(928, 298, 66);
+  s += person(960, 298, {});
+  s += wheel(840, 500, 20) + wheel(896, 500, 20);
+
+  // Branndør kilt opp
+  s += R(1010, 330, 80, 190, 'dooropen') + `<rect x="1010" y="330" width="80" height="190" fill="none" stroke="var(--s-dark)" stroke-width="4"/>`;
+  s += `<polygon points="1090,330 1130,316 1130,534 1090,520" class="door"/>` + R(1118, 420, 6, 18, 'td2', 'rx="2"');
+  s += `<polygon points="1112,534 1138,534 1112,524" fill="#B07A3C" stroke="#7A5226" stroke-width="1.5"/>`;
+  s += R(1006, 294, 88, 28, 'sr', 'rx="2"') + `<text x="1050" y="307" text-anchor="middle" class="stxt" font-size="12">BRANNDØR</text><text x="1050" y="318" text-anchor="middle" class="stxt" font-size="9">HOLDES LUKKET</text>`;
+
+  // Mottak: lekk kartong klasse 8, øyeskylling
+  s += pallet(1160, 508, 100);
+  s += R(1168, 450, 84, 58, 'box') + `<polygon points="1252,450 1252,470 1236,450" fill="var(--s-boxline)"/>`;
+  s += `<path d="M1176 508 q8 -18 26 -14 q14 4 22 14z" class="chem"/><ellipse cx="1226" cy="530" rx="34" ry="5" class="chem"/>`;
+  s += `<g transform="translate(1208 474) scale(.26)">${diamond('8')}</g>`;
+  s += R(1258, 280, 46, 46, 'sg', 'rx="3"') + `<ellipse cx="1281" cy="298" rx="13" ry="7" fill="#fff"/><circle cx="1281" cy="298" r="4" class="sg"/><path d="M1274 310 v6 M1281 310 v8 M1288 310 v6" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>`;
+  s += R(1268, 334, 26, 48, 'paper', 'rx="3"') + R(1273, 340, 16, 34, 'sg', 'rx="5" opacity=".7"');
+
+  s += '<g id="marks"></g><g id="hits">';
+  HAZARDS.forEach(h => s += `<rect class="hit" data-h="${h.id}" x="${h.hit[0]}" y="${h.hit[1]}" width="${h.hit[2]}" height="${h.hit[3]}" tabindex="0" role="button" aria-label="${t('examine')}"/>`);
+  DECOYS.forEach(d => s += `<rect class="hit" data-d="${d.id}" x="${d.hit[0]}" y="${d.hit[1]}" width="${d.hit[2]}" height="${d.hit[3]}" tabindex="0" role="button" aria-label="${t('examine')}"/>`);
+  s += '</g><g id="fx"></g>';
+  $('#scene').innerHTML = s;
+}
+
+function vRenderStats() {
+  $('#vFound').textContent = Object.keys(vState.found).length;
+  $('#vTotal').textContent = HAZARDS.length;
+  $('#vMiss').textContent = vState.miss;
+}
+function vRender() {
+  const v = vState.view;
+  if (v.h) vShowHazard(HAZARDS.find(x => x.id === v.h));
+  else if (v.d) vShowDecoy(DECOYS.find(x => x.id === v.d));
+  else vIntro();
+}
+function vIntro() {
+  vState.view = {};
+  const left = HAZARDS.length - Object.keys(vState.found).length;
+  $('#vPanel').innerHTML = left ? `
+    <h2>${t('tab1')}</h2>
+    <h3>${t('vFind', { n: HAZARDS.length })}</h3>
+    <p>${t('vIntro1')}</p>
+    <p class="muted">${t('vIntro2')}</p>
+    <p class="muted">${left < HAZARDS.length ? t('vLeft', { n: left }) : ''}</p>` : `
+    <h2>${t('tab1')}</h2>
+    <h3>${t('vAll')}</h3>
+    <p>${t('vAllText', { n: vState.miss })}</p>
+    <div class="row"><button class="btn primary" data-go="gods">${t('toGods')}</button></div>`;
+}
+const vBackHTML = () => `<div class="row" style="margin-top:10px"><button class="btn" id="vBack">${t('keepLooking')}</button></div>`;
+function bindBack() { $('#vBack').addEventListener('click', () => { vIntro(); reveal($('#tab-vern .stage')); }); }
+function vShowHazard(h) {
+  vState.view = { h: h.id };
+  const ans = vState.answered[h.id] || (vState.answered[h.id] = { order: newOrder(h.opts.length), chosen: null });
+  $('#vPanel').innerHTML = `
+    <div class="ref">${bi(h.ref)}</div>
+    <h3>${bi(h.title)}</h3>
+    <p>${bi(h.why)}</p>
+    <div class="rule">${bi(h.rule)}</div>
+    <p class="q">${bi(h.q)}</p>
+    ${optionsHTML(h.opts, ans.order)}
+    <div id="vFb"></div>`;
+  const box = $('#vPanel .opts');
+  if (ans.chosen !== null) { markOpts(box, ans.chosen, h.a); vFeedback(ans.chosen === h.a); return; }
+  box.addEventListener('click', e => {
+    const b = e.target.closest('.opt'); if (!b || b.disabled) return;
+    const i = +b.dataset.i;
+    ans.chosen = i;
+    markOpts(box, i, h.a);
+    if (i === h.a) award('vern', 5);
+    else state.wrong.push({ st: 'vern', q: [h.title, h.q], a: h.opts[h.a], ref: h.ref });
+    vFeedback(i === h.a);
+    endTurn();
+  });
+}
+function vShowDecoy(d) {
+  vState.view = { d: d.id };
+  $('#vPanel').innerHTML = `<div class="ref">${t('noHazard')}</div><h3>${bi(d.title)}</h3><p>${bi(d.text)}</p>${vBackHTML()}`;
+  bindBack();
+}
+function vFeedback(ok) {
+  $('#vFb').innerHTML = `<div class="fb ${ok ? 'ok' : 'no'}"><b>${t(ok ? 'goodAction' : 'notQuite')}</b>${t(ok ? 'plus5' : 'seeGreen')}</div>${vBackHTML()}`;
+  bindBack();
+}
+function vMark(h, n) {
+  $('#marks').insertAdjacentHTML('beforeend',
+    `<circle cx="${h.c[0]}" cy="${h.c[1]}" r="${h.r}" class="found-ring"/>` +
+    `<circle cx="${h.c[0] + h.r * .72}" cy="${h.c[1] - h.r * .72}" r="16" class="found-num"/>` +
+    `<text x="${h.c[0] + h.r * .72}" y="${h.c[1] - h.r * .72 + 7}" text-anchor="middle" class="found-txt">${n}</text>`);
+}
+function scenePoint(e) {
+  const svg = $('#scene'), p = svg.createSVGPoint();
+  p.x = e.clientX; p.y = e.clientY;
+  return p.matrixTransform(svg.getScreenCTM().inverse());
+}
+function vActivate(el, e) {
+  if (el && el.dataset.h) {
+    const h = HAZARDS.find(x => x.id === el.dataset.h);
+    if (!vState.found[h.id]) {
+      vState.found[h.id] = Object.keys(vState.found).length + 1;
+      vMark(h, vState.found[h.id]);
+      award('vern', 10);
+      vRenderStats();
+    }
+    vShowHazard(h);
+    reveal($('#vPanel'));
+  } else if (el && el.dataset.d) {
+    vShowDecoy(DECOYS.find(x => x.id === el.dataset.d));
+    reveal($('#vPanel'));
+  } else if (e) {
+    const p = scenePoint(e);
+    vState.miss++;
+    award('vern', -2);
+    vRenderStats();
+    $('#fx').insertAdjacentHTML('beforeend', `<path class="miss" d="M${p.x - 12} ${p.y - 12} l24 24 M${p.x + 12} ${p.y - 12} l-24 24"/>`);
+    const fx = $('#fx'); if (fx.children.length > 6) fx.firstElementChild.remove();
+    endTurn();
+  }
+}
+$('#scene').addEventListener('click', e => vActivate(e.target.closest('.hit'), e));
+$('#scene').addEventListener('keydown', e => {
+  if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('hit')) { e.preventDefault(); vActivate(e.target); }
+});
+$('#vHint').addEventListener('click', () => {
+  const left = HAZARDS.filter(h => !vState.found[h.id]);
+  if (!left.length) return;
+  const h = left[Math.floor(Math.random() * left.length)];
+  award('vern', -3);
+  $('#fx').insertAdjacentHTML('beforeend', `<circle class="hint" cx="${h.c[0]}" cy="${h.c[1]}" r="${h.r + 30}"/>`);
+  setTimeout(() => $('#fx .hint')?.remove(), 3200);
+  // Hintet kan ligge utenfor synlig del av scenen på telefon
+  const wrap = $('.scenewrap'), svg = $('#scene');
+  if (wrap.scrollWidth > wrap.clientWidth) wrap.scrollTo({ left: h.c[0] / 1320 * svg.clientWidth - wrap.clientWidth / 2, behavior: 'smooth' });
+});
+$('#vReset').addEventListener('click', () => {
+  state.station.vern = 0;
+  Object.assign(vState, { found: {}, miss: 0, view: {}, answered: {} });
+  state.wrong = state.wrong.filter(w => w.st !== 'vern');
+  drawScene(); vRenderStats(); vIntro();
+});
+
+// ---------- Fareseddel ----------
+const CLASSES = {
+  '1': 'Klasse 1 – Eksplosive stoffer og gjenstander', '2': 'Klasse 2 – Gasser', '3': 'Klasse 3 – Brannfarlige væsker',
+  '4.1': 'Klasse 4.1 – Brannfarlige faste stoffer', '4.3': 'Klasse 4.3 – Utvikler brennbar gass i kontakt med vann',
+  '5.1': 'Klasse 5.1 – Oksiderende stoffer', '6.1': 'Klasse 6.1 – Giftige stoffer', '7': 'Klasse 7 – Radioaktivt materiale',
+  '8': 'Klasse 8 – Etsende stoffer', '9': 'Klasse 9 – Forskjellige farlige stoffer og gjenstander'
+};
+const FLAME = 'M0,-26 C9,-15 13,-6 9,4 C15,0 15,-8 13,-12 C22,-1 20,14 0,18 C-20,14 -22,-1 -11,-14 C-13,-6 -9,1 -7,4 C-12,-6 -7,-16 0,-26Z';
+// Fareseddel sentrert i 0,0, halv diagonal 100
+function diamond(cls) {
+  const D = 'M0,-100 L100,0 L0,100 L-100,0Z', I = 'M0,-90 L90,0 L0,90 L-90,0Z';
+  const num = (t, fill = '#000') => `<text x="0" y="78" text-anchor="middle" font-family="Barlow Condensed,Arial Narrow,sans-serif" font-weight="700" font-size="30" fill="${fill}">${t}</text>`;
+  switch (cls) {
+    case '3': return `<path d="${D}" fill="#D7262B"/><path d="${I}" fill="none" stroke="#000" stroke-width="3"/><path d="${FLAME}" transform="translate(0 -28) scale(1.6)" fill="#000"/>${num(3)}`;
+    case '2': return `<path d="${D}" fill="#1F8A4C"/><path d="${I}" fill="none" stroke="#fff" stroke-width="3"/><rect x="-11" y="-72" width="22" height="58" rx="10" fill="#fff"/><rect x="-5" y="-80" width="10" height="9" fill="#fff"/>${num(2, '#fff')}`;
+    case '5.1': return `<path d="${D}" fill="#F2C200"/><path d="${I}" fill="none" stroke="#000" stroke-width="3"/><circle cx="0" cy="-14" r="14" fill="none" stroke="#000" stroke-width="6"/><path d="${FLAME}" transform="translate(0 -48) scale(1.05)" fill="#000"/>${num('5.1')}`;
+    case '6.1': return `<path d="${D}" fill="#fff" stroke="#000" stroke-width="2"/><path d="${I}" fill="none" stroke="#000" stroke-width="3"/>
+      <path d="M-34 -2 L34 -30 M-34 -30 L34 -2" stroke="#000" stroke-width="9" stroke-linecap="round"/>
+      <circle cx="0" cy="-46" r="20" fill="#000"/><rect x="-11" y="-34" width="22" height="14" rx="3" fill="#000"/>
+      <circle cx="-8" cy="-48" r="6" fill="#fff"/><circle cx="8" cy="-48" r="6" fill="#fff"/>${num(6)}`;
+    case '8': return `<path d="${D}" fill="#fff" stroke="#000" stroke-width="2"/><path d="M-100,0 L100,0 L0,100Z" fill="#000"/><path d="${I}" fill="none" stroke="#000" stroke-width="3"/>
+      <rect x="-40" y="-62" width="12" height="34" transform="rotate(30 -34 -45)" fill="#000"/><rect x="24" y="-62" width="12" height="34" transform="rotate(-30 30 -45)" fill="#000"/>
+      <path d="M-24 -26 q4 8 0 12 q-4 -4 0 -12z M24 -26 q4 8 0 12 q-4 -4 0 -12z" fill="#000"/><rect x="-46" y="-8" width="92" height="6" fill="#000"/>${num(8, '#fff')}`;
+    case '9': { let st = ''; for (let x = -42; x <= 42; x += 14) st += `<line x1="${x}" y1="${-(92 - Math.abs(x)) + 8}" x2="${x}" y2="-8" stroke="#000" stroke-width="7"/>`;
+      return `<path d="${D}" fill="#fff" stroke="#000" stroke-width="2"/><path d="${I}" fill="none" stroke="#000" stroke-width="3"/>${st}<text x="0" y="74" text-anchor="middle" font-family="Barlow Condensed,Arial Narrow,sans-serif" font-weight="700" font-size="30" text-decoration="underline">9</text>`; }
+  }
+  return '';
+}
+
+// ---------- Stasjon 2: Godsmottaket ----------
+const CLASS_STEP = (cls) => ({ q: 'Hvilken fareklasse viser faresedlen?', cls });
+const DECIDE = ['Godta forsendelsen', 'Avvis – emballasjen er skadet', 'Avvis – godset mangler fareseddel', 'Avvis – dokumentene mangler'];
+const SHIPMENTS = [
+  { from: 'Fargehuset AS', what: 'Maling, brannfarlig', un: 'UN 1263', label: '3', pack: 'ok', docs: [1, 1], say: '«Fire kartonger maling til dere.»',
+    steps: [CLASS_STEP('3'), { q: 'Hva gjør du med forsendelsen?', opts: DECIDE, a: 0, why: 'Godset er riktig merket, emballasjen er hel og papirene er i orden. Da kan det tas imot.' }] },
+  { from: 'Batteriservice Nord', what: 'Batterisyre', un: 'UN 2796', label: '8', pack: 'leak', docs: [1, 1], say: '«Den ene kartongen fikk seg en smell på veien, men det går sikkert fint.»',
+    steps: [CLASS_STEP('8'), { q: 'Hva gjør du med forsendelsen?', opts: DECIDE, a: 1, why: 'Skadet gods skal alltid avvises. Her lekker et etsende stoff.' }] },
+  { from: 'Agro Grossist', what: 'Plantevernmiddel, flytende, giftig', un: 'UN 2902', label: '6.1', pack: 'ok', docs: [0, 1], say: '«Fraktbrevet ligger nok igjen på terminalen. Kan dere ikke bare signere?»',
+    steps: [CLASS_STEP('6.1'), { q: 'Hva gjør du med forsendelsen?', opts: DECIDE, a: 3, why: 'De påbudte transportdokumentene skal foreligge. Mangler som ikke kan rettes opp, betyr at godset avvises.' }] },
+  { from: 'Gass & Sveis AS', what: 'Nitrogen, komprimert', un: 'UN 1066', label: null, pack: 'ok', docs: [1, 1], say: '«Det er bare nitrogen, det er jo ikke farlig.»',
+    steps: [{ q: 'Flaskene skal ha fareseddel for klasse 2. Hva ser du?', opts: ['Faresedlene mangler', 'Faresedlene er riktige', 'Feil fareseddel, det står klasse 3'], a: 0, why: 'Det er ingen fareseddel på flaskene. Komprimert gass er farlig gods, selv om gassen ikke brenner.' },
+      { q: 'Hva gjør du med forsendelsen?', opts: DECIDE, a: 2, why: 'Godset skal være korrekt merket. Mangler som ikke kan rettes opp på stedet, betyr at godset avvises.' }] },
+  { from: 'Bassengeksperten', what: 'Kalsiumhypokloritt (bassengklor)', un: 'UN 2880', label: '5.1', pack: 'ok', docs: [1, 1], say: '«Bassengklor til butikken.»',
+    steps: [CLASS_STEP('5.1'), { q: 'Hva gjør du med forsendelsen?', opts: DECIDE, a: 0, why: 'Alt er i orden. Oksiderende stoffer kan gi kraftig brann sammen med brennbart materiale, så vis forsiktighet ved plassering.' }] },
+  { from: 'Elektro Engros', what: 'Litiumionbatterier i utstyr', un: 'UN 3481', label: '9', pack: 'ok', docs: [1, 1], say: '«Verktøybatterier, pakket i utstyret.»',
+    steps: [CLASS_STEP('9'), { q: 'Hva gjør du med forsendelsen?', opts: DECIDE, a: 0, why: 'Riktig merket, hel emballasje og papirer i orden.' }] },
+  { from: 'Drivstoff Vest', what: 'Tankbil med bensin', un: 'UN 1203', tank: true, label: '3', docs: [1, 1], say: '«Leveranse til tankanlegget deres.»',
+    steps: [{ q: 'Hva betyr det nederste tallet på det oransje skiltet (1203)?', opts: ['UN-nummeret, som forteller hvilket stoff det er', 'Farenummeret', 'Mengden i liter'], a: 0, why: 'Det nederste tallet er UN-nummeret. 1203 er bensin.' },
+      { q: 'Hva betyr det øverste tallet (33)?', opts: ['Farenummeret: svært brannfarlig væske', 'Det er 33 tonn last', 'Antall kammer i tanken'], a: 0, why: 'Det øverste tallet er farenummeret. Dobbelt tall betyr forsterket fare, her svært brannfarlig væske.' },
+      { q: 'Når brukes oransje skilt med tall?', opts: ['Ved transport i tank og i bulk', 'På alle biler med farlig gods', 'Bare på jernbane'], a: 0, why: 'Oransje skilt viser at det fraktes farlig gods. Skilt med tall brukes ved transport i tank, batterikjøretøy og bulk.' }] }
+];
+const gState = { i: 0, step: 0, done: [] };
+
+function gArt(sh) {
+  let s = `<rect x="0" y="300" width="520" height="80" class="floor"/>`;
+  if (sh.tank) {
+    s += `<rect x="70" y="140" width="300" height="120" rx="60" fill="#C9D0D3" stroke="#7D888D" stroke-width="3"/>`;
+    s += `<rect x="372" y="160" width="100" height="110" rx="8" class="tb"/><rect x="420" y="172" width="42" height="44" rx="4" fill="#9EC3D6"/>`;
+    s += `<rect x="60" y="260" width="420" height="16" class="td"/>` + wheel(120, 290, 26) + wheel(190, 290, 26) + wheel(430, 290, 26);
+    s += `<g transform="translate(160 160)"><rect width="120" height="80" fill="#F07F12" stroke="#000" stroke-width="4"/><line x1="0" y1="40" x2="120" y2="40" stroke="#000" stroke-width="4"/>
+      <text x="60" y="33" text-anchor="middle" font-family="Barlow Condensed,Arial Narrow,sans-serif" font-weight="700" font-size="32">33</text>
+      <text x="60" y="73" text-anchor="middle" font-family="Barlow Condensed,Arial Narrow,sans-serif" font-weight="700" font-size="32">1203</text></g>`;
+    s += `<g transform="translate(320 200) scale(.28)">${diamond('3')}</g>`;
+    return s;
+  }
+  if (sh.label === null) {
+    for (let k = 0; k < 4; k++) {
+      const x = 120 + k * 72;
+      s += `<rect x="${x}" y="70" width="56" height="232" rx="26" fill="#5B7FA0" stroke="#2D4559" stroke-width="3"/><rect x="${x + 18}" y="48" width="20" height="26" rx="4" class="td"/>`;
+      s += `<rect x="${x + 10}" y="130" width="36" height="36" fill="none" stroke="#fff" stroke-width="2" stroke-dasharray="5 4" opacity=".7"/>`;
+    }
+    s += `<rect x="100" y="210" width="310" height="12" class="td2" rx="3"/>`;
+    return s;
+  }
+  s += pallet(90, 300 - 12, 340).replace(/height="4"/, 'height="6"');
+  const bx = [[100, 168, 155, 120], [265, 168, 155, 120], [140, 50, 240, 118]];
+  bx.forEach(([x, y, w, h], k) => {
+    s += `<rect x="${x}" y="${y}" width="${w}" height="${h}" class="box"/>`;
+    s += `<rect x="${x + 10}" y="${y + 10}" width="44" height="16" class="paper"/>`;
+    if (k < 2) s += `<g transform="translate(${x + w / 2} ${y + h / 2 + 4}) scale(.34)">${diamond(sh.label)}</g>`;
+    else s += `<g transform="translate(${x + w / 2} ${y + h / 2}) scale(.42)">${diamond(sh.label)}</g>`;
+  });
+  if (sh.pack === 'leak') {
+    s += `<polygon points="420,168 420,212 382,168" fill="var(--s-boxline)"/><path d="M270 288 q30 -36 80 -30 q40 6 70 30z" class="chem"/>`;
+    s += `<ellipse cx="380" cy="312" rx="80" ry="10" class="chem"/>`;
+  }
+  return s;
+}
+function gPapers(sh) {
+  const d = (ok, key) => `<div class="doc"><i class="${ok ? 'y' : 'n'}">${ok ? '✓' : '✗'}</i>${t(key)}</div>`;
+  return `<h2>${t('papers')}</h2>
+    <dl><dt>${t('sender')}</dt><dd>${esc(sh.from)}</dd><dt>${t('contents')}</dt><dd>${bi(sh.what)}</dd><dt>${t('unNo')}</dt><dd>${esc(sh.un)}</dd></dl>
+    ${d(sh.docs[0], 'docTransport')}${d(sh.docs[1], 'docInstr')}
+    <p class="say">${t('driver')} ${bi(sh.say)}</p>`;
+}
+// Forklaringen til fareklasse-spørsmålet settes sammen av klassenavnet
+function clsWhy(cls) {
+  const x = t('clsWhy', { c: LANG === 'nb' ? CLASSES[cls].toLowerCase() : tr(CLASSES[cls]) });
+  return esc(x) + (LANG !== 'nb' && showNo ? `<span class="nbt" lang="nb">${esc(t('clsWhy', { c: CLASSES[cls].toLowerCase() }, 'nb'))}</span>` : '');
+}
+function gProgress() {
+  $('#gProg').innerHTML = SHIPMENTS.map((_, i) => `<span class="${gState.done[i] ? 'done' : i === gState.i ? 'cur' : ''}"></span>`).join('');
+}
+function gRender(scroll) {
+  const sh = SHIPMENTS[gState.i];
+  $('#gNo').textContent = gState.i + 1; $('#gTotal').textContent = SHIPMENTS.length;
+  $('#gArt').innerHTML = gArt(sh);
+  $('#gPapers').innerHTML = gPapers(sh);
+  gProgress();
+  gStep();
+  if (scroll) reveal($('#tab-gods .stage'));
+}
+function gStep() {
+  const sh = SHIPMENTS[gState.i], st = sh.steps[gState.step];
+  if (!gState.cur) {
+    let texts, answer;
+    if (st.cls) {
+      const others = shuffle(Object.keys(CLASSES).filter(k => k !== st.cls)).slice(0, 3);
+      texts = [st.cls, ...others].map(k => CLASSES[k]); answer = 0;
+    } else { texts = st.opts; answer = st.a; }
+    gState.cur = { texts, answer, order: newOrder(texts.length), chosen: null };
+  }
+  const c = gState.cur;
+  $('#gPanel').innerHTML = `
+    <div class="ref">${t('godsRef')}</div>
+    <h3>${bi(sh.what)}</h3>
+    <p class="muted">${t('qOf', { a: gState.step + 1, b: sh.steps.length })}</p>
+    <p class="q">${bi(st.q)}</p>
+    ${optionsHTML(c.texts, c.order)}
+    <div id="gFb"></div>`;
+  const box = $('#gPanel .opts');
+  const feedback = () => {
+    const ok = c.chosen === c.answer;
+    const last = gState.step === sh.steps.length - 1, lastSh = gState.i === SHIPMENTS.length - 1;
+    $('#gFb').innerHTML = `<div class="fb ${ok ? 'ok' : 'no'}"><b>${t(ok ? 'rightPts' : 'wrong')}</b>${st.cls ? clsWhy(st.cls) : bi(st.why)}</div>
+      <div class="row" style="margin-top:10px"><button class="btn primary" id="gNext">${t(!last ? 'nextQ' : lastSh ? 'nextStation' : 'nextShip')}</button></div>`;
+    $('#gNext').addEventListener('click', () => {
+      gState.cur = null;
+      if (!last) { gState.step++; gStep(); return; }
+      gState.done[gState.i] = true;
+      if (lastSh) { show('rett'); return; }
+      gState.i++; gState.step = 0; gRender(true);
+    });
+  };
+  if (c.chosen !== null) { markOpts(box, c.chosen, c.answer); feedback(); return; }
+  box.addEventListener('click', e => {
+    const b = e.target.closest('.opt'); if (!b || b.disabled) return;
+    const i = +b.dataset.i;
+    c.chosen = i;
+    markOpts(box, i, c.answer);
+    if (i === c.answer) award('gods', 10);
+    else state.wrong.push({ st: 'gods', q: [sh.what, st.q], a: c.texts[c.answer], ref: 'Leksjon 6' });
+    endTurn();
+    feedback();
+  });
+}
+
+// ---------- Stasjon 3: Hva er riktig? ----------
+const CARDS = [
+  { who: 'Lærlingen', ref: 'Leksjon 1 · Krav til bruker',
+    sit: 'Jonas er 17 år og lærling på lageret. Det er travelt, og sjefen spør om han kan kjøre truck alene i helga.',
+    opts: ['Nei. Han kan få praktisk opplæring under tilsyn av en erfaren person, men ikke kjøre selvstendig før han er 18', 'Ja, hvis han har fått nok opplæring', 'Ja, hvis arbeidsgiver har gjort en risikovurdering'], a: 0,
+    why: 'Arbeidsutstyr som kan gi særlig fare for helseskade krever at brukeren er fylt 18 år. Fra 17 år kan man få praktisk opplæring under tilsyn.' },
+  { who: 'Ny truck', ref: 'Leksjon 1 · Utstyrsspesifikk opplæring',
+    sit: 'Sara har kompetansebevis for truck. Første dag i ny jobb står det en skyvemasttruck av et merke hun aldri har kjørt.',
+    opts: ['Hun må få utstyrsspesifikk opplæring på denne trucken, og det skal dokumenteres', 'Kompetansebeviset holder, hun kan kjøre', 'Hun må ta hele truckførerkurset på nytt'], a: 0,
+    why: 'Sertifisert opplæring gir ikke automatisk rett til å bruke alt utstyr på beviset. Utstyrsspesifikk opplæring kommer i tillegg og skal dokumenteres skriftlig.' },
+  { who: 'Mistet beviset', ref: 'Leksjon 1 · Kompetansebevis',
+    sit: 'Ali har mistet lommeboka med kompetansebeviset sitt.',
+    opts: ['Han kontakter opplæringsvirksomheten eller registeret som utstedte beviset', 'Han melder det til politiet og får nytt der', 'Han må ta ny prøve, beviset må fornyes uansett'], a: 0,
+    why: 'Nytt bevis får man fra den som utstedte det. Kompetansebevis for arbeidsutstyr trenger ikke fornyes, det varer livet ut.' },
+  { who: 'Fra utlandet', ref: 'Leksjon 1 · Kompetansebevis for EØS-borgere',
+    sit: 'Marta har nettopp flyttet fra Polen og har polsk kompetansebevis for truck.',
+    opts: ['Hun må søke Arbeidstilsynet og vise vedtaket sammen med det polske beviset', 'Polsk bevis gjelder direkte i hele EØS', 'Hun må ta norsk førerkort klasse B først'], a: 0,
+    why: 'Utenlandsk kompetansebevis gjelder i Norge bare sammen med skriftlig vedtak fra Arbeidstilsynet.' },
+  { who: 'Morgenen etter', ref: 'Leksjon 3 · Alkohol og medisiner',
+    sit: 'Per var på julebord og drakk til klokka to. Klokka sju skal han kjøre truck, og han føler seg grei.',
+    opts: ['Han skal ikke kjøre. Han kan fortsatt være påvirket, og alkohol gir lengre reaksjonstid og dårligere vurderingsevne', 'Det er greit når han føler seg edru', 'Det er greit så lenge han bare kjører inne på lageret'], a: 0,
+    why: 'Alkohol svekker syn, oppmerksomhet og vurderingsevne, men øker selvsikkerheten. Over 0,2 promille regnes man som påvirket.' },
+  { who: 'Kontroll før bruk', ref: 'Leksjon 5 · Kontroll av arbeidsutstyr',
+    sit: 'Under kontroll før bruk oppdager du at hornet på trucken ikke virker.',
+    opts: ['Stopper, bruker ikke trucken og rapporterer feilen til arbeidsgiver', 'Kjører forsiktig og roper når det trengs', 'Fikser det selv etter skiftet'], a: 0,
+    why: 'Feil på arbeidsutstyret betyr stopp og rapport til arbeidsgiver eller rette person i bedriften.' },
+  { who: 'Innkjøpet', ref: 'Leksjon 2 og 5 · CE-merking og samsvarserklæring',
+    sit: 'Bedriften kjøper en ny truck. Hvordan vet dere at den oppfyller kravene?',
+    opts: ['Den er CE-merket og har samsvarserklæring og bruksanvisning på norsk', 'Ordrebekreftelsen fra leverandøren sier det', 'Den er ny, så den er godkjent'], a: 0,
+    why: 'Maskiner produsert etter 1995 skal være CE-merket og ha samsvarserklæring. Arbeidsmiljøloven krever bruksanvisning på norsk.' },
+  { who: 'HMS-arbeidet', ref: 'Leksjon 2 · Internkontrollforskriften',
+    sit: 'En ny bedrift har ingen rutiner for HMS. Hvem har ansvaret for å sette i gang?',
+    opts: ['Eier eller arbeidsgiver', 'Arbeidstilsynet', 'Verneombudet'], a: 0,
+    why: 'Arbeidsgiver skal sørge for at loven følges (aml. § 2-1). Arbeidstakerne har plikt til å delta aktivt.' },
+  { who: 'Etter ulykken', ref: 'Leksjon 3 · Straffebestemmelser',
+    sit: 'En truckfører har gang på gang brutt sikkerhetsreglene, og det ender med en ulykke. Kan en arbeidstaker straffes etter arbeidsmiljøloven?',
+    opts: ['Ja, med bøter og/eller fengsel', 'Nei, bare arbeidsgiver kan straffes', 'Nei, bare med en skriftlig advarsel'], a: 0,
+    why: 'Arbeidsmiljøloven § 19-2 gjelder arbeidstakere. Uaktsomt brudd gir bøter. Forsettlig eller grovt uaktsomt brudd gir bøter eller fengsel inntil 3 måneder, og ved særlig skjerpende omstendigheter inntil 1 år.' },
+  { who: 'Kaldlageret', ref: 'Leksjon 5 · Sakkyndig kontroll',
+    sit: 'En truck har stått ubrukt i åtte måneder. Nå skal den i bruk igjen.',
+    opts: ['Den skal ha sakkyndig kontroll først hvis stillstanden kan gi fare', 'Kontroll før bruk er nok', 'Lad batteriet, så er den klar'], a: 0,
+    why: 'Sakkyndig kontroll kreves blant annet når utstyret ikke har vært brukt de siste 6 månedene og det kan gi fare.' },
+  { who: 'Alvorlig skade', ref: 'Leksjon 3 · Førstehjelp',
+    sit: 'En kollega er alvorlig skadet etter en klemulykke. Hvem ringer du først?',
+    opts: ['Ambulanse, 113', 'Arbeidsgiver', 'Arbeidstilsynet'], a: 0,
+    why: 'Liv først. Ring 113, gi førstehjelp, og varsle arbeidsgiver etterpå. HLR er 30 kompresjoner og 2 innblåsinger.' },
+  { who: 'Farlig jobb', ref: 'Leksjon 2 · Arbeidstakers plikter',
+    sit: 'Du skal flytte en last du mener ikke kan løftes uten fare for liv eller helse.',
+    opts: ['Avbryte arbeidet og melde fra', 'Gjøre jobben, og melde fra etterpå', 'Gjøre jobben, bare verneombudet kan stanse arbeid'], a: 0,
+    why: 'Arbeidstaker skal avbryte arbeidet om det ikke kan fortsette uten fare for liv eller helse (aml. § 2-3).' }
+];
+const rState = { i: 0, done: [], cur: null };
+function rProgress() { $('#rProg').innerHTML = CARDS.map((_, i) => `<span class="${rState.done[i] ? 'done' : i === rState.i ? 'cur' : ''}"></span>`).join(''); }
+function rRender(scroll) {
+  const c = CARDS[rState.i];
+  if (!rState.cur) rState.cur = { order: newOrder(c.opts.length), chosen: null };
+  const cur = rState.cur;
+  $('#rNo').textContent = rState.i + 1; $('#rTotal').textContent = CARDS.length;
+  rProgress();
+  $('#rCard').innerHTML = `<div class="who">${bi(c.who)}</div><p class="sit">${bi(c.sit)}</p>`;
+  $('#rPanel').innerHTML = `<div class="ref">${bi(c.ref)}</div><p class="q">${t('whatRight')}</p>${optionsHTML(c.opts, cur.order)}<div id="rFb"></div>`;
+  const box = $('#rPanel .opts');
+  const feedback = () => {
+    const ok = cur.chosen === c.a, last = rState.i === CARDS.length - 1;
+    $('#rFb').innerHTML = `<div class="fb ${ok ? 'ok' : 'no'}"><b>${t(ok ? 'rightPts' : 'wrong')}</b>${bi(c.why)}</div>
+      <div class="row" style="margin-top:10px"><button class="btn primary" id="rNext">${t(last ? 'seeReport' : 'nextCard')}</button></div>`;
+    $('#rNext').addEventListener('click', () => { rState.cur = null; if (last) show('rapport'); else { rState.i++; rRender(true); } });
+  };
+  if (scroll) reveal($('#tab-rett .stage'));
+  if (cur.chosen !== null) { markOpts(box, cur.chosen, c.a); feedback(); return; }
+  box.addEventListener('click', e => {
+    const b = e.target.closest('.opt'); if (!b || b.disabled) return;
+    const i = +b.dataset.i;
+    cur.chosen = i;
+    markOpts(box, i, c.a);
+    if (i === c.a) award('rett', 10);
+    else state.wrong.push({ st: 'rett', q: [c.sit], a: c.opts[c.a], ref: c.ref });
+    endTurn();
+    rState.done[rState.i] = true; rProgress();
+    feedback();
+  });
+}
+
+// ---------- Skiftrapport ----------
+function maxPts() {
+  return { vern: HAZARDS.length * 15, gods: SHIPMENTS.reduce((n, s) => n + s.steps.length * 10, 0), rett: CARDS.length * 10 };
+}
+function renderReport() {
+  const m = maxPts(), st = state.station;
+  const missed = HAZARDS.filter(h => !vState.found[h.id]);
+  const total = st.vern + st.gods + st.rett, tmax = m.vern + m.gods + m.rett;
+  const winner = state.teamMode ? t(state.team[0] === state.team[1] ? 'draw' : state.team[0] > state.team[1] ? 't1wins' : 't2wins') : null;
+  $('#tab-rapport').innerHTML = `
+    <div class="tiles">
+      <div class="tile"><div class="v">${total}<span class="muted" style="font-size:20px"> / ${tmax}</span></div><div class="l">${winner ? esc(winner) + ` (${state.team[0]}–${state.team[1]})` : t('rTotal')}</div></div>
+      <div class="tile"><div class="v">${st.vern}</div><div class="l">${t('rVern', { a: Object.keys(vState.found).length, b: HAZARDS.length, c: vState.miss })}</div></div>
+      <div class="tile"><div class="v">${st.gods}</div><div class="l">${t('rGods', { m: m.gods })}</div></div>
+      <div class="tile"><div class="v">${st.rett}</div><div class="l">${t('rRett', { m: m.rett })}</div></div>
+    </div>
+    <div class="rep">
+      <h2>${t('repeat')}</h2>
+      ${state.wrong.length || missed.length ? `<ul>
+        ${missed.map(h => `<li><b>${t('notFound')} ${bi(h.title)}</b> ${bi(h.rule)} <small>${bi(h.ref)}</small></li>`).join('')}
+        ${state.wrong.map(w => `<li><b>${w.q.map(bi).join(': ')}</b><br>${t('correctLbl')} ${bi(w.a)} <small>${bi(w.ref)}</small></li>`).join('')}
+      </ul>` : `<p class="muted" style="margin-top:8px">${t('nothing')}</p>`}
+    </div>
+    <div class="rep teach" lang="nb">
+      <h2>${t('hTeacher')}</h2>
+      <p style="margin-top:8px"><b>På tavla:</b> Slå på Lagkamp. Lagene bytter tur etter hvert svar, og bom i vernerunden gir minuspoeng. La laget som svarer begrunne valget før dere trykker.</p>
+      <p><b>Leksjonene:</b> Vernerunden dekker leksjon 3–6, godsmottaket leksjon 6 og kortene leksjon 1, 2, 3 og 5. Hvert svar viser hvilken leksjon det hører til, så dere kan gå tilbake til lysbildene ved behov.</p>
+      <p><b>Språk:</b> Elevene kan velge engelsk eller ukrainsk øverst. Den norske teksten vises under oversettelsen, siden prøven er på norsk.</p>
+      <p><b>Lagring:</b> Ingenting lagres. Last siden på nytt for å starte en ny klasse.</p>
+    </div>
+    <div class="row noprint"><button class="btn primary" onclick="window.print()">${t('printReport')}</button><button class="btn" onclick="location.reload()">${t('newRound')}</button></div>`;
+}
+
+// ---------- Faner ----------
+function show(tab) {
+  document.querySelectorAll('.tab').forEach(el => el.setAttribute('aria-selected', el.dataset.tab === tab));
+  ['vern', 'gods', 'rett', 'rapport'].forEach(k => $('#tab-' + k).hidden = k !== tab);
+  if (tab === 'rapport') renderReport();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+document.querySelectorAll('.tab').forEach(el => el.addEventListener('click', () => show(el.dataset.tab)));
+document.addEventListener('click', e => { const g = e.target.closest('[data-go]'); if (g) show(g.dataset.go); });
+
+applyLang(); drawScene(); vRenderStats(); vIntro(); gRender(); rRender(); renderScore();
+</script>
+
+</body>
+</html>

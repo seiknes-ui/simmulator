@@ -1,0 +1,861 @@
+<!doctype html>
+<html lang="nb">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Teoriprøve modul 1</title>
+<meta name="description" content="Prøvetrening for de avsluttende teoriprøvene i modul 1.1 og 2.2 for truckførere.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: startside med modusvalg og mestring per leksjon, deretter én oppgave om gangen */
+:root{
+  --bg:#E8EBE9; --sheet:#F6F7F5; --ink:#17201D; --muted:#56625D; --line:#C7CFCB;
+  --accent:#D49500; --accent-soft:rgba(212,149,0,.16); --badge-ink:#1a1300;
+  --ok:#1D7A4C; --ok-soft:rgba(29,122,76,.12); --bad:#C0352B; --bad-soft:rgba(192,53,43,.10);
+  --f-display:'Barlow Condensed','Arial Narrow',sans-serif;
+  --f-body:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F1312; --sheet:#161B1A; --ink:#E3E8E5; --muted:#95A19C; --line:#2A3230;
+    --accent:#F0B21A; --accent-soft:rgba(240,178,26,.14);
+    --ok:#4CC38A; --ok-soft:rgba(76,195,138,.13); --bad:#FF6B5E; --bad-soft:rgba(255,107,94,.12);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F1312; --sheet:#161B1A; --ink:#E3E8E5; --muted:#95A19C; --line:#2A3230;
+  --accent:#F0B21A; --accent-soft:rgba(240,178,26,.14);
+  --ok:#4CC38A; --ok-soft:rgba(76,195,138,.13); --bad:#FF6B5E; --bad-soft:rgba(255,107,94,.12);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{background:var(--bg)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:calc(20px + env(safe-area-inset-top,0px)) calc(40px + env(safe-area-inset-bottom,0px))}
+.wrap{max-width:1100px;margin:0 auto}
+header{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-start;gap:12px 24px;margin-bottom:18px}
+header .t{display:grid;gap:4px;flex:1 1 420px;min-width:0}
+.langbox{display:grid;gap:6px;justify-items:end}
+.lang{display:flex;gap:4px}
+.lang button{cursor:pointer;font-family:var(--f-display);font-weight:700;font-size:15px;letter-spacing:.04em;padding:6px 10px;border-radius:4px;border:1px solid var(--line);background:var(--sheet);min-width:44px;min-height:36px}
+.lang button[aria-pressed="true"]{background:var(--ink);color:var(--sheet);border-color:var(--ink)}
+.lang button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.shownb{font-size:13px;color:var(--muted);display:flex;gap:6px;align-items:center;cursor:pointer}
+.langnote{font-size:13.5px;border-left:3px solid var(--accent);padding-left:10px}
+.nbt{display:block;font-size:.8em;font-weight:400;color:var(--muted);font-style:italic;margin-top:2px;line-height:1.35}
+.m.code .nbt{font-family:var(--f-body);font-size:12px}
+h4 .nbt,.modbtn .nbt{text-transform:none}
+h1{font-family:var(--f-display);font-weight:700;font-size:clamp(30px,4vw,40px);letter-spacing:.01em;margin:0;text-transform:uppercase;line-height:1}
+h1 span{color:var(--accent)}
+header p{margin:0;color:var(--muted);max-width:70ch}
+a.back{color:var(--muted);font-size:13px;text-decoration:none}
+a.back:hover{color:var(--ink)}
+h2{font-family:var(--f-display);font-weight:600;font-size:15px;letter-spacing:.08em;text-transform:uppercase;margin:0 0 10px;color:var(--muted);display:flex;align-items:center;gap:12px}
+h2::after{content:"";flex:1;height:1px;background:var(--line)}
+h3{font-family:var(--f-display);font-weight:700;font-size:24px;line-height:1.05;text-transform:uppercase;margin:0;letter-spacing:.01em}
+section{margin-top:24px}
+button{font:inherit;color:inherit}
+.btn{cursor:pointer;font-weight:600;font-size:14px;padding:8px 14px;border-radius:4px;border:1px solid var(--line);background:var(--sheet)}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--ink);color:var(--sheet);border-color:var(--ink)}
+.btn.primary:hover{background:var(--accent);border-color:var(--accent);color:var(--badge-ink)}
+.btn:focus-visible,.opt:focus-visible,.chip:focus-visible,.m:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn:disabled{opacity:.5;cursor:default}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.muted{color:var(--muted)}
+
+/* Startside */
+.modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:12px}
+.mode{display:grid;grid-template-rows:auto 1fr auto;gap:10px;background:var(--sheet);border:1px solid var(--line);border-radius:4px;padding:16px}
+.mode .top{display:flex;gap:12px;align-items:flex-start}
+.badge{flex:none;font-family:var(--f-display);font-weight:700;font-size:22px;line-height:1;padding:8px 6px;min-width:46px;text-align:center;border-radius:3px;background:var(--ink);color:var(--sheet)}
+.mode p{margin:0;font-size:14.5px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{all:unset;cursor:pointer;font-size:13.5px;padding:5px 12px;border:1px solid var(--line);border-radius:999px;background:var(--sheet)}
+.chip[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);font-weight:600}
+.mastery{display:grid;gap:8px}
+.mrow{display:grid;grid-template-columns:minmax(0,220px) minmax(0,1fr) auto;gap:12px;align-items:center;font-size:14px}
+.bar{height:10px;border-radius:5px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--ok);border-radius:5px}
+.mrow b{font-family:var(--f-display);font-size:18px;min-width:5ch;text-align:right}
+@media (max-width:560px){.mrow{grid-template-columns:minmax(0,1fr) auto}.mrow .bar{grid-column:1 / -1;grid-row:2}}
+select{font:inherit;padding:6px 8px;border-radius:4px;border:1px solid var(--line);background:var(--sheet);color:var(--ink)}
+
+/* Oppgave */
+.quiz{background:var(--sheet);border:1px solid var(--line);border-radius:4px;padding:20px;display:grid;gap:14px}
+.qbar{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 16px;align-items:center;font-size:14px;color:var(--muted)}
+.qbar b{color:var(--ink);font-family:var(--f-display);font-size:20px}
+.track{height:6px;border-radius:3px;background:var(--line);overflow:hidden}
+.track i{display:block;height:100%;background:var(--accent)}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tag{font-size:12px;padding:2px 8px;border:1px solid var(--line);border-radius:999px;color:var(--muted)}
+.qtext{font-size:clamp(18px,2.2vw,22px);font-weight:600;line-height:1.35;margin:0;max-width:60ch}
+.opts{display:grid;gap:8px}
+.opt{all:unset;cursor:pointer;display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:start;padding:12px 14px;border:1px solid var(--line);border-radius:4px;background:var(--bg);font-size:15.5px}
+.opt .k{font-family:var(--f-display);font-weight:700;font-size:18px;line-height:1.2;width:20px}
+.opt:hover:not([disabled]){border-color:var(--muted)}
+.opt[disabled]{cursor:default}
+.opt.sel{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);background:var(--accent-soft)}
+.opt.right{border-color:var(--ok);background:var(--ok-soft)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.opt.dim{opacity:.55}
+.fb{padding:12px 14px;border-radius:4px;font-size:14.5px;display:grid;gap:4px}
+.fb.ok{background:var(--ok-soft);border:1px solid var(--ok)}
+.fb.no{background:var(--bad-soft);border:1px solid var(--bad)}
+.src{font-size:13px;font-weight:600;color:var(--muted)}
+
+/* Paragrafjakt */
+.match{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:10px}
+.col{display:grid;gap:8px;align-content:start}
+.m{all:unset;cursor:pointer;padding:12px 14px;border:1px solid var(--line);border-radius:4px;background:var(--bg);font-size:15px;min-height:24px}
+.m.code{font-family:var(--f-display);font-weight:700;font-size:20px;line-height:1.1}
+.m.sel{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);background:var(--accent-soft)}
+.m.done{border-color:var(--ok);background:var(--ok-soft);cursor:default;opacity:.75}
+.m.err{border-color:var(--bad);background:var(--bad-soft)}
+
+/* Resultat */
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:10px}
+.tile{background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:12px 14px}
+.tile .v{font-family:var(--f-display);font-weight:700;font-size:34px;line-height:1}
+.tile .l{font-size:13px;color:var(--muted)}
+.review{display:grid;gap:10px;margin:0;padding:0;list-style:none}
+.review li{border:1px solid var(--line);border-left:4px solid var(--bad);border-radius:4px;padding:10px 14px;background:var(--bg);display:grid;gap:4px;font-size:14.5px}
+.review li.okk{border-left-color:var(--ok)}
+.note{font-size:14px;color:var(--muted);max-width:75ch}
+
+/* Modulvalg */
+.modsel{display:flex;flex-wrap:wrap;gap:8px}
+.modbtn{all:unset;cursor:pointer;display:grid;gap:2px;padding:10px 16px;border:1px solid var(--line);border-radius:4px;background:var(--sheet);min-width:220px}
+.modbtn b{font-family:var(--f-display);font-size:22px;text-transform:uppercase;line-height:1}
+.modbtn small{color:var(--muted);font-size:13px}
+.modbtn[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);background:var(--accent-soft)}
+.modbtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* Fagstoff */
+.facts{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,320px),1fr));gap:12px}
+.fact{background:var(--sheet);border:1px solid var(--line);border-radius:4px;padding:14px 16px;display:grid;gap:8px;align-content:start}
+.fact h4{margin:0;font-family:var(--f-display);font-size:20px;text-transform:uppercase;line-height:1.1}
+.fact ul{margin:0;padding-left:18px;display:grid;gap:4px;font-size:14.5px}
+.fact .gap{justify-self:start;font-size:11.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:2px 8px;border-radius:999px;background:var(--accent-soft);border:1px solid var(--accent)}
+.fact svg{width:64px;height:64px}
+.qsvg svg{width:90px;height:90px;display:block}
+
+/* Maskinskilt */
+.plate{background:linear-gradient(160deg,#D9DDE0,#B9BFC3);color:#14181A;border:2px solid #7B8389;border-radius:6px;padding:14px 16px;font-family:'Arial Narrow',Arial,sans-serif;font-size:13px;overflow-x:auto}
+.plate .ph{display:flex;flex-wrap:wrap;gap:4px 24px;margin-bottom:8px}
+.plate .ph span b{font-weight:700}
+.plate table{border-collapse:collapse;margin-top:6px;min-width:300px}
+.plate th,.plate td{padding:3px 12px;text-align:right;border-bottom:1px solid rgba(0,0,0,.18)}
+.plate th{font-weight:700}
+.plate td:first-child,.plate th:first-child{text-align:left}
+.plate .cap{font-size:11px;font-weight:700;text-transform:uppercase;margin-top:10px}
+/* Telefon */
+.navrow #hand{margin-left:auto}
+@media (max-width:560px){
+  .quiz{padding:14px;gap:12px}
+  .qtext{font-size:18px}
+  .opt{padding:12px;font-size:15px}
+  .match{grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:6px}
+  .m{padding:10px;font-size:14px}
+  .m.code{font-size:16px}
+  .modbtn{min-width:0;flex:1 1 100%}
+  .langbox{justify-items:start}
+  .plate{font-size:12px;padding:10px}
+  .plate th,.plate td{padding:3px 6px}
+  .navrow #hand{margin-left:0}
+  .qbar{font-size:13px}
+}
+@media print{body{background:#fff}.noprint,a.back{display:none!important}.review li{break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="t">
+      <a class="back" href="../index.html" data-i18n="back">← Transport og logistikk</a>
+      <h1 data-i18n-html="title">Teoriprøve <span>truck</span></h1>
+      <p data-i18n="intro">Forbered deg til de avsluttende teoriprøvene i modul 1.1 og 2.2. Les fagstoffet, øv til du kan det, ta en prøve, eller tren på maskinskilt.</p>
+      <p class="langnote" data-i18n="langNote" hidden></p>
+    </div>
+    <div class="langbox">
+      <div class="lang" role="group" aria-label="Språk / Language / Мова">
+        <button data-lang="nb" lang="nb">NO</button><button data-lang="en" lang="en">EN</button><button data-lang="uk" lang="uk">УКР</button>
+      </div>
+      <label class="shownb" hidden><input type="checkbox" id="showNo" checked> <span data-i18n="showNo">Vis norsk tekst</span></label>
+    </div>
+  </header>
+
+  <main id="home">
+    <section style="margin-top:0">
+      <h2 data-i18n="hModule">Velg modul</h2>
+      <div class="modsel" id="modSel"></div>
+    </section>
+    <section>
+      <h2 data-i18n="hTopics">Velg emner</h2>
+      <div class="chips" id="lessonChips"></div>
+      <div class="chips" id="kindChips" style="margin-top:8px"></div>
+    </section>
+    <section>
+      <h2 data-i18n="hMode">Velg øving</h2>
+      <div class="modes">
+        <article class="mode">
+          <div class="top"><span class="badge">FS</span><div><h3 data-i18n="factsTitle">Fagstoff</h3><p class="muted" data-i18n="factsSub">Det du må kunne, kort fortalt</p></div></div>
+          <p data-i18n="factsDesc">Faktakort for emnene du har valgt.</p>
+          <div class="row"><button class="btn primary" data-start="facts" data-i18n="factsBtn">Les fagstoff</button><span class="muted" id="factCount"></span></div>
+        </article>
+        <article class="mode">
+          <div class="top"><span class="badge">ØV</span><div><h3 data-i18n="ovTitle">Øv til du kan det</h3><p class="muted" data-i18n="ovSub">Svar og forklaring med en gang</p></div></div>
+          <p data-i18n="ovDesc">Spørsmål du svarer feil på kommer tilbake litt senere.</p>
+          <div class="row"><button class="btn primary" data-start="ov" data-i18n="ovBtn">Start øving</button><span class="muted" id="ovCount"></span></div>
+        </article>
+        <article class="mode">
+          <div class="top"><span class="badge">PR</span><div><h3 data-i18n="exTitle">Prøve</h3><p class="muted" data-i18n="exSub">Som på eksamen</p></div></div>
+          <p data-i18n="exDesc">Tilfeldige spørsmål uten fasit underveis.</p>
+          <div class="row">
+            <label class="muted"><span data-i18n="exCount">Antall</span> <select id="examN"><option>20</option><option selected>30</option><option>40</option></select></label>
+            <button class="btn primary" data-start="prove" data-i18n="exBtn">Start prøve</button>
+          </div>
+        </article>
+        <article class="mode">
+          <div class="top"><span class="badge">§</span><div><h3 data-i18n="maTitle">Paragrafjakt</h3><p class="muted" data-i18n="maSub">Koble sammen to og to</p></div></div>
+          <p data-i18n="maDesc">Koble paragraf, forskrift eller tall med riktig innhold.</p>
+          <div class="row"><select id="matchSet"></select><button class="btn primary" data-start="match" data-i18n="start">Start</button></div>
+        </article>
+        <article class="mode">
+          <div class="top"><span class="badge">MS</span><div><h3 data-i18n="plTitle">Maskinskilt</h3><p class="muted" data-i18n="plSub">Les lastdiagrammet</p></div></div>
+          <p data-i18n="plDesc">Hvert skilt er nytt og har egne tall.</p>
+          <div class="row"><button class="btn primary" data-start="plate" data-i18n="start">Start</button><span class="muted" data-i18n="plCount">10 oppgaver</span></div>
+        </article>
+      </div>
+    </section>
+    <section>
+      <h2 data-i18n="hMastery">Mestring på denne maskinen</h2>
+      <div class="mastery" id="mastery"></div>
+      <p class="note"><span data-i18n="masteryNote">Et spørsmål regnes som mestret når du har svart riktig på det to ganger på rad.</span> <button class="btn" id="resetM" style="margin-left:6px" data-i18n="reset">Nullstill</button></p>
+    </section>
+    <section>
+      <h2 data-i18n="hTeacher">Til læreren</h2>
+      <p class="note" lang="nb">Spørsmålene er skrevet med egne ord og er ikke kopier av eksamensoppgavene. De dekker likevel hvert tema i de avsluttende teoriprøvene for 1.1 og 2.2, også temaene lysbildene ikke tar opp. Engelsk og ukrainsk oversettelse vises med den norske teksten under, siden prøven i Dugga er på norsk.</p>
+      <p class="note" lang="nb">Paragrafene er kontrollert mot Lovdata i november 2026. Lysbildene oppgir at arbeidsgiver kan få fengsel inntil 3 år ved særlig skjerpende omstendigheter. Etter arbeidsmiljøloven § 19-1 er det nå inntil 5 år. Lysbildene plasserer også 17-årsregelen i forskrift om utførelse av arbeid kapittel 10, men den står i forskrift om organisering, ledelse og medvirkning § 12-7. Her brukes gjeldende regler.</p>
+    </section>
+  </main>
+
+  <main id="play" hidden></main>
+</div>
+
+<script src="i18n.js"></script>
+<script>
+// ---------- Spørsmålsbank ----------
+// Riktig svar står alltid først i o[]; rekkefølgen stokkes ved visning.
+// k: p = paragraf og regelverk, t = tall og frister, b = begreper og plikter, g = farlig gods
+const MODS = {
+  m1: { name: 'Modul 1.1', sub: 'Arbeidsmiljø, ansvar og konsekvenser',
+    lessons: { 1: 'Sikkerhetsopplæring', 2: 'Lover og forskrifter', 3: 'Ansvar og konsekvenser', 4: 'Ytre miljø', 5: 'Sikkerhet ved bruk av arbeidsutstyr', 6: 'Farlig gods' } },
+  m2: { name: 'Modul 2.2', sub: 'Truck, løfte- og stablevogner t.o.m. 10 tonn',
+    lessons: { 1: 'Trucktyper og tilleggsutstyr', 2: 'Konstruksjon og virkemåte', 3: 'Daglig kontroll og vedlikehold', 4: 'Stabilitet og maskinskilt', 5: 'Godshåndtering', 6: 'Trafikk og sikkerhet' } }
+};
+const lname = (m, l) => MODS[m].lessons[l];
+const KINDS = { p: 'Paragrafer', t: 'Tall og frister', b: 'Begreper og plikter', g: 'Farlig gods' };
+const UTF = 'Forskrift om utførelse av arbeid', ORG = 'Forskrift om organisering, ledelse og medvirkning';
+const QS1 = [
+  // Leksjon 1
+  [1, 'b', 'Leksjon 1', 'Hva er hovedmålet med sikkerhetsopplæring?', ['Å unngå ulykker og skape et trygt arbeidsmiljø', 'Å få et sertifikat', 'Å få høyere lønn', 'Å tilfredsstille arbeidsgiverens krav'], 'Målet er trygt arbeidsmiljø, færre skader, bedre trivsel, effektivitet og økonomi.'],
+  [1, 't', ORG + ' kap. 12', 'Hvor gammel må du være for å bruke arbeidsutstyr som kan gi særlig fare for helseskade?', ['18 år', '16 år', '17 år', '20 år'], 'Hovedregelen er 18 år. Arbeidsgiver kan stille strengere krav internt.'],
+  [1, 't', ORG + ' § 12-7', 'Fra hvilken alder kan ungdom få praktisk opplæring i bruk av truck og kran?', ['17 år', '15 år', '16 år', '18 år'], 'Fra fylte 17 år, dersom opplæringen følger kravene om sikkerhetsopplæring i forskrift om utførelse av arbeid kapittel 10.'],
+  [1, 't', ORG + ' § 12-7', 'Når kan en elev i videregående skole få opplæring i slikt arbeidsutstyr?', ['Fra fylte 16 år, under skolens kyndige veiledning', 'Fra fylte 15 år, med samtykke fra foresatte', 'Først fra fylte 18 år', 'Fra fylte 17 år, uten tilsyn'], 'Elever kan få opplæring fra 16 år når den skjer under skolens kyndige veiledning.'],
+  [1, 'p', ORG + ' § 12-7', 'Hvor står regelen om at 17-åringer kan få praktisk opplæring i bruk av kraner og løfte- og stablevogner?', [ORG + ' § 12-7', UTF + ' § 10-3', 'Arbeidsmiljøloven § 2-3', 'Internkontrollforskriften § 5'], 'Arbeid av barn og ungdom er regulert i kapittel 12 i forskrift om organisering, ledelse og medvirkning.'],
+  [1, 'b', ORG + ' § 12-7', 'Kan en 17-åring kjøre truck selvstendig etter god opplæring?', ['Nei, bare praktisk opplæring under tilsyn av en erfaren og kompetent person', 'Ja, dersom opplæringen er god nok', 'Ja, dersom arbeidsgiver har gjort en risikovurdering', 'Ja, med skriftlig samtykke fra foresatte'], 'Selvstendig arbeid krever at man er fylt 18 år.'],
+  [1, 'p', UTF + ' § 10-3', 'Hvilken paragraf i forskrift om utførelse av arbeid lister opp arbeidsutstyret som krever sertifisert sikkerhetsopplæring?', ['§ 10-3', '§ 10-1', '§ 12-3', '§ 13-2'], '§ 10-3: Arbeidsutstyr underlagt krav om dokumentert sikkerhetsopplæring gitt av sertifisert opplæringsvirksomhet.'],
+  [1, 'p', UTF + ' § 10-4', 'Hvilken paragraf stiller krav om utstyrsspesifikk opplæring?', [UTF + ' § 10-4', UTF + ' § 10-3', 'Arbeidsmiljøloven § 3-2', UTF + ' § 13-1'], '§ 10-4: Krav til utstyrsspesifikk opplæring.'],
+  [1, 'p', UTF + ' §§ 10-1 og 10-2', 'Hva handler § 10-1 og § 10-2 i forskrift om utførelse av arbeid om?', ['Krav om dokumentert sikkerhetsopplæring', 'Sakkyndig kontroll', 'Personløft', 'Merking av arbeidsutstyr'], '§ 10-1 gjelder utstyr som krever særlig forsiktighet, § 10-2 dokumentert sikkerhetsopplæring ved bruk av arbeidsutstyr.'],
+  [1, 'b', UTF + ' § 10-3', 'Hvilket av disse krever sertifisert sikkerhetsopplæring?', ['Løfte- og stablevogn for gods med permanent førerplass', 'Manuell palletralle', 'Masseforflytningsmaskin på 10 kW', 'Lastebilkran på 1,5 tm'], 'Truck med permanent førerplass står på listen i § 10-3.'],
+  [1, 't', UTF + ' § 10-3', 'Kran på lastebil krever sertifisert opplæring når kapasiteten er …', ['større enn 2 tm', 'større enn 1 tm', 'større enn 5 tm', 'større enn 10 tm'], 'Både mobilkraner og kraner på lastebil eller lastebilhenger over 2 tm står på listen.'],
+  [1, 't', UTF + ' § 10-3', 'Masseforflytningsmaskiner krever sertifisert opplæring når effekten er …', ['større enn 15 kW (20,4 hk)', 'større enn 10 kW', 'større enn 50 kW', 'uansett effekt'], '15 kW tilsvarer 20,4 hk.'],
+  [1, 'b', UTF + ' § 10-3', 'Hvilket utstyr står IKKE på listen over sertifisert sikkerhetsopplæring?', ['Personløfter', 'Tårnkran', 'Portalkran', 'Offshorekran'], 'Personløftere krever dokumentert opplæring, men står ikke på listen i § 10-3.'],
+  [1, 'b', UTF + ' § 10-4', 'Gir sertifisert sikkerhetsopplæring automatisk rett til å bruke alt utstyr som står på kompetansebeviset?', ['Nei, du må i tillegg ha utstyrsspesifikk opplæring', 'Ja, alt utstyr på beviset', 'Ja, med skriftlig samtykke fra arbeidsgiver', 'Ja, når beviset er yngre enn fem år'], 'Utstyrsspesifikk opplæring på det konkrete utstyret kommer alltid i tillegg.'],
+  [1, 'b', 'Leksjon 1', 'Hvem kan gi utstyrsspesifikk opplæring?', ['Leverandøren eller en person i bedriften som har fått opplæring', 'Bare en sertifisert opplæringsvirksomhet', 'Bare Arbeidstilsynet', 'Bare verneombudet'], 'Det skal dokumenteres hvilket utstyr, hvem som ga og hvem som fikk opplæringen. Dokumentasjonen oppbevares i bedriften.'],
+  [1, 'b', 'Leksjon 1', 'Hvem skal dokumentasjonen av sikkerhetsopplæringen være tilgjengelig for?', ['Verneombudet, og den skal vises myndighetene på forlangende', 'Bare daglig leder', 'Bare forsikringsselskapet', 'Ingen, den er personlig'], ''],
+  [1, 'b', 'Leksjon 1', 'Hva avgjør hvilket arbeidsutstyr som krever dokumentert sikkerhetsopplæring fordi det krever «særlig forsiktighet»?', ['Arbeidsgivers risikovurdering', 'Arbeidstilsynets liste', 'Leverandørens anbefaling', 'Verneombudets vedtak'], ''],
+  [1, 't', 'Leksjon 1', 'Hvor lenge gjelder et kompetansebevis for arbeidsutstyr?', ['Livet ut, det trenger ikke fornyes', '5 år', '2 år', 'Til du fyller 70'], ''],
+  [1, 'b', 'Leksjon 1', 'Hvem kan utstede kompetansebevis?', ['Opplæringsvirksomheten som ga opplæringen, eller et bevisregister den har gitt myndighet', 'Arbeidstilsynet', 'Politiet', 'Arbeidsgiver'], ''],
+  [1, 'b', 'Leksjon 1', 'Hvor henvender du deg hvis du har mistet kompetansebeviset?', ['Til opplæringsvirksomheten eller registeret som utstedte det', 'Til politiet', 'Til Arbeidstilsynet', 'Du må ta ny prøve'], ''],
+  [1, 'b', 'Leksjon 1', 'Hva må en virksomhet som gir sertifisert sikkerhetsopplæring ha?', ['Sertifisering fra et sertifiseringsorgan', 'Godkjenning fra politiet', 'Bare en instruktør med kompetansebevis', 'Ingen særskilte krav'], ''],
+  [1, 'b', 'Leksjon 1', 'Når kan den praktiske delen av sertifisert opplæring begynne?', ['Når teoriopplæringen er gjennomført og teoriprøvene er bestått', 'Samtidig med teorien', 'Etter én måned i bedriften', 'Når arbeidsgiver bestemmer det'], ''],
+  [1, 'b', 'Leksjon 1', 'Hvilken modul kan gjennomføres i bedrift med fadderordning?', ['Modul 4, mengdetrening', 'Modul 1, grunnopplæring', 'Modul 3', 'Modul 2, teori om utstyret'], 'Modul 3 gjennomføres i regi av opplæringsvirksomheten.'],
+  [1, 'b', 'Leksjon 1', 'Hvem utnevner fadderen i bedriften?', ['Bedriftsledelsen, i samråd med instruktør og verneombud', 'Arbeidstilsynet', 'Eleven selv', 'Opplæringsvirksomheten alene'], 'Fadderen regnes som fører av utstyret under opplæringen.'],
+  [1, 'b', 'Leksjon 1', 'Hva må en EØS-borger gjøre for å bruke utstyr som krever sertifisert opplæring i Norge?', ['Søke Arbeidstilsynet og vise vedtaket sammen med det utenlandske beviset', 'Ingenting, beviset gjelder i hele EØS', 'Ta hele opplæringen på nytt i Norge', 'Få beviset stemplet av politiet'], ''],
+  // Leksjon 2
+  [2, 'p', 'Arbeidsmiljøloven', 'Hva heter rammeloven som arbeidsmiljøforskriftene bygger på?', ['Arbeidsmiljøloven', 'Lov om administrative ordninger', 'Arbeidsutstyrsloven', 'Vegtrafikkloven'], ''],
+  [2, 'p', 'Arbeidsmiljøloven § 1-1', 'Hva handler arbeidsmiljøloven § 1-1 om?', ['Lovens formål', 'Arbeidsgivers plikter', 'Arbeidstakers medvirkningsplikt', 'Straff'], 'Å sikre et arbeidsmiljø med full trygghet mot fysiske og psykiske skadevirkninger.'],
+  [2, 'p', 'Arbeidsmiljøloven § 2-1', 'Hva sier arbeidsmiljøloven § 2-1?', ['Arbeidsgiver skal sørge for at loven blir overholdt', 'Arbeidstaker skal bruke verneutstyr', 'Verneombudet kan stanse farlig arbeid', 'Maskiner skal ha bruksanvisning på norsk'], ''],
+  [2, 'p', 'Arbeidsmiljøloven § 2-3', 'Hva heter arbeidsmiljøloven § 2-3?', ['Arbeidstakers medvirkningsplikt', 'Arbeidsgivers plikter', 'Lovens formål', 'Verneombudets oppgaver'], ''],
+  [2, 'p', 'Arbeidsmiljøloven § 2-3 (2) a', 'Hva sier arbeidsmiljøloven § 2-3 annet ledd bokstav a?', ['Arbeidstaker skal bruke påbudt verneutstyr, vise aktsomhet og medvirke til å hindre ulykker', 'Arbeidstaker skal delta i dialogmøte', 'Arbeidstaker skal rette seg etter pålegg fra Arbeidstilsynet', 'Arbeidstaker skal melde fra om trakassering'], ''],
+  [2, 'p', 'Arbeidsmiljøloven § 2-3 (2) c', 'Når skal arbeidstaker avbryte arbeidet etter arbeidsmiljøloven § 2-3?', ['Når arbeidstaker mener det ikke kan fortsette uten fare for liv eller helse', 'Bare når verneombudet sier det', 'Bare når arbeidsgiver gir beskjed', 'Aldri, det er arbeidsgivers ansvar'], ''],
+  [2, 'p', 'Arbeidsmiljøloven § 2-3 (2) b', 'Hva skal arbeidstaker gjøre straks hvis hen oppdager feil som kan gi fare for liv eller helse og ikke selv kan rette den?', ['Underrette arbeidsgiver og verneombudet', 'Skrive det i loggen ved skiftslutt', 'Melde det til Arbeidstilsynet', 'Fortsette forsiktig'], ''],
+  [2, 'p', 'Arbeidsmiljøloven § 3-2', 'Hva krever arbeidsmiljøloven § 3-2?', ['At arbeidsgiver gjør arbeidstaker kjent med farer og gir nødvendig opplæring, øvelse og instruksjon', 'At arbeidstaker bruker verneutstyr', 'At maskiner er CE-merket', 'At det velges verneombud'], 'Særskilte forholdsregler for å ivareta sikkerheten.'],
+  [2, 'p', 'Arbeidsmiljøloven § 5-5 (4)', 'Hvilken paragraf krever bruksanvisning på norsk for maskiner og annet arbeidsutstyr?', ['Arbeidsmiljøloven § 5-5', 'Arbeidsmiljøloven § 2-1', UTF + ' § 10-3', 'Internkontrollforskriften § 5'], 'Bruksanvisningen skal dekke transport, oppstilling, betjening og vedlikehold.'],
+  [2, 'p', 'Arbeidsmiljøloven § 6-1', 'Når skal en virksomhet ha verneombud?', ['Alltid, men med færre enn 5 ansatte kan partene skriftlig avtale en annen ordning', 'Bare med over 10 ansatte', 'Bare med over 50 ansatte', 'Bare når Arbeidstilsynet krever det'], ''],
+  [2, 'p', 'Arbeidsmiljøloven § 6-3', 'Hva gir arbeidsmiljøloven § 6-3 verneombudet rett til?', ['Å stanse arbeid ved umiddelbar fare for liv eller helse', 'Å gi bøter', 'Å si opp arbeidstakere', 'Å godkjenne arbeidsutstyr'], 'Arbeidet stanses inntil Arbeidstilsynet har tatt stilling til om det kan fortsette.'],
+  [2, 't', 'Arbeidsmiljøloven § 7-1', 'Fra hvor mange arbeidstakere skal en virksomhet ha arbeidsmiljøutvalg?', ['50', '5', '10', '100'], ''],
+  [2, 'p', UTF, 'Hvilken forskrift beskriver hvem som får bruke arbeidsutstyr som truck, og krav til opplæring og kontroll?', [UTF, 'Arbeidsplassforskriften', 'Internkontrollforskriften', 'Byggherreforskriften'], ''],
+  [2, 'b', 'Leksjon 2', 'Hvor bindende er en forskrift?', ['Like bindende som loven', 'Den er bare veiledende', 'Den gjelder bare arbeidsgiver', 'Den gjelder bare offentlige virksomheter'], ''],
+  [2, 'p', 'Internkontrollforskriften', 'Er systematisk HMS-arbeid etter internkontrollforskriften et lovfestet krav?', ['Ja', 'Nei', 'Bare for virksomheter med over 50 ansatte', 'Bare på bygge- og anleggsplasser'], ''],
+  [2, 'p', 'Internkontrollforskriften § 4', 'Hvem skal sørge for at internkontroll innføres i virksomheten?', ['Den som er ansvarlig for virksomheten, i samarbeid med arbeidstakerne', 'Arbeidstilsynet', 'Verneombudet', 'Bedriftshelsetjenesten'], 'Eier eller arbeidsgiver har ansvaret for å starte HMS-arbeidet.'],
+  [2, 'p', 'Internkontrollforskriften § 5', 'Hvilken paragraf i internkontrollforskriften beskriver hva det systematiske HMS-arbeidet skal inneholde?', ['§ 5', '§ 1', '§ 4', '§ 2'], ''],
+  [2, 'p', 'Internkontrollforskriften § 5', 'Hva skal blant annet dokumenteres skriftlig etter internkontrollforskriften § 5?', ['Mål for HMS, ansvar, risikovurdering med tiltak, rutiner for avvik og gjennomgang', 'Bare navnet på verneombudet', 'Bare HMS-målene', 'Ingenting'], 'Punkt 4 til 8 skal dokumenteres skriftlig.'],
+  [2, 'b', 'Internkontrollforskriften', 'Hvilken plikt har arbeidstaker etter arbeidsmiljøloven og internkontrollforskriften?', ['Delta aktivt i HMS-arbeidet', 'Være organisert', 'Være fleksibel', 'Ingen'], ''],
+  [2, 'p', 'Arbeidsplassforskriften', 'Hvem retter arbeidsplassforskriften seg mot?', ['Arbeidsgiver', 'Produsenter av maskiner', 'Arbeidstilsynet', 'Bare verneombudet'], 'Formålet er at arbeidsplasser og lokaler utformes så sikkerhet, helse og velferd ivaretas.'],
+  [2, 'p', 'Maskinforskriften', 'Hvem gjelder maskinforskriften først og fremst for?', ['Produsenter, importører og leverandører av maskiner', 'Truckførere', 'Verneombud', 'Arbeidstilsynet'], 'Brukere må også kjenne den: det er bare lov å bruke utstyr som oppfyller kravene.'],
+  [2, 't', 'Maskinforskriften', 'Maskiner produsert etter hvilken dato skal være CE-merket?', ['1. januar 1995', '1. januar 2000', '1. januar 1985', '1. januar 2010'], ''],
+  [2, 'b', 'Maskinforskriften', 'Hva er en samsvarserklæring?', ['Produsentens egenerklæring om at maskinen oppfyller kravene', 'Arbeidstilsynets godkjenning', 'Forsikringsbevis', 'Bevis på sakkyndig kontroll'], ''],
+  [2, 'b', 'Maskinforskriften', 'Hva skal en maskin produsert og levert før 1995 ha i stedet for samsvarserklæring?', ['Maskinsertifikat', 'CE-merke', 'Ingenting', 'Kontrollbok'], 'Krav om sakkyndig kontroll gjelder uansett alder.'],
+  [2, 'p', 'Byggherreforskriften', 'Hva gjelder byggherreforskriften for?', ['Midlertidige eller skiftende bygge- og anleggsplasser', 'Alle lagre', 'Transport av farlig gods', 'Produksjon av maskiner'], ''],
+  [2, 't', 'Byggherreforskriften', 'Hvor lenge er et HMS-kort gyldig?', ['2 år', '1 år', '5 år', 'Livet ut'], 'Alle som arbeider på bygge- og anleggsplasser skal ha HMS-kort, ett for hver virksomhet de arbeider for.'],
+  [2, 'p', 'Leksjon 2', 'Hvem er tilsynsmyndighet for landtransport av farlig gods?', ['Direktoratet for samfunnssikkerhet og beredskap (DSB)', 'Arbeidstilsynet', 'Miljødirektoratet', 'Statens vegvesen'], ''],
+  [2, 'b', 'Leksjon 2', 'Hvilke farger har fareskilt?', ['Gul og svart', 'Rød og gul', 'Blå og hvit', 'Grønn og hvit'], 'Påbudsskilt er blå, forbudsskilt røde og redningsskilt grønne.'],
+  // Leksjon 3
+  [3, 'p', 'Arbeidsmiljøloven § 19-1', 'Hva er strafferammen for arbeidsgiver ved brudd på arbeidsmiljøloven?', ['Bøter eller fengsel inntil 1 år, eller begge deler', 'Bare bøter', 'Fengsel inntil 3 måneder', 'Fengsel inntil 10 år'], ''],
+  [3, 't', 'Arbeidsmiljøloven § 19-1 (2)', 'Hvor lang fengselsstraff kan arbeidsgiver få ved særlig skjerpende omstendigheter?', ['Inntil 5 år', 'Inntil 1 år', 'Inntil 3 år', 'Inntil 10 år'], 'Eldre materiell sier 3 år, men gjeldende lov sier 5 år.'],
+  [3, 'p', 'Arbeidsmiljøloven § 19-2', 'Kan en arbeidstaker straffes for brudd på arbeidsmiljøloven?', ['Ja, etter § 19-2', 'Nei, bare arbeidsgiver', 'Bare med advarsel', 'Bare hvis hen er leder'], ''],
+  [3, 't', 'Arbeidsmiljøloven § 19-2', 'Hva kan en arbeidstaker få ved særlig skjerpende omstendigheter?', ['Fengsel inntil 1 år', 'Fengsel inntil 5 år', 'Bare bøter', 'Fengsel inntil 3 år'], 'Uaktsomt brudd gir bøter. Forsettlig eller grovt uaktsomt brudd gir bøter eller fengsel inntil 3 måneder.'],
+  [3, 'b', 'Leksjon 3', 'Hva menes med yrkesskade?', ['Personskade, sykdom eller dødsfall som skyldes en arbeidsulykke', 'Skade på arbeidsutstyr', 'Skade på en forbipasserende', 'Skade på varer under transport'], ''],
+  [3, 'b', 'Leksjon 3', 'Hva er årsaken til de fleste ulykker med truck, kran og masseforflytningsmaskiner?', ['Menneskelige feilvurderinger, som feil bruk og dårlig organisering', 'Tekniske feil på utstyret', 'Overbelastning av utstyret', 'Dårlig vær'], 'Tekniske feil forekommer, men de fleste ulykker skyldes valg mennesker tar.'],
+  [3, 'b', 'Leksjon 3', 'Hvilke tre spørsmål stiller man i en enkel risikovurdering?', ['Hva kan gå galt, hvilke konsekvenser får det, og hva kan gjøres for å hindre det', 'Hvem, hva og hvor', 'Hva koster det, hvem betaler, og når', 'Hvem har skylden, hva er straffen, og hvem skal varsles'], ''],
+  [3, 'b', 'Leksjon 3', 'Hva står SJA for?', ['Sikker jobb-analyse', 'Sertifisert jobbanalyse', 'Sikkerhets- og jobbavtale', 'System for jobbansvar'], 'En systematisk gjennomgang av en arbeidsoppgave for å avdekke faremomenter.'],
+  [3, 'p', 'Vegtrafikkloven', 'Hvilke trafikkregler gjelder for selvgående arbeidsutstyr på vei?', ['Vegtrafikkloven, som for annen trafikk', 'Ingen', 'Bare bedriftens egne regler', 'Bare forskrift om utførelse av arbeid'], ''],
+  [3, 'p', 'Forskrift om bruk av kjøretøy § 2-1 b', 'Når er motorredskap konstruert for under 50 km/t likevel registreringspliktig?', ['Når den er konstruert for 20 km/t eller mer, er laget for person- eller godstransport eller trekking, og brukes på offentlig veg', 'Alltid', 'Aldri', 'Bare når den veier over 3,5 tonn'], ''],
+  [3, 't', 'Leksjon 3', 'Fra hvilken promille regnes du som påvirket av alkohol?', ['0,2 promille', '0,5 promille', '0,0 promille', '0,8 promille'], ''],
+  [3, 't', 'Leksjon 3', 'Hvor lenge etter kjøringen må du ikke drikke alkohol hvis du forstår at det kan bli politietterforskning?', ['6 timer', '2 timer', '12 timer', '24 timer'], ''],
+  [3, 'b', 'Leksjon 3', 'Kan et kompetansebevis inndras?', ['Nei, men du kan miste retten til å kjøre etter dom eller forbud på arbeidsplassen', 'Ja, politiet kan inndra det ved promillekjøring', 'Ja, hvis det ikke er fornyet', 'Ja, av arbeidsgiver'], 'Beviset dokumenterer kunnskap og kan ikke inndras.'],
+  [3, 't', 'Leksjon 3', 'Hva er nødnummeret til medisinsk nødhjelp?', ['113', '110', '112', '911'], '110 er brann, 112 er politi.'],
+  [3, 't', 'Leksjon 3', 'Hva er forholdet mellom brystkompresjoner og innblåsinger ved HLR?', ['30 : 2', '15 : 2', '24 : 2', '30 : 5'], ''],
+  [3, 'b', 'Leksjon 3', 'Hvem tilkaller du først ved alvorlig personskade?', ['Ambulanse', 'Arbeidsgiver', 'Arbeidstilsynet', 'Politiet'], ''],
+  [3, 'b', 'Leksjon 3', 'Er brannvern lovpålagt?', ['Ja', 'Nei', 'Virksomheten vurderer selv', 'Bare i bygg over to etasjer'], 'Den som oppdager brann har varslingsplikt. Alle skal kjenne branninstruksen.'],
+  [3, 'p', UTF + ' §§ 18-7 og 18-8', 'Hva er hovedregelen for løfting av personer?', ['Personer skal bare løftes med arbeidsutstyr og plattform beregnet for det', 'Truck kan brukes hvis personen står på en pall', 'Det er tillatt med forsiktighet', 'Det er alltid forbudt'], 'Unntaksvis kan annet utstyr brukes: betjeningsstedet skal være bemannet, og personen skal ha kommunikasjon og kunne evakueres sikkert.'],
+  // Leksjon 4
+  [4, 'b', 'Leksjon 4', 'Hva menes med det ytre miljøet?', ['Luft, vann og jord', 'Arbeidsplassen og pauserommet', 'Kunder og leverandører', 'Lys og støy'], ''],
+  [4, 'p', 'Leksjon 4', 'Hvem er tilsynsmyndighet for det ytre miljøet?', ['Miljødirektoratet', 'Arbeidstilsynet', 'DSB', 'Statsforvalteren'], ''],
+  [4, 'p', 'Forurensningsloven', 'Hvilken lov har som formål å verne det ytre miljøet mot forurensning og redusere avfall?', ['Forurensningsloven', 'Produktkontrolloven', 'Naturmangfoldloven', 'Kulturminneloven'], ''],
+  [4, 'p', 'Produktkontrolloven', 'Hvilken lov skal forebygge at produkter gir helseskade eller miljøforstyrrelse?', ['Produktkontrolloven', 'Forurensningsloven', 'Arbeidsmiljøloven', 'Miljøinformasjonsloven'], ''],
+  [4, 'p', 'Naturmangfoldloven', 'Hva er den mest sentrale loven innen naturforvaltning?', ['Naturmangfoldloven', 'Forurensningsloven', 'Kulturminneloven', 'Friluftsloven'], ''],
+  [4, 'b', 'Leksjon 4', 'Hva er en vanlig årsak til oljesøl i naturen fra arbeidsutstyr?', ['Slangebrudd', 'Punktering', 'Feil dekktrykk', 'For mye olje på motoren'], ''],
+  [4, 'b', 'Leksjon 4', 'Skal du ha utstyr som begrenser skadene dersom det blir oljesøl?', ['Ja, til førsteinnsats, for eksempel absorberende matter', 'Ja, men det vurderer du selv', 'Nei, det er frivillig', 'Bare i verneområder'], ''],
+  [4, 'b', 'Leksjon 4', 'Hva heter det tidligere HMS-databladet nå?', ['Sikkerhetsdatablad', 'Helsedatablad', 'Miljødatablad', 'Produktdatablad'], ''],
+  [4, 'b', 'Leksjon 4', 'Hva går EUs kjemikalieforordning ut på?', ['Den registrerer, vurderer og begrenser bruk av kjemikalier', 'Den forbyr alle kjemikalier', 'Den gjelder bare medisiner', 'Den gjelder bare utenfor Norge'], ''],
+  [4, 'b', 'Leksjon 4', 'Er det lov å bruke arbeidsutstyr med forbrenningsmotor innendørs?', ['Ja, når det er god luftveksling', 'Alltid', 'Aldri', 'Bare om natten'], 'I rom uten eller med liten luftveksling er det ikke tillatt.'],
+  [4, 'b', 'Leksjon 4', 'Hva kjennetegner et erstatningsstoff?', ['Det er mindre skadelig og forurensende', 'Det er klart og rent', 'Det er lettantennelig', 'Det er billigere'], ''],
+  [4, 'b', 'Leksjon 4', 'Hvorfor er det krav til trepaller og treemballasje ved inn- og utførsel?', ['Treverk kan føre med seg skogskadegjørere', 'For å begrense volum', 'For å spare penger', 'Det er ingen krav'], 'Paller som oppfyller kravene skal være merket. Det gjelder også EUR-paller.'],
+  // Leksjon 5
+  [5, 'p', 'Arbeidsmiljøloven § 5-5', 'Hva sier arbeidsmiljøloven om bruksanvisning?', ['Den skal følge med og være på norsk', 'Den er ikke påkrevd', 'Engelsk bruksanvisning godtas', 'Den kan lastes ned på forespørsel'], ''],
+  [5, 'b', 'Leksjon 5', 'Hva gjør du hvis du oppdager feil på arbeidsutstyret?', ['Stopper arbeidet og rapporterer til arbeidsgiver eller rette person', 'Vurderer faren og fortsetter hvis det virker forsvarlig', 'Stopper arbeidet uten å si fra', 'Reparerer det selv'], ''],
+  [5, 'b', 'Leksjon 5', 'Hvordan vet du at nytt arbeidsutstyr oppfyller forskriftskravene?', ['Det har CE-merking og samsvarserklæring', 'Det står i bruksanvisningen', 'Det står i ordrebekreftelsen', 'Det er nytt'], ''],
+  [5, 'b', 'Leksjon 5', 'Hvem har ansvar for at nødvendig verneutstyr finnes på arbeidsplassen?', ['Arbeidsgiver', 'Arbeidsmiljøutvalget', 'Verneombudet', 'Hver enkelt arbeidstaker'], 'Arbeidstaker har plikt til å bruke det.'],
+  [5, 'b', 'Leksjon 5', 'Hvilken kontroll skal føreren selv utføre?', ['Kontroll før bruk', 'Periodisk kontroll', 'Sakkyndig kontroll', 'Typekontroll'], 'Hver gang maskinen tas i bruk etter en periode borte, eller når du overtar den.'],
+  [5, 'b', 'Leksjon 5', 'Hvem utfører periodisk kontroll (service)?', ['En kvalifisert person, etter produsentens retningslinjer', 'Føreren', 'Arbeidstilsynet', 'Verneombudet'], ''],
+  [5, 'b', 'Leksjon 5', 'Hvem utfører sakkyndig kontroll?', ['En sakkyndig kontrollør fra en sakkyndig virksomhet', 'Føreren', 'Verkstedet som selger trucken', 'Verneombudet'], ''],
+  [5, 'p', UTF + ' § 13-2', 'Hvilken paragraf sier når sakkyndig kontroll skal utføres?', [UTF + ' § 13-2', UTF + ' § 10-3', 'Arbeidsmiljøloven § 5-5', 'Internkontrollforskriften § 5'], ''],
+  [5, 't', UTF + ' § 13-2', 'Hvor ofte skal sakkyndig kontroll utføres som hovedregel?', ['Hver 12. måned', 'Hver 6. måned', 'Hvert 2. år', 'Hver 3. måned'], ''],
+  [5, 't', UTF + ' § 13-2', 'Utstyr som ikke har vært brukt på en stund skal ha sakkyndig kontroll før det tas i bruk igjen. Hvor lenge?', ['6 måneder, når det kan gi fare for liv eller helse', '3 måneder', '12 måneder', '2 år'], 'Det kreves også etter betydelig overbelastning og etter større reparasjoner eller ombygginger.'],
+  [5, 'b', UTF + ' § 13-4', 'Hvor dokumenteres sakkyndig kontroll?', ['I kontrollbok eller kontrollskjema', 'I servicehefte', 'I bruksanvisningen', 'Det skal ikke dokumenteres'], ''],
+  [5, 'b', 'Leksjon 5', 'Hvor skal rutinene for ettersyn og kontroll av maskiner beskrives?', ['I bedriftens internkontrollsystem', 'I bruksanvisningen', 'Hos Arbeidstilsynet', 'På oppslagstavla'], ''],
+  [5, 'b', 'Leksjon 5', 'Er det tillatt å bruke arbeidsutstyr til personløft?', ['Ja, dersom utstyret er beregnet til formålet', 'Ja, med forsiktighet', 'Nei, aldri', 'Ja, under 2 meter'], ''],
+  [5, 'b', 'Leksjon 5', 'Hva er kravet til en motordrevet maskin med fører når det gjelder start og kjøring?', ['Den skal ikke kunne kjøres uten at føreren er ved betjeningsinnretningene', 'Den skal ha nøkkel', 'Den skal ha ryggealarm', 'Den skal ha belte'], 'Derfor har trucken setebryter eller annen sikkerhetsbryter.'],
+  [5, 'b', 'Leksjon 5', 'Hva skal merkingen på en maskin inneholde?', ['Produsent, betegnelse, CE-merke, serie- eller typebetegnelse og byggeår', 'Bare CE-merke', 'Navn på eieren', 'Dato for siste service'], ''],
+  [5, 't', 'Leksjon 5', 'Fra hvilket nivå regnes støy som skadelig?', ['80 dB(A), og impulslyd over 130 dB(C)', '65 dB(A)', '100 dB(A)', '120 dB(A)'], 'En vanlig samtale er rundt 65 dB.'],
+  [5, 't', 'Leksjon 5', 'Hvor mye øker lydnivået når lydstyrken dobles?', ['3 dB', '10 dB', '2 dB', '6 dB'], '83 dB er dobbelt så sterkt som 80 dB.'],
+  [5, 'b', 'Leksjon 5', 'Hva er den vanligste yrkesskaden i Europa?', ['Hørselstap som skyldes støy', 'Ryggskader', 'Kuttskader', 'Fallskader'], ''],
+  [5, 'b', 'Leksjon 5', 'Hva skal brukes først for å hindre fall til lavere nivå?', ['Kollektive tiltak, før personlig verneutstyr', 'Fallsikringssele', 'Stige', 'Hjelm'], ''],
+  [5, 'b', 'Leksjon 5', 'Hva kan en stige brukes til?', ['Kortvarig arbeid og adkomst', 'Alt arbeid i høyden', 'Langvarig arbeid hvis den er godkjent', 'Ingenting'], ''],
+  // Leksjon 6
+  [6, 'g', 'Leksjon 6', 'Hva regulerer ADR?', ['Transport av farlig gods på vei', 'Transport av farlig gods på jernbane', 'Transport av farlig gods på sjøen', 'Transport av farlig gods med fly'], 'RID gjelder jernbane, IMDG sjø og ICAO fly.'],
+  [6, 'g', 'Leksjon 6', 'Hva regulerer IMDG?', ['Sjøtransport av farlig gods', 'Veitransport', 'Flyfrakt', 'Jernbane'], ''],
+  [6, 'g', 'Leksjon 6', 'Hvilke av disse godstypene er omfattet av reglene for farlig gods?', ['Brannfarlig, etsende og eksplosivt gods', 'Tungt gods', 'Gods med skarpe kanter', 'Dårlig stablet gods'], ''],
+  [6, 'g', 'ADR', 'Hvilken klasse er brannfarlige væsker?', ['Klasse 3', 'Klasse 2', 'Klasse 4.1', 'Klasse 5.1'], ''],
+  [6, 'g', 'ADR', 'Hvilken klasse er etsende stoffer?', ['Klasse 8', 'Klasse 6.1', 'Klasse 9', 'Klasse 5.2'], ''],
+  [6, 'g', 'ADR', 'Hvilken klasse er giftige stoffer?', ['Klasse 6.1', 'Klasse 6.2', 'Klasse 8', 'Klasse 4.3'], '6.2 er infeksjonsfremmende stoffer.'],
+  [6, 'g', 'ADR', 'Hvilken klasse er gasser?', ['Klasse 2', 'Klasse 1', 'Klasse 3', 'Klasse 7'], ''],
+  [6, 'g', 'ADR', 'Hvilken klasse er oksiderende stoffer?', ['Klasse 5.1', 'Klasse 5.2', 'Klasse 4.1', 'Klasse 3'], '5.2 er organiske peroksider.'],
+  [6, 'g', 'ADR', 'Hvilken klasse er stoffer som utvikler brennbare gasser i kontakt med vann?', ['Klasse 4.3', 'Klasse 4.1', 'Klasse 2', 'Klasse 5.1'], ''],
+  [6, 'g', 'ADR', 'Hvilken klasse er radioaktivt materiale?', ['Klasse 7', 'Klasse 1', 'Klasse 9', 'Klasse 6.2'], ''],
+  [6, 'g', 'ADR', 'Hvilken klasse er eksplosive stoffer og gjenstander?', ['Klasse 1', 'Klasse 2', 'Klasse 4.1', 'Klasse 5.2'], ''],
+  [6, 'g', 'Leksjon 6', 'Er det internasjonale bestemmelser om faresedler på farlig gods?', ['Ja', 'Nei', 'Bare norske', 'Bare i EU'], ''],
+  [6, 'g', 'Leksjon 6', 'Hvilken farge har skiltet på kjøretøy som frakter farlig gods?', ['Oransje', 'Rødt', 'Gult', 'Hvitt'], 'Skiltet sitter foran og bak på transportenheten.'],
+  [6, 'g', 'Leksjon 6', 'Hva betyr det øverste tallet på et oransje skilt med tall?', ['Farenummeret', 'UN-nummeret', 'Fareklassen', 'Vekten'], 'Det nederste tallet er UN-nummeret, som forteller hvilket stoff det er.'],
+  [6, 'g', 'Leksjon 6', 'Når brukes oransje skilt med tall?', ['Ved transport i tank, batterikjøretøy og bulk', 'På alle kjøretøy med farlig gods', 'Bare på jernbane', 'Bare ved eksplosiver'], ''],
+  [6, 'g', 'Leksjon 6', 'Hva er skriftlige instruksjoner?', ['Sikkerhetsregler og tiltak hvis det skjer en ulykke med farlig gods', 'Et skjema forsikringsselskapet krever', 'Et kort du fyller ut når gods er skadet', 'Fraktbrevet'], 'Tidligere kalt transportuhellskort.'],
+  [6, 'g', 'Leksjon 6', 'Hvem skal utpeke sikkerhetsrådgiver?', ['Virksomheter som håndterer, sender, transporterer eller mottar farlig gods på vei og jernbane', 'Bare transportfirmaer med tankbil', 'Arbeidstilsynet', 'Kommunen'], 'Sikkerhetsrådgiveren skal ha bestått eksamen og gyldig kompetansebevis.'],
+  [6, 'g', 'Leksjon 6', 'Når er transport av farlig gods på et bedriftsområde unntatt ADR/RID?', ['Når området er stengt for alminnelig trafikk', 'Alltid', 'Aldri', 'Når mengden er under 100 kg'], 'Området må ikke være fysisk stengt, men det må være klart for allmennheten at ferdsel ikke er tillatt.'],
+  [6, 'g', 'Leksjon 6', 'Hva gjør du med skadet farlig gods?', ['Avviser det alltid', 'Tar imot og teiper det', 'Tar imot hvis sjåføren signerer', 'Setter det til side for kontroll senere'], ''],
+  [6, 'g', 'Leksjon 6', 'Hvem er ansvarlig for lasten når farlig gods håndteres med truck?', ['Føreren av arbeidsutstyret', 'Avsenderen', 'Sjåføren av lastebilen', 'Sikkerhetsrådgiveren'], ''],
+  [6, 'g', 'Leksjon 6', 'Hvem har plikt til å stille sikkerhetsdatablad til rådighet?', ['Leverandøren, gratis på papir eller elektronisk', 'Kjøperen', 'Arbeidstilsynet', 'Transportøren'], ''],
+  [6, 'p', 'Landtransportforskriften', 'Hva heter forskriften som regulerer landtransport av farlig gods?', ['Forskrift om landtransport av farlig gods', 'Forskrift om utførelse av arbeid', 'Produktkontrolloven', 'Forurensningsforskriften'], 'Den tar inn ADR (vei) og RID (jernbane) i norsk rett.'],
+  // Temaer fra den avsluttende teoriprøven som lysbildene ikke dekker
+  [1, 'b', 'Leksjon 1', 'Hvilke krav må du oppfylle for å bruke truck, kran eller masseforflytningsmaskin?', ['Være fylt 18 år, være fysisk og psykisk skikket, og ha bestått teoretisk og praktisk sikkerhetsopplæring', 'Være fylt 18 år og ha førerkort for bil', 'Være fylt 17 år og ha deltatt på et kurs', 'Ha kompetansebevis, alder spiller ingen rolle'], ''],
+  [1, 'b', UTF, 'Hva er formålet med forskrift om utførelse av arbeid?', ['Å sikre god utførelse av arbeid og verne arbeidstakerne mot skader på liv og helse', 'Å øke omsetningen i bedriften', 'Å gi arbeidstakerne høyere inntekt', 'Å regulere arbeidstiden'], 'Det fulle navnet er forskrift om utførelse av arbeid, bruk av arbeidsutstyr og tilhørende tekniske krav.'],
+  [3, 'p', 'Arbeidsmiljøloven § 5-2', 'Hvem skal varsles straks når en arbeidsulykke fører til død eller alvorlig skade?', ['Arbeidstilsynet og nærmeste politimyndighet', 'Bare forsikringsselskapet', 'Veimyndighetene', 'Ingen, det er nok å skrive avviksmelding'], 'Arbeidsgiver har varslingsplikt etter arbeidsmiljøloven § 5-2. Ring 113 først når liv står i fare.'],
+  [3, 'b', 'Leksjon 3', 'Når kan en fører nekte å bruke arbeidsutstyr?', ['Når føreren mangler opplæring, eller utstyret ikke er godkjent og kontrollert', 'Aldri, arbeidsgiver bestemmer', 'Når føreren synes oppgaven er kjedelig', 'Bare når verneombudet er til stede'], 'Arbeidsgiver kan ikke gi dispensasjon for bruk av utstyr som ikke er godkjent.'],
+  [3, 'b', ORG + ' kap. 7', 'Når skal det gjøres en risikovurdering?', ['Når arbeidsutstyret eller arbeidet kan være farlig, før arbeidet starter', 'Hver gang du tar i bruk en maskin', 'Bare når Arbeidstilsynet krever det', 'Bare etter en ulykke'], ''],
+  [3, 'b', 'Leksjon 3', 'Hvem har hovedansvaret for brannsikkerheten på arbeidsplassen?', ['Arbeidsgiver', 'Hovedverneombudet', 'Tillitsvalgt', 'Brannvesenet'], 'Alle har plikt til å kjenne branninstruksen og brannslokkeutstyret.'],
+  [3, 'p', 'Arbeidsplassforskriften kap. 5', 'Hvem har hovedansvaret for riktig skilting og merking på arbeidsplassen?', ['Arbeidsgiver', 'Verneombudet', 'De ansatte', 'Truckføreren'], 'Skilting og merking står i kapittel 5 i arbeidsplassforskriften, som retter seg mot arbeidsgiver.'],
+  [3, 'b', 'Leksjon 3', 'Hva oppnår du med god ergonomi på arbeidsutstyret?', ['Mindre fare for belastningsskader over tid', 'Mindre hørselsskader', 'Høyere fart', 'Ingen fordeler'], ''],
+  [4, 'p', 'Forurensningsloven', 'Hva er det fulle navnet på forurensningsloven?', ['Lov om vern mot forurensninger og om avfall', 'Loven om ytre miljøvern', 'Loven om luftforurensning', 'Lov om miljøinformasjon'], ''],
+  [4, 'b', 'Leksjon 4', 'Hva kan arbeidsutstyr ha for å stoppe utslipp av hydraulikkolje hvis en slange ryker?', ['Slangebruddsventil', 'Reduksjonsventil', 'Tilbakeslagsventil i tanken', 'Oljeslangeventil'], 'Slangebruddsventilen stenger når trykket faller brått. Den hindrer også at lasten faller ned.'],
+  [4, 'b', 'Leksjon 4', 'Hva betyr IPPC-merket med HT på treemballasje?', ['At treverket er varmebehandlet og fritt for skadedyr', 'At det er fritt for fargestoffer', 'At det bare kan brukes i Skandinavia', 'At det er laget av kompositt'], 'HT betyr varmebehandlet (heat treated). Emballasje uten slikt merke kan bli stoppet ved inn- og utførsel.'],
+  [5, 'b', 'Leksjon 5', 'Hvilke opplysninger finner du på maskinskiltet?', ['Maskintype, merke, produsent, produksjonsår, modell, løftekapasitet og løftehøyder', 'Lengde, bredde og høyde', 'Motorytelse og driftslengde', 'Navnet på eieren'], ''],
+  [5, 't', 'Leksjon 5', 'Fra hvilken høyde er det anbefalt å bruke fallsikring?', ['Over 2 meter', 'Over 1 meter', 'Over 4 meter', 'Over 6 meter'], 'Etter en risikovurdering kan sele også være aktuelt under 2 meter.'],
+  [5, 'b', 'Leksjon 2 og 5', 'Hvilket arbeidsutstyr skal ha sakkyndig kontroll?', ['Blant annet trucker, kraner og masseforflytningsmaskiner', 'Bare kraner', 'Bare utstyr eldre enn 10 år', 'Bolte- og spikerpistoler'], ''],
+  [5, 'b', 'Leksjon 5', 'Hvem er ansvarlig for at arbeidsutstyret oppfyller kravene og har sakkyndig kontroll?', ['Arbeidsgiver', 'Hovedverneombudet', 'Arbeidstilsynet', 'Føreren'], ''],
+  [6, 'g', 'Leksjon 6', 'Hvor kommer de internasjonale reglene for transport av farlig gods opprinnelig fra?', ['FNs anbefalinger', 'Norske myndigheter', 'EU-parlamentet', 'Forsikringsselskapene'], 'ADR, RID, IMDG og ICAO bygger alle på FNs anbefalinger for transport av farlig gods.'],
+  [6, 'g', 'Leksjon 6', 'Hva sier regelverket om opplæring av personell som håndterer farlig gods?', ['Alle skal ha opplæring tilpasset oppgavene sine og kjenne regelverket for veitransport av farlig gods', 'Det er ikke krav om opplæring', 'Arbeidsgiver bestemmer fritt', 'Bare sjåførene trenger opplæring'], ''],
+  [6, 'g', 'ADR', 'Hvilken farge har faresedlen for brannfarlig væske?', ['Rød', 'Oransje', 'Blå', 'Gul'], 'Rød betyr brann. Ikke-brennbar gass er grønn, oksiderende stoffer gule, giftige og etsende hvite eller svart-hvite.'],
+  [6, 'g', 'Leksjon 6', 'Hvordan ser du at et kolli inneholder farlig gods?', ['Det er merket med fareseddel', 'Det har en spesiell form', 'Det er pakket i spesialpapir', 'Det står på en blå pall'], '']
+].map(([l, k, src, q, o, ex]) => ({ m: 'm1', l, k, src, q, o, ex, id: hash(q) }));
+
+// Modul 2.2 – truck
+const CG_SVG = '<svg viewBox="0 0 100 100" aria-label="Symbol"><circle cx="50" cy="50" r="22" fill="none" stroke="currentColor" stroke-width="6"/><path d="M50 50 L50 28 A22 22 0 0 1 72 50Z M50 50 L50 72 A22 22 0 0 1 28 50Z" fill="currentColor"/><path d="M50 4 V96 M4 50 H96" stroke="currentColor" stroke-width="6"/></svg>';
+const QS2 = [
+  [1, 't', 'Opplæringsplan', 'Hvilken klasse på kompetansebeviset gjelder motvektstruck?', ['T4', 'T1', 'T2', 'T5'], ''],
+  [1, 'b', 'Opplæringsplan', 'Hvilke trucker hører til klasse T2?', ['Skyvemasttruck og støttebenstruck', 'Motvektstruck', 'Sidelaster', 'Svinggaffeltruck'], ''],
+  [1, 'b', 'Opplæringsplan', 'Hvilken klasse gjelder lavtløftende plukktruck og palletruck med førerplass?', ['T1', 'T2', 'T3', 'T4'], ''],
+  [1, 'b', 'Opplæringsplan', 'Hvilken klasse gjelder svinggaffeltruck og høytløftende plukktruck?', ['T3', 'T1', 'T4', 'T5'], ''],
+  [1, 'b', 'Opplæringsplan', 'Hvilken klasse gjelder sidelaster?', ['T5', 'T2', 'T3', 'T4'], ''],
+  [1, 't', 'Modul 2.2', 'Hvor stor løftekapasitet kan trucker i modul 2.2 ha?', ['Til og med 10 tonn', 'Til og med 8 tonn', 'Til og med 12 tonn', 'Til og med 5 tonn'], 'Med kompetansebevis T4 kan du dermed kjøre motvektstruck til og med 10 tonn.'],
+  [1, 'b', 'Trucktyper', 'Hva heter trucken der føreren løftes opp sammen med gaflene for å plukke varer i reolen?', ['Høytløftende plukktruck', 'Sidelaster', 'Høytløftende motvektstruck', 'Støttebenstruck'], ''],
+  [1, 'b', 'Trucktyper', 'Hva heter trucken der masten kan skyves fram og tilbake mellom støttebena?', ['Skyvemasttruck', 'Motvektstruck', 'Støttebenstruck', 'Svinggaffeltruck'], ''],
+  [1, 'b', 'Trucktyper', 'Hvilke trucker har skyvbar mast?', ['Skyvemasttruck og sidelaster', 'Motvektstruck og støttebenstruck', 'Støttebenstruck og høytløftende plukktruck', 'Palletruck og motvektstruck'], ''],
+  [1, 'b', 'Tilleggsutstyr', 'Hva skjer med truckens løftekapasitet når du monterer tilleggsutstyr?', ['Den reduseres', 'Den øker', 'Den er uendret', 'Trucken blir stødigere'], 'Utstyret har egenvekt og flytter lastens tyngdepunkt lenger fram. Bruk lastdiagrammet for utstyret.'],
+  [1, 'p', UTF + ' §§ 10-1 og 10-4', 'Hvilken opplæring kreves for å bruke tilleggsutstyr som klemaggregat eller roterende klemme?', ['Dokumentert sikkerhetsopplæring på utstyret', 'Sakkyndig kontroll', 'Ingen opplæring', 'Nytt kompetansebevis'], 'I tillegg kreves utstyrsspesifikk opplæring (§ 10-4).'],
+  [2, 'b', 'Maskinforskriften', 'Hva innebærer det at trucken er CE-merket?', ['Produsenten garanterer at trucken oppfyller EUs krav til helse og sikkerhet', 'At den er produsert før 1995', 'At den har sikkerhetsskilt', 'At Arbeidstilsynet har kontrollert den'], ''],
+  [2, 'b', 'Truck ABC', 'Hva er friløft?', ['Hvor høyt gaffelvogna kan løftes før innermasten begynner å gå opp', 'Hvor høyt ytre mast kan løftes', 'Hvor høyt tiltsylinderen går', 'Høyden gaflene kan løftes uten last'], 'Med friløft kan du løfte innenfor en container eller under lav takhøyde uten at masten blir høyere.'],
+  [2, 'b', 'Truck ABC', 'Hva skjer hvis begge løftekjedene ryker?', ['Gaffelvogna og lasten faller ned', 'Hydraulikksylinderen holder gaffelvogna', 'Parkeringsbremsen stopper fallet', 'Ingenting, kjedene er bare reserve'], 'Derfor skal løftekjedene kontrolleres ved daglig kontroll.'],
+  [2, 'b', 'Truck ABC', 'Hva slags løftesylinder har en høytløftende truck?', ['Enkeltvirkende, gaflene senkes av egenvekten', 'Dobbeltvirkende', 'Trippelvirkende', 'Pneumatisk'], ''],
+  [2, 'b', 'Truck ABC', 'Hvilke bremser har vanligvis en motvektstruck med forbrenningsmotor?', ['Trommel- eller skivebremser', 'Elektromagnetiske bremser', 'Bare motorbrems', 'Luftbremser'], ''],
+  [2, 'b', 'Truck ABC', 'På hvilke hjul virker bremsene vanligvis på en motvektstruck?', ['Drivhjulene', 'Styrehjulene', 'Bare bakhjulene', 'Masthjulene'], ''],
+  [2, 't', 'Truck ABC', 'Hvor mange volt gir hver celle i et truckbatteri?', ['2 V', '1,5 V', '6 V', '12 V'], 'Et batteri med 24 celler gir 48 V, 40 celler gir 80 V.'],
+  [2, 't', 'Truck ABC', 'Et truckbatteri har 24 celler. Hvilken spenning gir det?', ['48 V', '24 V', '12 V', '96 V'], 'Hver celle gir 2 V.'],
+  [2, 'b', 'Truck ABC', 'Hva er den største fordelen med en elektrisk truck?', ['Den gir ingen giftige avgasser og passer innendørs', 'Den tåler bratte ramper', 'Batteriene er billige', 'Den er raskere'], ''],
+  [2, 'b', 'Truck ABC', 'Hvilken motor er vanligst i trucker med forbrenningsmotor?', ['Dieselmotor', 'Bensinmotor', 'Propanmotor', 'Totaktsmotor'], ''],
+  [2, 'b', 'Truck ABC', 'Hvilken kraftoverføring er vanligst på en truck med forbrenningsmotor?', ['Hydraulisk-mekanisk girkasse (automatgir)', 'Hydrostatisk kraftoverføring', 'Manuell girkasse med clutch', 'Kjededrift'], ''],
+  [2, 'b', 'Truck ABC', 'Hva slags hjul har en skyvemasttruck vanligvis?', ['Kompakte, massive hjul', 'Luftgummihjul', 'Halvmassive dekk', 'Belter'], 'Skyvemasttrucken er laget for jevne, harde gulv innendørs.'],
+  [2, 'b', UTF + ' og maskinforskriften', 'Er det krav om førervern på høytløftende trucker med førerplass?', ['Ja', 'Nei', 'Bare utendørs', 'Bare over 5 tonn'], 'Førervernet beskytter føreren mot gods som faller ned.'],
+  [3, 'b', 'Truck ABC', 'Når skal du utføre daglig kontroll?', ['Hver gang du tar i bruk en truck du ikke selv har kontrollert samme dag', 'Etter hvert skift', 'En gang i uka', 'Bare på mandager'], ''],
+  [3, 'b', 'Truck ABC', 'Hvem skal normalt utføre daglig kontroll av trucken?', ['Truckføreren', 'Verneombudet', 'Arbeidslederen', 'Den sakkyndige'], ''],
+  [3, 'b', 'Truck ABC', 'Hvilken gass dannes når et truckbatteri lades?', ['Hydrogen og oksygen, knallgass', 'Nitrogen', 'Karbonmonoksid', 'Edelgass'], ''],
+  [3, 'b', 'Truck ABC', 'Hvilken farlig egenskap har knallgass?', ['Den er eksplosiv', 'Den er etsende', 'Den lukter vondt', 'Den er giftig å ta på'], 'Ved lading: god ventilasjon, ingen åpen flamme eller gnister, og lokket på batteriet skal være åpent.'],
+  [3, 'b', 'Truck ABC', 'Hvorfor er det viktig å kontrollere løftekjedene?', ['De holder gaffelvogna og gaflene oppe', 'De er koblet til lastvekten', 'Sylinderen kan belastes ujevnt', 'De styrer tilten'], ''],
+  [3, 'b', 'Leksjon 5', 'Hvem kan utføre periodisk kontroll på truck?', ['En kvalifisert person', 'Truckføreren', 'Lagersjefen', 'Hvem som helst med kompetansebevis'], ''],
+  [3, 't', UTF + ' § 13-2', 'Må trucken ha sakkyndig kontroll for å være lovlig å bruke?', ['Ja, minst en gang hver 12. måned', 'Nei, det er ikke krav', 'Arbeidsgiver bestemmer selv', 'Ja, hver 3. måned'], ''],
+  [3, 'b', 'Truck ABC', 'Du finner en feil under daglig kontroll. Hva gjør du?', ['Bruker ikke trucken, merker den og rapporterer feilen', 'Kjører forsiktig resten av dagen', 'Reparerer selv', 'Skriver det i loggen ved skiftslutt'], ''],
+  [4, 'b', 'Truck ABC', 'Hva kan en motvektstruck med last sammenlignes med?', ['En vektstang (vippe) med forakselen som vippepunkt', 'Støttebensprinsippet', 'En sidelaster', 'En pendel'], 'Lasten på den ene siden må veies opp av motvekten på den andre.'],
+  [4, 'b', 'Truck ABC', 'Hvilken form har støtteflaten på en motvektstruck?', ['Trekant', 'Firkant', 'Femkant', 'Sirkel'], 'Bakakselen er pendlende, så støtteflaten blir en trekant – stabilitetstriangelet.'],
+  [4, 'b', 'Truck ABC', 'Du løfter lasten helt opp og tilter masten forover. Hva skjer med det felles tyngdepunktet?', ['Det flyttes framover', 'Det flyttes bakover', 'Det flyttes ikke', 'Det flyttes til siden'], 'Prøv dette i Truckstabilitet-simulatoren.'],
+  [4, 'b', 'Truck ABC', 'Hvilken truck ligner en skyvemasttruck på når masten er skjøvet helt ut?', ['En motvektstruck', 'En sidelaster', 'En støttebenstruck', 'En palletruck'], ''],
+  [4, 'b', 'Truck ABC', 'Hva viser lastdiagrammet på maskinskiltet?', ['Løftekapasiteten ved ulike tyngdepunktavstander og løftehøyder', 'Truckens vekt ved ulike laster', 'Lastens mål med tilleggsutstyr', 'Batteriets kapasitet'], ''],
+  [4, 'b', 'Truck ABC', 'Hva er lastens tyngdepunktavstand?', ['Avstanden fra gaffelryggen til lastens tyngdepunkt', 'Avstanden fra forakselen til bakakselen', 'Lastens høyde over gulvet', 'Avstanden mellom gaflene'], ''],
+  [4, 't', 'Truck ABC', 'En jevnt fordelt kasse er 1200 mm lang langs gaflene. Hva er tyngdepunktavstanden?', ['600 mm', '1200 mm', '500 mm', '800 mm'], 'Ved jevn fordeling ligger tyngdepunktet midt i lasten.'],
+  [4, 'b', 'Truck ABC', 'Lastens mål ligger mellom to kolonner i lastdiagrammet. Hvilken kolonne bruker du?', ['Den neste større tyngdepunktavstanden og løftehøyden', 'Den nærmeste mindre verdien', 'Gjennomsnittet av de to', 'Den nominelle løftekapasiteten'], 'Velg alltid det strengeste alternativet.'],
+  [5, 't', 'Truck ABC', 'Hva er standard mål på en EUR-pall?', ['800 × 1200 mm', '1000 × 1200 mm', '800 × 1000 mm', '900 × 1200 mm'], ''],
+  [5, 'b', 'Truck ABC', 'Er det tillatt å bruke en skadet pall?', ['Nei', 'Ja', 'Ja, når lasten er godt sikret', 'Ja, innendørs'], ''],
+  [5, 'b', 'Truck ABC', 'Hva betyr IPPC-merket på en EUR-pall?', ['At pallen er varmebehandlet og skadedyr i treverket er fjernet', 'At pallen er farget riktig', 'At transportøren har godkjent pallen', 'At pallen tåler 1000 kg'], ''],
+  [5, 'b', 'Merking av emballasje', 'Hva betyr dette symbolet på emballasje?', ['Tyngdepunkt', 'Festes her', 'Må ikke rulles', 'Løft her'], '', CG_SVG],
+  [5, 'b', 'Truck ABC', 'Hva må du alltid huske før du rygger ut fra en pallreol?', ['Se bakover og forsikre deg om at ingen er bak trucken', 'Tilte bakover', 'Tilte forover', 'Senke lasten helt ned'], ''],
+  [5, 'b', 'Truck ABC', 'Hvorfor skal gaffelarmene være vannrette når pallen løftes?', ['For ikke å skade pallen', 'For ikke å skade masten', 'For ikke å skade gaffelarmene', 'For å spare strøm'], ''],
+  [5, 'b', 'Truck ABC', 'Hvordan stiller du gaflene når du løfter langt gods?', ['Så bredt som mulig', 'Så smalt som mulig', 'Den ene gaffelen fjernes', 'Det spiller ingen rolle'], ''],
+  [5, 'b', 'Truck ABC', 'Hvordan kjører du når lasten hindrer sikten forover?', ['Baklengs, eller med en som dirigerer', 'Forover med lasten høyt', 'Forover og sakte', 'Med hodet ut til siden'], ''],
+  [6, 'b', 'Truck ABC', 'Er det lov å ha passasjerer på trucken?', ['Nei', 'Ja, på motvekten', 'Ja, med tillatelse fra verneombudet', 'Ja, under 10 km/t'], ''],
+  [6, 'b', 'Leksjon 3 og 5', 'En kollega vil bli løftet opp på gaflene eller på en pall for å nå en hylle. Når er det tillatt?', ['Aldri', 'Når føreren sitter på førerplassen', 'Når arbeidsgiver gir tillatelse', 'Når det går fort'], 'Personer skal bare løftes med utstyr som er laget og godkjent for det.'],
+  [6, 'b', 'Truck ABC', 'Må du bruke setebelte på trucker med setebelte?', ['Ja, setebeltet skal brukes', 'Nei, det er frivillig', 'Bare utendørs', 'Bare med last'], ''],
+  [6, 'b', 'Truck ABC', 'Hva gjør du hvis trucken begynner å velte?', ['Blir sittende, holder fast og lener deg bort fra veltesiden', 'Hopper av', 'Hopper av motsatt vei', 'Bremser hardt'], 'Hopper du av, risikerer du å bli klemt under førervernet.'],
+  [6, 'b', 'Truck ABC', 'Hva betyr det at en truck er EX-merket?', ['At den er godkjent for bruk i brann- og eksplosjonsfarlige områder', 'At den har ekstrautstyr', 'At den har ekstra lange gafler', 'At den er eksportert'], ''],
+  [6, 'b', 'Førerkortforskriften', 'Hva er minstekravet for å kjøre truck langs vei og gate?', ['Riktig førerkort etter førerkortforskriften', 'Ingenting, kompetansebevis holder', 'Førerkort for moped', 'Tillatelse fra kommunen'], ''],
+  [6, 'b', 'Truck ABC', 'Kan du kjøre truck uten last på gaflene langs vei og gate?', ['Ja, men gaffelarmene må være sikret eller merket', 'Nei, aldri', 'Ja, det spiller ingen rolle', 'Bare om natten'], ''],
+  [6, 'b', 'Truck ABC', 'Du kjører med last i en bakke. Hvilken vei skal lasten peke?', ['Oppover mot toppen av bakken', 'Nedover mot bunnen', 'Det spiller ingen rolle', 'Til siden'], 'Kjør forover opp og bakover ned. Uten last skal gaflene peke nedover.'],
+  [6, 'b', 'Truck ABC', 'Hvordan kjører du med last?', ['Lasten lavt, rett over bakken, og masten tiltet bakover', 'Lasten høyt for bedre sikt', 'Masten tiltet forover', 'Lasten midt på masten'], ''],
+  [6, 'b', 'Truck ABC', 'Hvordan parkerer du trucken?', ['Gaflene ned på gulvet, parkeringsbrems på og nøkkelen ut', 'Gaflene i hofthøyde', 'Motoren går så den er klar', 'Foran en nødutgang så den er lett å finne'], ''],
+  [6, 'b', 'Truckførerkurset', 'Hva er hovedformålet med truckføreropplæringen?', ['At du skal bli en sikker, aktsom og god truckfører', 'At du skal bli raskere', 'At du får et bevis som gjelder i 5 år', 'At du lærer å reparere trucken'], '']
+].map(([l, k, src, q, o, ex, svg]) => ({ m: 'm2', l, k, src, q, o, ex, svg, id: hash(q) }));
+const QS = [...QS1, ...QS2];
+function hash(s) { let h = 0; for (const c of s) h = (h * 31 + c.charCodeAt(0)) | 0; return 'q' + (h >>> 0).toString(36); }
+
+// Koble sammen-sett for paragrafjakt
+const SETS = {
+  aml: { name: 'Arbeidsmiljøloven', pairs: [['§ 1-1', 'Lovens formål'], ['§ 2-1', 'Arbeidsgiver skal sørge for at loven blir overholdt'], ['§ 2-3', 'Arbeidstakers medvirkningsplikt, blant annet å bruke verneutstyr'], ['§ 3-2', 'Arbeidsgiver skal gi opplæring, øvelse og instruksjon om farer'], ['§ 5-5', 'Bruksanvisning på norsk skal følge maskinen'], ['§ 6-1', 'Plikt til å velge verneombud'], ['§ 6-3', 'Verneombudet kan stanse farlig arbeid'], ['§ 7-1', 'Arbeidsmiljøutvalg ved minst 50 ansatte'], ['§ 19-1', 'Straff for arbeidsgiver, inntil 5 år ved særlig skjerpende omstendigheter'], ['§ 19-2', 'Straff for arbeidstaker']] },
+  utf: { name: 'Forskrift om utførelse av arbeid', pairs: [['§ 10-1', 'Dokumentert opplæring for utstyr som krever særlig forsiktighet'], ['§ 10-3', 'Liste over utstyr som krever sertifisert sikkerhetsopplæring'], ['§ 10-4', 'Utstyrsspesifikk opplæring'], ['§ 10-10', 'Nødstopp'], ['§ 12-5', 'Tiltak ved feil på arbeidsutstyr'], ['§ 13-2', 'Tidspunkt for sakkyndig kontroll'], ['§ 13-4', 'Dokumentasjon av sakkyndig kontroll'], ['§ 18-8', 'Tiltak når en person løftes']] },
+  fors: { name: 'Hvilken lov eller forskrift?', pairs: [['Internkontrollforskriften', 'Systematisk HMS-arbeid i virksomheten'], ['Arbeidsplassforskriften', 'Utforming av arbeidsplasser og arbeidslokaler'], ['Maskinforskriften', 'Krav til konstruksjon, CE-merking og samsvarserklæring'], ['Byggherreforskriften', 'Bygge- og anleggsplasser og HMS-kort'], ['Forskrift om utførelse av arbeid', 'Opplæringskrav og kontroll av arbeidsutstyr'], ['Organisering, ledelse og medvirkning', 'Risikovurdering, verneombud og arbeid av barn og ungdom'], ['Landtransportforskriften', 'Farlig gods på vei og jernbane (ADR/RID)'], ['Forurensningsloven', 'Vern av ytre miljø mot forurensning og avfall'], ['Produktkontrolloven', 'Hindre at produkter gir helse- eller miljøskade']] },
+  tall: { name: 'Tall og frister', pairs: [['18 år', 'Alder for selvstendig bruk av farlig arbeidsutstyr'], ['17 år', 'Praktisk opplæring på truck under tilsyn'], ['16 år', 'Opplæring for elever i videregående skole'], ['12 måneder', 'Intervall for sakkyndig kontroll'], ['6 måneder', 'Ute av bruk, sakkyndig kontroll før oppstart'], ['2 tm', 'Krangrense for sertifisert opplæring'], ['15 kW', 'Masseforflytningsmaskin med krav om sertifisert opplæring'], ['0,2 promille', 'Grense for å regnes som påvirket'], ['6 timer', 'Ikke drikke alkohol etter kjøring'], ['80 dB(A)', 'Grense for skadelig støy'], ['3 dB', 'Økning når lydstyrken dobles'], ['113', 'Medisinsk nødhjelp'], ['30 : 2', 'Kompresjoner og innblåsinger ved HLR'], ['2 år', 'Gyldighet for HMS-kort'], ['1995', 'CE-merking kreves for maskiner produsert etter dette året']] },
+  tkl: { name: 'Truckklasser T1–T5', pairs: [['T1', 'Lavtløftende plukktruck, palletruck med førerplass'], ['T2', 'Skyvemasttruck og støttebenstruck'], ['T3', 'Svinggaffeltruck og høytløftende plukktruck'], ['T4', 'Motvektstruck'], ['T5', 'Sidelaster']] },
+  gml: { name: 'Opplæring og kontroll', pairs: [['§ 10-1', 'Dokumentert opplæring for utstyr som krever særlig forsiktighet'], ['§ 10-3', 'Sertifisert sikkerhetsopplæring'], ['§ 10-4', 'Utstyrsspesifikk opplæring'], ['§ 13-1', 'Utstyr som krever sakkyndig kontroll'], ['§ 13-2', 'Når sakkyndig kontroll skal utføres'], ['§ 13-4', 'Dokumentasjon av sakkyndig kontroll']] },
+  adr: { name: 'Fareklasser', pairs: [['Klasse 1', 'Eksplosive stoffer'], ['Klasse 2', 'Gasser'], ['Klasse 3', 'Brannfarlige væsker'], ['Klasse 4.1', 'Brannfarlige faste stoffer'], ['Klasse 4.3', 'Utvikler brennbar gass i kontakt med vann'], ['Klasse 5.1', 'Oksiderende stoffer'], ['Klasse 5.2', 'Organiske peroksider'], ['Klasse 6.1', 'Giftige stoffer'], ['Klasse 6.2', 'Infeksjonsfremmende stoffer'], ['Klasse 7', 'Radioaktivt materiale'], ['Klasse 8', 'Etsende stoffer'], ['Klasse 9', 'Forskjellige farlige stoffer og gjenstander']] }
+};
+
+// Fagstoff. gap: true betyr at temaet kommer på prøven, men ikke dekkes av lysbildene.
+const FACTS = [
+  { m: 'm1', l: 1, title: 'Krav til føreren', pts: ['Fylt 18 år', 'Fysisk og psykisk skikket', 'Bestått teoretisk og praktisk sikkerhetsopplæring', 'Utstyrsspesifikk opplæring på maskinen du skal bruke', 'Fra 17 år: praktisk opplæring under tilsyn (organisering, ledelse og medvirkning § 12-7)'] },
+  { m: 'm1', l: 1, title: 'Tre typer opplæring', pts: ['Dokumentert sikkerhetsopplæring – utførelse §§ 10-1 og 10-2', 'Sertifisert sikkerhetsopplæring – utførelse § 10-3: truck med førerplass, kraner over 2 tm, masseforflytning over 15 kW m.fl.', 'Utstyrsspesifikk opplæring – utførelse § 10-4', 'Kompetansebeviset varer livet ut og kan ikke inndras'] },
+  { m: 'm1', l: 2, title: 'Arbeidsmiljøloven – paragrafene du må kunne', pts: ['§ 1-1 Lovens formål', '§ 2-1 Arbeidsgiver skal sørge for at loven følges', '§ 2-3 Arbeidstakers medvirkningsplikt: bruke verneutstyr, melde fra om feil, avbryte farlig arbeid', '§ 3-2 Arbeidsgiver skal gi opplæring, øvelse og instruksjon', '§ 5-5 Bruksanvisning på norsk', '§ 6-3 Verneombudet kan stanse farlig arbeid'] },
+  { m: 'm1', l: 2, title: 'Internkontrollforskriften', pts: ['Systematisk HMS-arbeid er et lovfestet krav', 'Eier eller arbeidsgiver har ansvaret for å innføre det (§ 4)', 'Arbeidstaker har plikt og rett til å delta aktivt', '§ 5 lister hva som skal gjøres; punkt 4–8 skal dokumenteres skriftlig'] },
+  { m: 'm1', l: 3, gap: true, title: 'Varsling ved alvorlig ulykke', pts: ['Ring 113 først når liv står i fare', 'Arbeidsgiver skal straks varsle Arbeidstilsynet og nærmeste politimyndighet ved død eller alvorlig skade (aml. § 5-2)'] },
+  { m: 'm1', l: 3, title: 'Straff etter arbeidsmiljøloven', pts: ['Arbeidsgiver (§ 19-1): bøter eller fengsel inntil 1 år, særlig skjerpende inntil 5 år', 'Arbeidstaker (§ 19-2): uaktsomt – bøter; forsett/grov uaktsomhet – inntil 3 måneder; særlig skjerpende – inntil 1 år', 'Lysbildene sier 3 år for arbeidsgiver, men det er utdatert'] },
+  { m: 'm1', l: 3, gap: true, title: 'Arbeidsgiver har hovedansvaret for', pts: ['Brannsikkerheten', 'Skilting og merking (arbeidsplassforskriften kap. 5)', 'At utstyret oppfyller kravene og har sakkyndig kontroll', 'Verneutstyr', 'Men: du plikter selv å kjenne branninstruksen og slukkeutstyret'] },
+  { m: 'm1', l: 3, gap: true, title: 'Når kan du nekte?', pts: ['Når du mangler opplæring på utstyret', 'Når utstyret ikke er godkjent eller kontrollert', 'Når arbeidet ikke kan gjøres uten fare for liv eller helse (aml. § 2-3)', 'Arbeidsgiver kan ikke gi dispensasjon for ulovlig utstyr'] },
+  { m: 'm1', l: 3, title: 'Ulykker og risiko', pts: ['De fleste ulykker skyldes menneskelige feilvurderinger, ikke tekniske feil', 'Risikovurdering gjøres når arbeidet eller utstyret kan være farlig, før arbeidet starter', 'God ergonomi gir mindre belastningsskader over tid', 'Påvirket av alkohol eller andre rusmidler: aldri lov å bruke arbeidsutstyr'] },
+  { m: 'm1', l: 4, gap: true, title: 'Miljø: navn og utstyr', pts: ['Forurensningsloven heter fullt ut «Lov om vern mot forurensninger og om avfall»', 'Slangebruddsventil stopper oljeutslipp hvis en hydraulikkslange ryker', 'IPPC-merke med HT på treemballasje betyr varmebehandlet og fri for skadedyr', 'Erstatningsstoffer er mindre skadelige alternativer til farlige kjemikalier'] },
+  { m: 'm1', l: 5, gap: true, title: 'Tall og krav du må kunne', pts: ['Fallsikring: anbefalt over 2 meter', 'Sakkyndig kontroll: minst hver 12. måned', 'Sakkyndig kontroll gjelder blant annet trucker, kraner og masseforflytningsmaskiner', 'CE-merke: produsenten garanterer at EUs krav til helse og sikkerhet er oppfylt'] },
+  { m: 'm1', l: 5, gap: true, title: 'Maskinskiltet', pts: ['Maskintype og modell', 'Merke og produsent/leverandør', 'Produksjonsår og serienummer', 'Løftekapasitet og løftehøyder', 'CE-merke'] },
+  { m: 'm1', l: 6, gap: true, title: 'Farlig gods – bakgrunn', pts: ['Reglene bygger på FNs anbefalinger og er internasjonale', 'Alle som håndterer farlig gods skal ha opplæring tilpasset oppgavene', 'Du kjenner igjen farlig gods på faresedlene', 'Rød fareseddel = brannfarlig (væske eller gass). Grønn = ikke-brennbar gass. Gul = oksiderende'] },
+  { m: 'm2', l: 1, title: 'Truckklasser', pts: ['T1 – lavtløftende plukktruck, palletruck med førerplass', 'T2 – skyvemasttruck og støttebenstruck', 'T3 – svinggaffeltruck og høytløftende plukktruck', 'T4 – motvektstruck', 'T5 – sidelaster', 'Modul 2.2 gjelder trucker til og med 10 tonn'] },
+  { m: 'm2', l: 1, title: 'Tilleggsutstyr', pts: ['Klemaggregat, roterende klemme, sideforskyver, skyveaggregat m.m.', 'Reduserer alltid løftekapasiteten', 'Krever dokumentert sikkerhetsopplæring (§§ 10-1 og 10-2) og utstyrsspesifikk opplæring (§ 10-4)', 'Skyvbar mast har skyvemasttruck og sidelaster'] },
+  { m: 'm2', l: 2, title: 'Mast og hydraulikk', pts: ['Friløft: gaffelvogna går opp før innermasten', 'Løftesylinderen er enkeltvirkende – gaflene senkes av egenvekten', 'Ryker begge løftekjedene, faller gaffelvogna', 'Førervern er påbudt på høytløftende trucker med førerplass'] },
+  { m: 'm2', l: 2, title: 'Drift og bremser', pts: ['Forbrenningsmotor: oftest diesel, automatgir (hydraulisk-mekanisk)', 'Bremsene virker på drivhjulene, trommel- eller skivebremser', 'Batteri: 2 V per celle (24 celler = 48 V)', 'Eltruck: ingen avgasser, passer innendørs', 'Skyvemasttruck: kompakte, massive hjul'] },
+  { m: 'm2', l: 3, title: 'Daglig kontroll og lading', pts: ['Føreren kontrollerer trucken første gang den brukes hver dag', 'Løftekjedene holder gaffelvogna oppe – sjekk dem', 'Lading gir knallgass (hydrogen + oksygen), som er eksplosiv', 'Periodisk kontroll: kvalifisert person. Sakkyndig kontroll: hver 12. måned', 'Feil: ikke bruk trucken, merk den og rapporter'] },
+  { m: 'm2', l: 4, title: 'Stabilitet', pts: ['Motvektstruck = vektstang med forakselen som vippepunkt', 'Støtteflaten er en trekant (stabilitetstriangel)', 'Høy løft og tilt forover flytter tyngdepunktet fram', 'Skyvemasttruck med masten ute oppfører seg som en motvektstruck', 'Øv i Truckstabilitet-simulatoren'] },
+  { m: 'm2', l: 4, title: 'Slik leser du maskinskiltet', pts: ['Tyngdepunktavstand D = fra gaffelryggen til lastens tyngdepunkt (halve lengden ved jevn last)', 'Finn raden for løftehøyde H og kolonnen for D', 'Ligger verdien mellom to kolonner: bruk neste større D og H', 'Med sideforskyver gjelder den egne, lavere tabellen', 'Tilleggsutstyr reduserer kapasiteten'] },
+  { m: 'm2', l: 5, title: 'Paller og merking', pts: ['EUR-pall: 800 × 1200 mm', 'Skadet pall skal ikke brukes', 'IPPC-merke: varmebehandlet, skadedyr fjernet', 'Gaflene vannrett når du løfter, så du ikke skader pallen', 'Langt gods: gaflene så bredt som mulig'], svg: CG_SVG, svgText: 'Symbolet betyr tyngdepunkt.' },
+  { m: 'm2', l: 6, title: 'Trafikk og sikkerhet', pts: ['Ingen passasjerer, og aldri personer på gaflene', 'Bruk setebeltet', 'Velter trucken: bli sittende og hold fast', 'EX-merket: godkjent for eksplosjonsfarlige områder', 'På vei: førerkort etter førerkortforskriften, og gaflene sikret eller merket', 'I bakke med last: lasten peker oppover', 'Rygg aldri ut av en reol uten å se bakover'] }
+];
+
+// ---------- Hjelpere og lagring ----------
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const LETTERS = 'ABCDEF';
+const KEY = 'teori-modul1-v1';
+let streak = {};
+try { streak = JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { streak = {}; }
+function save() { try { localStorage.setItem(KEY, JSON.stringify(streak)); } catch (e) {} }
+function record(q, ok) { streak[q.id] = ok ? Math.min(2, (streak[q.id] || 0) + 1) : 0; save(); }
+const mastered = q => (streak[q.id] || 0) >= 2;
+
+// ---------- Språk ----------
+// Innholdet er skrevet på norsk. Oversettelsene slås opp på hash av den norske teksten,
+// så en endret norsk tekst faller tilbake til norsk til den er oversatt på nytt.
+const LANG_KEY = 'truck-lang';
+let LANG = 'nb', showNo = true;
+try { const l = localStorage.getItem(LANG_KEY); if (['nb', 'en', 'uk'].includes(l)) LANG = l; showNo = localStorage.getItem(LANG_KEY + '-no') !== '0'; } catch (e) {}
+function t(key, v = {}, lang = LANG) {
+  const e = I18N.ui[key]; const s = e ? (e[lang] ?? e.nb) : key;
+  return s.replace(/\{(\w+)\}/g, (_, k) => v[k] ?? '');
+}
+const tr = s => (LANG === 'nb' || s == null) ? s : (I18N[LANG][hash(String(s))] ?? s);
+// Oversatt tekst med den norske under i liten skrift
+function bi(s) { const x = tr(s); return esc(x) + (x !== s && showNo ? `<span class="nbt" lang="nb">${esc(s)}</span>` : ''); }
+function biT(key, v) { const x = t(key, v); return esc(x) + (LANG !== 'nb' && showNo ? `<span class="nbt" lang="nb">${esc(t(key, v, 'nb'))}</span>` : ''); }
+let redraw = () => {};
+function applyLang() {
+  document.documentElement.lang = LANG;
+  document.querySelectorAll('[data-i18n]').forEach(el => el.textContent = t(el.dataset.i18n));
+  document.querySelectorAll('[data-i18n-html]').forEach(el => el.innerHTML = t(el.dataset.i18nHtml));
+  document.querySelectorAll('[data-lang]').forEach(b => b.setAttribute('aria-pressed', b.dataset.lang === LANG));
+  $('.langnote').hidden = LANG === 'nb';
+  $('.shownb').hidden = LANG === 'nb';
+  $('#showNo').checked = showNo;
+  fillSets();
+}
+document.querySelectorAll('[data-lang]').forEach(b => b.addEventListener('click', () => {
+  LANG = b.dataset.lang;
+  try { localStorage.setItem(LANG_KEY, LANG); } catch (e) {}
+  applyLang(); redraw();
+}));
+$('#showNo').addEventListener('change', e => {
+  showNo = e.target.checked;
+  try { localStorage.setItem(LANG_KEY + '-no', showNo ? '1' : '0'); } catch (err) {}
+  redraw();
+});
+
+const sel = { mod: 'm1', lessons: new Set([1, 2, 3, 4, 5, 6]), kinds: new Set(Object.keys(KINDS)) };
+try { const m = localStorage.getItem(KEY + '-mod'); if (MODS[m]) sel.mod = m; } catch (e) {}
+function pool() { return QS.filter(q => q.m === sel.mod && sel.lessons.has(q.l) && sel.kinds.has(q.k)); }
+const factPool = () => FACTS.filter(f => f.m === sel.mod && sel.lessons.has(f.l));
+
+function renderHome() {
+  redraw = renderHome;
+  $('#modSel').innerHTML = Object.entries(MODS).map(([k, m]) => `<button class="modbtn" data-mod="${k}" aria-pressed="${sel.mod === k}"><b>${esc(tr(m.name))}</b><small>${esc(tr(m.sub))}</small></button>`).join('');
+  $('#lessonChips').innerHTML = Object.entries(MODS[sel.mod].lessons).map(([n, x]) => `<button class="chip" data-l="${n}" aria-pressed="${sel.lessons.has(+n)}">${n}. ${esc(tr(x))}</button>`).join('');
+  $('#kindChips').innerHTML = Object.entries(KINDS).map(([k, x]) => `<button class="chip" data-k="${k}" aria-pressed="${sel.kinds.has(k)}">${esc(tr(x))}</button>`).join('');
+  const p = pool(), fp = factPool();
+  $('#ovCount').textContent = t('ovCount', { n: p.length, m: p.filter(q => !mastered(q)).length });
+  const gaps = fp.filter(f => f.gap).length;
+  $('#factCount').textContent = t('factCount', { n: fp.length }) + (gaps ? t('factGaps', { n: gaps }) : '');
+  document.querySelectorAll('[data-start]').forEach(b => b.disabled = !['match', 'plate'].includes(b.dataset.start) && !(b.dataset.start === 'facts' ? fp.length : p.length));
+  $('#mastery').innerHTML = Object.entries(MODS[sel.mod].lessons).map(([n, x]) => {
+    const qs = QS.filter(q => q.m === sel.mod && q.l === +n), m = qs.filter(mastered).length, pct = Math.round(100 * m / qs.length);
+    return `<div class="mrow"><span>${n}. ${esc(tr(x))}</span><div class="bar"><i style="width:${pct}%"></i></div><b>${m}/${qs.length}</b></div>`;
+  }).join('');
+}
+['aml', 'utf', 'fors', 'tall', 'adr'].forEach(k => SETS[k].m = 'm1');
+SETS.tkl.m = 'm2';
+function fillSets() {
+  const cur = $('#matchSet').value;
+  $('#matchSet').innerHTML = Object.keys(SETS).filter(k => !SETS[k].m || SETS[k].m === sel.mod).map(k => `<option value="${k}">${esc(tr(SETS[k].name))}</option>`).join('');
+  if (cur && SETS[cur] && [...$('#matchSet').options].some(o => o.value === cur)) $('#matchSet').value = cur;
+}
+$('#home').addEventListener('click', e => {
+  const md = e.target.closest('.modbtn');
+  if (md) {
+    sel.mod = md.dataset.mod;
+    try { localStorage.setItem(KEY + '-mod', sel.mod); } catch (err) {}
+    fillSets(); renderHome(); return;
+  }
+  const c = e.target.closest('.chip');
+  if (c) {
+    const set = c.dataset.l ? sel.lessons : sel.kinds, v = c.dataset.l ? +c.dataset.l : c.dataset.k;
+    set.has(v) ? set.delete(v) : set.add(v);
+    renderHome(); return;
+  }
+  const s = e.target.closest('[data-start]');
+  if (s) ({ ov: startPractice, prove: startExam, match: startMatch, facts: () => showFacts(), plate: startPlate })[s.dataset.start]();
+});
+$('#resetM').addEventListener('click', () => { if (confirm(t('confirmReset'))) { streak = {}; save(); renderHome(); } });
+
+function goHome() { $('#play').hidden = true; $('#home').hidden = false; renderHome(); scrollTo(0, 0); }
+function goPlay(html, keepScroll) { $('#home').hidden = true; const p = $('#play'); p.hidden = false; p.innerHTML = html; if (!keepScroll) scrollTo(0, 0); return p; }
+function tagsHTML(q) { return `<div class="tags"><span class="tag">${esc(tr(MODS[q.m].name))} · ${q.l}. ${esc(tr(lname(q.m, q.l)))}</span><span class="tag">${esc(tr(KINDS[q.k]))}</span></div>`; }
+const qHTML = q => (q.svg ? `<div class="qsvg">${q.svg}</div>` : '') + `<p class="qtext">${bi(q.q)}</p>`;
+// q.o er norske tekster, eller ferdige HTML-biter når q.html er satt (maskinskilt)
+function optsHTML(q) {
+  if (!q._order) q._order = shuffle(q.o.map((x, i) => ({ x, i })));
+  return '<div class="opts">' + q._order.map((o, n) => `<button class="opt" data-i="${o.i}"><span class="k">${LETTERS[n]}</span><span>${q.html ? q.html[o.i] : bi(o.x)}</span></button>`).join('') + '</div>';
+}
+const srcHTML = q => `<span class="src">${t('source')} ${bi(q.src)}</span>`;
+
+// ---------- Øving ----------
+// Feil svar settes inn igjen tre plasser frem i køen
+function startPractice() {
+  const p = pool();
+  const fresh = shuffle(p.filter(q => !mastered(q))), rest = shuffle(p.filter(mastered));
+  const run = { queue: [...fresh, ...rest].slice(0, Math.max(15, fresh.length)), right: 0, wrong: 0, total: 0 };
+  run.total = run.queue.length;
+  run.queue.forEach(q => delete q._order);
+  nextPractice(run);
+}
+function nextPractice(run, keepScroll) {
+  redraw = () => nextPractice(run, true);
+  if (!run.queue.length) return endPractice(run);
+  const q = run.queue[0], done = run.total - new Set(run.queue.map(x => x.id)).size;
+  const p = goPlay(`<div class="quiz">
+    <div class="qbar"><span>${t('prLeft')} <b>${run.queue.length}</b></span><span>${t('right')} <b>${run.right}</b> · ${t('wrong')} <b>${run.wrong}</b></span><button class="btn" id="quit">${t('quit')}</button></div>
+    <div class="track"><i style="width:${100 * done / run.total}%"></i></div>
+    ${tagsHTML(q)}${qHTML(q)}${optsHTML(q)}<div id="fb"></div></div>`, keepScroll);
+  $('#quit').onclick = goHome;
+  p.querySelector('.opts').addEventListener('click', e => {
+    const b = e.target.closest('.opt'); if (!b || b.disabled) return;
+    const i = +b.dataset.i, ok = i === 0;
+    p.querySelectorAll('.opt').forEach(x => { x.disabled = true; const j = +x.dataset.i; x.classList.add(j === 0 ? 'right' : j === i ? 'wrong' : 'dim'); });
+    record(q, ok);
+    run.queue.shift(); delete q._order;
+    if (ok) run.right++; else { run.wrong++; run.queue.splice(Math.min(3, run.queue.length), 0, q); }
+    $('#fb').innerHTML = `<div class="fb ${ok ? 'ok' : 'no'}"><b>${ok ? t('right') : t('wrongAns') + ' ' + bi(q.o[0])}</b>${q.ex ? `<span>${bi(q.ex)}</span>` : ''}${srcHTML(q)}</div>
+      <div class="row" style="margin-top:10px"><button class="btn primary" id="next">${run.queue.length ? t('next') : t('done')}</button></div>`;
+    $('#next').focus();
+    $('#next').onclick = () => nextPractice(run);
+  });
+}
+function endPractice(run) {
+  redraw = () => endPractice(run);
+  goPlay(`<div class="quiz"><h3>${t('roundDone')}</h3>
+    <div class="tiles"><div class="tile"><div class="v">${run.total}</div><div class="l">${t('tQuestions')}</div></div>
+    <div class="tile"><div class="v">${run.wrong}</div><div class="l">${t('tWrongAlong')}</div></div>
+    <div class="tile"><div class="v">${pool().filter(mastered).length}/${pool().length}</div><div class="l">${t('tMastered')}</div></div></div>
+    <div class="row"><button class="btn primary" id="again">${t('newRound')}</button><button class="btn" id="home2">${t('toStart')}</button></div></div>`);
+  $('#again').onclick = startPractice; $('#home2').onclick = goHome;
+}
+
+// ---------- Prøve ----------
+function startExam() {
+  const n = +$('#examN').value, p = pool();
+  // Fordel spørsmålene jevnt på valgte leksjoner
+  const by = {}; shuffle(p).forEach(q => (by[q.l] = by[q.l] || []).push(q));
+  const picked = []; let k = 0; const ls = Object.keys(by);
+  while (picked.length < Math.min(n, p.length)) { const a = by[ls[k++ % ls.length]]; if (a.length) picked.push(a.pop()); }
+  picked.forEach(q => delete q._order);
+  const run = { qs: shuffle(picked), ans: {}, i: 0, t0: Date.now() };
+  run.timer = setInterval(() => { const el = $('#clock'); if (el) el.textContent = clock(Date.now() - run.t0); else clearInterval(run.timer); }, 1000);
+  showExam(run);
+}
+const clock = ms => { const s = Math.floor(ms / 1000); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
+function showExam(run, keepScroll) {
+  redraw = () => showExam(run, true);
+  const q = run.qs[run.i], answered = Object.keys(run.ans).length;
+  const p = goPlay(`<div class="quiz">
+    <div class="qbar"><span>${t('exQ')} <b>${run.i + 1}</b> ${t('of')} <b>${run.qs.length}</b></span><span>${t('answered')} <b>${answered}</b> · ${t('time')} <b id="clock">${clock(Date.now() - run.t0)}</b></span></div>
+    <div class="track"><i style="width:${100 * answered / run.qs.length}%"></i></div>
+    ${qHTML(q)}${optsHTML(q)}
+    <div class="row navrow"><button class="btn" id="prev" ${run.i ? '' : 'disabled'}>${t('prev')}</button><button class="btn primary" id="nxt">${run.i < run.qs.length - 1 ? t('next') : t('handIn')}</button><button class="btn" id="hand">${t('handInNow')}</button></div></div>`, keepScroll);
+  const mark = () => p.querySelectorAll('.opt').forEach(x => x.classList.toggle('sel', run.ans[q.id] === +x.dataset.i));
+  mark();
+  p.querySelector('.opts').addEventListener('click', e => { const b = e.target.closest('.opt'); if (!b) return; run.ans[q.id] = +b.dataset.i; mark(); });
+  $('#prev').onclick = () => { run.i--; showExam(run); };
+  $('#nxt').onclick = () => { if (run.i < run.qs.length - 1) { run.i++; showExam(run); } else finishExam(run); };
+  $('#hand').onclick = () => finishExam(run);
+}
+function finishExam(run) {
+  const left = run.qs.length - Object.keys(run.ans).length;
+  if (left && !confirm(t('confirmHand', { n: left }))) return;
+  clearInterval(run.timer);
+  run.t1 = Date.now();
+  run.qs.forEach(q => record(q, run.ans[q.id] === 0));
+  showResult(run);
+}
+function showResult(run) {
+  redraw = () => showResult(run);
+  const right = run.qs.filter(q => run.ans[q.id] === 0).length;
+  const pct = Math.round(100 * right / run.qs.length);
+  const wrong = run.qs.filter(q => run.ans[q.id] !== 0);
+  const byL = {}; run.qs.forEach(q => { byL[q.l] = byL[q.l] || [0, 0]; byL[q.l][1]++; if (run.ans[q.id] === 0) byL[q.l][0]++; });
+  goPlay(`<div class="quiz">
+    <h3>${t('result')}</h3>
+    <div class="tiles"><div class="tile"><div class="v">${right}/${run.qs.length}</div><div class="l">${t('correctAnswers')}</div></div>
+      <div class="tile"><div class="v">${pct} %</div><div class="l">${t('score')}</div></div>
+      <div class="tile"><div class="v">${clock(run.t1 - run.t0)}</div><div class="l">${t('timeUsed')}</div></div></div>
+    <div class="mastery">${Object.entries(byL).map(([l, [r, n]]) => `<div class="mrow"><span>${l}. ${esc(tr(lname(sel.mod, l)))}</span><div class="bar"><i style="width:${100 * r / n}%"></i></div><b>${r}/${n}</b></div>`).join('')}</div>
+    <h2 style="margin-top:6px">${wrong.length ? t('reviewWrong') : t('noWrong')}</h2>
+    <ul class="review">${wrong.map(q => `<li><b>${bi(q.q)}</b>
+      <span>${t('yourAns')} ${run.ans[q.id] === undefined ? `<i>${t('notAnswered')}</i>` : bi(q.o[run.ans[q.id]])}</span>
+      <span>${t('correctLbl')} <b>${bi(q.o[0])}</b></span>${q.ex ? `<span class="muted">${bi(q.ex)}</span>` : ''}${srcHTML(q)}</li>`).join('')}</ul>
+    <div class="row noprint"><button class="btn primary" id="again">${t('newTest')}</button><button class="btn" onclick="window.print()">${t('print')}</button><button class="btn" id="home2">${t('toStart')}</button></div></div>`);
+  $('#again').onclick = startExam; $('#home2').onclick = goHome;
+}
+
+// ---------- Paragrafjakt ----------
+function startMatch() {
+  const set = SETS[$('#matchSet').value];
+  const rounds = []; const all = shuffle(set.pairs);
+  for (let i = 0; i < all.length; i += 5) rounds.push(all.slice(i, i + 5));
+  if (rounds.length > 1 && rounds[rounds.length - 1].length < 3) rounds[rounds.length - 2].push(...rounds.pop());
+  const run = { set, rounds, r: 0, errors: 0, t0: Date.now() };
+  showMatch(run);
+}
+function showMatch(run, keepScroll) {
+  redraw = () => showMatch(run, true);
+  const pairs = run.rounds[run.r];
+  const left = shuffle(pairs.map((p, i) => ({ x: p[0], i }))), right = shuffle(pairs.map((p, i) => ({ x: p[1], i })));
+  const p = goPlay(`<div class="quiz">
+    <div class="qbar"><span>${esc(tr(run.set.name))} · ${t('round')} <b>${run.r + 1}</b> ${t('of')} <b>${run.rounds.length}</b></span><span>${t('wrong')} <b id="err">${run.errors}</b></span><button class="btn" id="quit">${t('quit')}</button></div>
+    <p class="muted" style="margin:0">${t('matchHelp')}</p>
+    <div class="match"><div class="col">${left.map(x => `<button class="m code" data-side="a" data-i="${x.i}">${bi(x.x)}</button>`).join('')}</div>
+    <div class="col">${right.map(x => `<button class="m" data-side="b" data-i="${x.i}">${bi(x.x)}</button>`).join('')}</div></div>
+    <div id="mfb"></div></div>`, keepScroll);
+  $('#quit').onclick = goHome;
+  let pick = { a: null, b: null }, done = 0;
+  p.querySelector('.match').addEventListener('click', e => {
+    const b = e.target.closest('.m'); if (!b || b.classList.contains('done')) return;
+    const side = b.dataset.side;
+    p.querySelectorAll(`.m[data-side="${side}"]`).forEach(x => x.classList.remove('sel', 'err'));
+    b.classList.add('sel'); pick[side] = b;
+    if (!pick.a || !pick.b) return;
+    const A = pick.a, B = pick.b; pick = { a: null, b: null };
+    if (A.dataset.i === B.dataset.i) { [A, B].forEach(x => { x.classList.remove('sel'); x.classList.add('done'); x.disabled = true; }); done++; }
+    else { run.errors++; $('#err').textContent = run.errors; [A, B].forEach(x => { x.classList.remove('sel'); x.classList.add('err'); }); setTimeout(() => [A, B].forEach(x => x.classList.remove('err')), 700); }
+    if (done === pairs.length) {
+      const last = run.r === run.rounds.length - 1;
+      $('#mfb').innerHTML = last
+        ? `<div class="fb ok"><b>${t('matchDone', { n: run.set.pairs.length, t: clock(Date.now() - run.t0), e: run.errors })}</b></div><div class="row" style="margin-top:10px"><button class="btn primary" id="again">${t('playAgain')}</button><button class="btn" id="home2">${t('toStart')}</button></div>`
+        : `<div class="row"><button class="btn primary" id="nextr">${t('nextRound')}</button></div>`;
+      if (last) { $('#again').onclick = startMatch; $('#home2').onclick = goHome; }
+      else { $('#nextr').onclick = () => { run.r++; showMatch(run); }; $('#nextr').focus(); }
+    }
+  });
+}
+
+// ---------- Fagstoff ----------
+function showFacts(onlyGap = false, keepScroll) {
+  redraw = () => showFacts(onlyGap, true);
+  const all = factPool(), list = onlyGap ? all.filter(f => f.gap) : all;
+  goPlay(`<div class="quiz">
+    <div class="qbar"><span>${t('factsTitle')} · <b>${esc(tr(MODS[sel.mod].name))}</b></span><div class="row"><button class="btn" id="gapT" aria-pressed="${onlyGap}" ${all.some(f => f.gap) ? '' : 'hidden'}>${onlyGap ? t('showAll') : t('onlyGap')}</button><button class="btn" onclick="window.print()">${t('print')}</button><button class="btn" id="quit">${t('backBtn')}</button></div></div>
+    <div class="facts">${list.map(f => `<article class="fact">${f.gap ? `<span class="gap">${t('gapTag')}</span>` : ''}
+      <h4>${bi(f.title)}</h4><span class="muted" style="font-size:12.5px">${f.l}. ${esc(tr(lname(f.m, f.l)))}</span>
+      ${f.svg ? `<div class="row">${f.svg}<span>${bi(f.svgText || '')}</span></div>` : ''}
+      <ul>${f.pts.map(p => `<li>${bi(p)}</li>`).join('')}</ul></article>`).join('')}</div>
+    <div class="row noprint"><button class="btn primary" id="ovNow">${t('practiseThis')}</button></div></div>`, keepScroll);
+  $('#quit').onclick = goHome;
+  $('#gapT').onclick = () => showFacts(!onlyGap);
+  $('#ovNow').onclick = startPractice;
+}
+
+// ---------- Maskinskilt ----------
+// Lager et nytt skilt med egne tall. Kapasiteten faller med tyngdepunktavstand og løftehøyde.
+const round10 = v => Math.round(v / 10) * 10;
+function makePlate() {
+  const pick = a => a[Math.floor(Math.random() * a.length)];
+  const nom = pick([1600, 2000, 2500, 3000, 3500]);
+  const H = pick([[3300, 4300, 5000], [4300, 5000, 5500], [3000, 4000, 4700], [3600, 4500, 5400]]);
+  const D = [500, 600, 800];
+  const hf = [1, pick([.95, .96, .97]), pick([.88, .89, .9])];
+  const side = pick([.56, .58, .6]);
+  // Momentarm fra forakselen til gaffelryggen er satt til ca. 450 mm
+  const vert = H.map((h, i) => D.map(d => round10(nom * 950 / (450 + d) * hf[i])));
+  const sf = vert.map(r => r.map(v => round10(v * side)));
+  return { model: pick(['FX', 'LT', 'NV', 'KR']) + ' ' + (nom / 100) + pick(['E', 'D', 'G']), year: pick([2012, 2015, 2018, 2021, 2023]), serial: 10000 + Math.floor(Math.random() * 89999), weight: round10(nom * 1.35), nom, H, D, vert, sf };
+}
+function plateHTML(p) {
+  const tbl = (rows, cap) => `<div class="cap">${t(cap)}</div><table><tr><th>${t('pH')}</th>${p.D.map(d => `<th>D ${d}</th>`).join('')}</tr>${p.H.map((h, i) => `<tr><td>${h}</td>${rows[i].map(v => `<td>${v} kg</td>`).join('')}</tr>`).join('')}</table>`;
+  return `<div class="plate"><div class="ph"><span>${t('pModel')} <b>${p.model}</b></span><span>${t('pSerial')} <b>${p.serial}</b></span><span>${t('pYear')} <b>${p.year}</b></span><span>${t('pWeight')} <b>${p.weight} kg</b></span><span>${t('pNom')} <b>${p.nom} kg</b></span><span><b>CE</b></span></div>
+    ${tbl(p.vert, 'pCapV')}${tbl(p.sf, 'pCapS')}</div>`;
+}
+// Neste kolonne/rad som er lik eller større enn verdien
+const upIdx = (arr, v) => arr.findIndex(x => x >= v);
+// Oppgaven lagres som nøkler og verdier, så den kan vises på nytt på et annet språk
+function plateTask(p) {
+  const pick = a => a[Math.floor(Math.random() * a.length)];
+  const hi = Math.floor(Math.random() * 3), di = Math.floor(Math.random() * 3);
+  const near = (tbl, right) => { const vals = [...new Set(tbl.flat())].filter(v => v !== right); return shuffle(vals).slice(0, 3); };
+  const kg = a => ({ o: a.map(v => v + ' kg') });
+  const kind = pick(['exact', 'side', 'between', 'box', 'box', 'nom']);
+  if (kind === 'exact') { const r = p.vert[hi][di]; return { q: ['tExact', { d: p.D[di], h: p.H[hi] }], ...kg([r, ...near(p.vert, r)]), ex: ['tExactEx', { d: p.D[di], h: p.H[hi] }] }; }
+  if (kind === 'side') { const r = p.sf[hi][di]; return { q: ['tSide', { d: p.D[di], h: p.H[hi] }], ...kg([r, p.vert[hi][di], ...near(p.sf, r).slice(0, 2)]), ex: ['tSideEx', {}] }; }
+  if (kind === 'between') {
+    const d = pick([520, 550, 580, 650, 700, 750]), h = p.H[0] + 200 + Math.floor(Math.random() * (p.H[2] - p.H[0] - 400) / 100) * 100;
+    const r = p.vert[upIdx(p.H, h)][upIdx(p.D, d)];
+    const lower = p.vert[Math.max(0, upIdx(p.H, h) - 1)][Math.max(0, upIdx(p.D, d) - 1)];
+    return { q: ['tBetween', { d, h }], ...kg([r, ...[...new Set([lower, ...p.vert.flat()])].filter(v => v !== r).slice(0, 3)]), ex: ['tBetweenEx', { d: p.D[upIdx(p.D, d)], h: p.H[upIdx(p.H, h)] }] };
+  }
+  if (kind === 'box') {
+    const L = pick([1000, 1200, 1600]), d = L / 2, dI = upIdx(p.D, d), cap = p.vert[hi][dI];
+    const ok = Math.random() < .5, w = round10(ok ? cap * pick([.8, .9, .97]) : cap * pick([1.05, 1.12, 1.25]));
+    return { q: ['tBox', { l: L, w, h: p.H[hi] }], keys: ok ? ['yes', 'no'] : ['no', 'yes'], ex: ['tBoxEx', { d, dd: p.D[dI], c: cap, h: p.H[hi] }] };
+  }
+  return { q: ['tNom', {}], ...kg([p.nom, p.weight, p.vert[2][2], p.sf[0][0]]), ex: ['tNomEx', {}] };
+}
+function startPlate() { runPlate({ i: 0, n: 10, right: 0 }); }
+function runPlate(run, keepScroll) {
+  redraw = () => runPlate(run, true);
+  if (run.i === run.n) {
+    goPlay(`<div class="quiz"><h3>${t('plResult', { r: run.right, n: run.n })}</h3><div class="row"><button class="btn primary" id="again">${t('newPlates')}</button><button class="btn" id="home2">${t('toStart')}</button></div></div>`);
+    $('#again').onclick = startPlate; $('#home2').onclick = goHome; return;
+  }
+  if (!run.task) {
+    if (run.i % 3 === 0 || !run.p) run.p = makePlate();
+    run.task = plateTask(run.p);
+    const o = run.task.keys || [...new Set(run.task.o)];
+    run.q = { o, _order: shuffle(o.map((x, i) => ({ x, i }))) };
+  }
+  const tk = run.task, q = run.q;
+  q.html = tk.keys ? tk.keys.map(k => biT(k)) : q.o.map(esc);
+  const p = goPlay(`<div class="quiz">
+    <div class="qbar"><span>${t('plTask')} <b>${run.i + 1}</b> ${t('of')} <b>${run.n}</b></span><span>${t('right')} <b>${run.right}</b></span><button class="btn" id="quit">${t('quit')}</button></div>
+    ${plateHTML(run.p)}<p class="qtext">${biT(...tk.q)}</p>${optsHTML(q)}<div id="fb"></div></div>`, keepScroll);
+  $('#quit').onclick = goHome;
+  p.querySelector('.opts').addEventListener('click', e => {
+    const b = e.target.closest('.opt'); if (!b || b.disabled) return;
+    const i = +b.dataset.i, ok = i === 0;
+    p.querySelectorAll('.opt').forEach(x => { x.disabled = true; const j = +x.dataset.i; x.classList.add(j === 0 ? 'right' : j === i ? 'wrong' : 'dim'); });
+    if (ok) run.right++;
+    run.task = null;
+    $('#fb').innerHTML = `<div class="fb ${ok ? 'ok' : 'no'}"><b>${ok ? t('right') : t('wrongAns') + ' ' + q.html[0]}</b><span>${biT(...tk.ex)}</span></div>
+      <div class="row" style="margin-top:10px"><button class="btn primary" id="next">${run.i < run.n - 1 ? t('next') : t('seeResult')}</button></div>`;
+    $('#next').focus();
+    $('#next').onclick = () => { run.i++; runPlate(run); };
+  });
+}
+
+applyLang();
+renderHome();
+</script>
+</body>
+</html>
