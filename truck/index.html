@@ -1,0 +1,1301 @@
+<title>Truckstabilitet</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: kontrollskinne til venstre, tegneark med tre projeksjoner (side, plan, bak) til høyre – som en teknisk tegning */
+:root{
+  --bg:#E8EBE9; --sheet:#F6F7F5; --ink:#17201D; --muted:#56625D; --line:#C7CFCB; --grid:#E3E7E4;
+  --accent:#D49500; --accent-soft:rgba(212,149,0,.18); --accent-ink:#6B4C00;
+  --ok:#1D7A4C; --warn:#B26600; --bad:#C0352B;
+  --t-body:#3F5661; --t-dark:#27343B; --t-cw:#1C2428; --t-mast:#6C7E87; --t-mast2:#8B9BA3;
+  --t-fork:#2E393F; --t-load:#C79A63; --t-pallet:#8E6A42; --t-guard:#27343B;
+  --tire:#1A1F21; --hub:#A3AEB3; --edge:rgba(0,0,0,.32);
+  --f-display:'Barlow Condensed','Arial Narrow',sans-serif;
+  --f-body:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --f-mono:'IBM Plex Mono',ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F1312; --sheet:#161B1A; --ink:#E3E8E5; --muted:#95A19C; --line:#2A3230; --grid:#1D2422;
+    --accent:#F0B21A; --accent-soft:rgba(240,178,26,.16); --accent-ink:#F5C54A;
+    --ok:#4CC38A; --warn:#F0A030; --bad:#FF6B5E;
+    --t-body:#5C7885; --t-dark:#3B4B53; --t-cw:#2C383E; --t-mast:#81939C; --t-mast2:#9CADB5;
+    --t-fork:#A8B5BB; --t-load:#C99A62; --t-pallet:#98724A; --t-guard:#8EA0A9;
+    --tire:#0A0D0E; --hub:#6E7B81; --edge:rgba(0,0,0,.55);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F1312; --sheet:#161B1A; --ink:#E3E8E5; --muted:#95A19C; --line:#2A3230; --grid:#1D2422;
+  --accent:#F0B21A; --accent-soft:rgba(240,178,26,.16); --accent-ink:#F5C54A;
+  --ok:#4CC38A; --warn:#F0A030; --bad:#FF6B5E;
+  --t-body:#5C7885; --t-dark:#3B4B53; --t-cw:#2C383E; --t-mast:#81939C; --t-mast2:#9CADB5;
+  --t-fork:#A8B5BB; --t-load:#C99A62; --t-pallet:#98724A; --t-guard:#8EA0A9;
+  --tire:#0A0D0E; --hub:#6E7B81; --edge:rgba(0,0,0,.55);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 40px}
+.wrap{max-width:1400px;margin:0 auto}
+header{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 18px;margin-bottom:18px}
+h1{font-family:var(--f-display);font-weight:700;font-size:34px;letter-spacing:.01em;margin:0;text-transform:uppercase;line-height:1}
+h1 span{color:var(--accent)}
+header p{margin:0;color:var(--muted);max-width:70ch}
+h2{font-family:var(--f-display);font-weight:600;font-size:15px;letter-spacing:.08em;text-transform:uppercase;margin:0;color:var(--muted)}
+.app{display:grid;grid-template-columns:minmax(290px,350px) minmax(0,1fr);grid-template-areas:"picker main" "controls main";grid-template-rows:auto 1fr;gap:18px 22px;align-items:start}
+.picker{grid-area:picker}.controls{grid-area:controls}.main{grid-area:main;min-width:0}
+@media (max-width:920px){.app{grid-template-columns:minmax(0,1fr);grid-template-areas:"picker" "main" "controls"}}
+
+.types{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}
+.type{all:unset;cursor:pointer;display:grid;grid-template-columns:auto 1fr;align-items:center;gap:2px 10px;padding:8px 10px;border:1px solid var(--line);border-radius:4px;background:var(--sheet)}
+.type:hover{border-color:var(--muted)}
+.type:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.type[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.type .code{grid-row:span 2;font-family:var(--f-display);font-weight:700;font-size:20px;min-width:34px;text-align:center;line-height:1;padding:6px 4px;border-radius:3px;background:var(--ink);color:var(--sheet)}
+.type[aria-pressed="true"] .code{background:var(--accent);color:#1a1300}
+.type .nm{font-weight:600;font-size:13px;line-height:1.2}
+.type .sb{font-size:11.5px;color:var(--muted);line-height:1.25}
+.note{margin:10px 0 0;font-size:13px;color:var(--muted)}
+
+.group{border-top:1px solid var(--line);padding-top:12px;margin-top:14px;display:grid;gap:12px}
+.ctl{display:grid;gap:3px}
+.ctl .row{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.ctl label{font-weight:500;font-size:13px}
+.ctl output{font-family:var(--f-mono);font-size:12.5px;font-variant-numeric:tabular-nums;color:var(--ink);white-space:nowrap}
+.ctl small{color:var(--muted);font-size:11.5px;line-height:1.3}
+input[type=range]{width:100%;accent-color:var(--accent);margin:2px 0}
+input[type=range]:disabled{opacity:.4}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.seg button{all:unset;cursor:pointer;text-align:center;padding:6px 4px;font-size:13px;background:var(--sheet)}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--sheet);font-weight:600}
+.seg button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.scen{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.scen button{all:unset;cursor:pointer;padding:7px 9px;border:1px solid var(--line);border-radius:4px;font-size:12.5px;line-height:1.25;background:var(--sheet)}
+.scen button:hover{border-color:var(--accent)}
+.scen button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.status{display:grid;grid-template-columns:auto repeat(3,minmax(0,1fr));gap:10px 18px;align-items:center;background:var(--sheet);border:1px solid var(--line);border-radius:4px;padding:12px 14px;margin-bottom:12px}
+@media (max-width:760px){.status{grid-template-columns:1fr 1fr}.status .pill{grid-column:1/-1;justify-self:start}}
+.pill{font-family:var(--f-display);font-weight:700;font-size:20px;text-transform:uppercase;letter-spacing:.04em;padding:6px 14px;border-radius:3px;color:#fff;background:var(--ok);white-space:nowrap}
+.pill.warn{background:var(--warn)}.pill.bad{background:var(--bad)}
+.kv{display:grid;gap:1px;min-width:0}
+.kv span{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.kv b{font-family:var(--f-mono);font-weight:500;font-size:16px;font-variant-numeric:tabular-nums}
+.kv small{font-size:12px;color:var(--muted);line-height:1.3}
+
+.sheet{background:var(--sheet);border:1px solid var(--line);border-radius:4px;padding:10px 12px 12px}
+.sheet .hd{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+.sheet .hd small{color:var(--muted);font-size:12px}
+canvas{display:block;width:100%}
+.views2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+@media (max-width:640px){.views2{grid-template-columns:1fr}}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:10px;font-size:12.5px;color:var(--muted)}
+.legend i{display:inline-block;width:14px;height:14px;vertical-align:-3px;margin-right:6px;border-radius:50%}
+.lg-cog{background:conic-gradient(var(--ink) 0 25%,var(--sheet) 0 50%,var(--ink) 0 75%,var(--sheet) 0);border:1.5px solid var(--ink)}
+.lg-tot{background:conic-gradient(var(--accent) 0 25%,var(--sheet) 0 50%,var(--accent) 0 75%,var(--sheet) 0);border:2px solid var(--accent)}
+.lg-dyn{border:3px solid var(--ok)}
+.lg-sup{border-radius:2px!important;background:var(--accent-soft);border:2px solid var(--accent)}
+
+.lower{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:12px;margin-top:12px}
+@media (max-width:1100px){.lower{grid-template-columns:minmax(0,1fr)}}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:5px 8px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+th{font-weight:500;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+td{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+td:first-child{font-family:var(--f-body)}
+tr.tot td{font-weight:600;border-bottom:none;border-top:2px solid var(--ink)}
+.formula{font-family:var(--f-mono);font-size:12.5px;color:var(--muted);margin:8px 0 0}
+.axle{margin-top:12px}
+.axle .bar{display:flex;height:22px;border-radius:3px;overflow:hidden;border:1px solid var(--line);margin-top:4px}
+.axle .bar div{display:flex;align-items:center;padding:0 8px;font-family:var(--f-mono);font-size:12px;color:#fff;white-space:nowrap;min-width:0;overflow:hidden}
+.axle .f{background:var(--t-body)}.axle .r{background:var(--t-mast)}
+.axle small{display:block;color:var(--muted);font-size:12px;margin-top:4px}
+.explain{display:grid;gap:10px;font-size:13.5px}
+.explain p{margin:0;max-width:68ch}
+.explain b{font-weight:600}
+.present{display:flex;flex-wrap:wrap;gap:8px;margin-left:auto}
+.btn,.zm button,.b-btns button{all:unset;cursor:pointer;padding:7px 12px;border:1px solid var(--line);border-radius:4px;background:var(--sheet);color:var(--ink);font-size:13px;font-weight:500;line-height:1.2;text-align:center}
+.zm button{padding:3px 10px;min-width:12px}
+.btn:hover,.zm button:hover,.b-btns button:hover{border-color:var(--accent)}
+.btn:focus-visible,.zm button:focus-visible,.b-btns button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn.primary{background:var(--ink);color:var(--sheet);border-color:var(--ink)}
+.b-btns button[aria-pressed="true"]{background:var(--ink);color:var(--sheet)}
+.zm{display:flex;gap:4px;margin-left:auto}
+.sheet .hd small{flex:1 1 auto;text-align:right}
+.pagemsg,.winnote{margin:-6px 0 14px;padding:9px 12px;border-radius:4px;border:1px solid var(--accent);background:var(--accent-soft);font-size:13px}
+.winnote{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px}
+.winnote span{flex:1 1 300px}
+.zoomhint{margin:6px 0 0;font-size:12px;color:var(--muted)}
+canvas{cursor:grab}
+canvas:active{cursor:grabbing}
+
+/* Tavlevisning: brukes både som fullskjermlag og i eget vindu */
+body.popup{padding:0;overflow:hidden}
+.board{position:fixed;inset:0;z-index:50;background:var(--bg);color:var(--ink);display:flex;flex-direction:column;gap:10px;
+  padding:calc(10px + env(safe-area-inset-top,0px)) max(14px,env(safe-area-inset-right,0px)) calc(12px + env(safe-area-inset-bottom,0px)) max(14px,env(safe-area-inset-left,0px))}
+.b-head{display:flex;flex-wrap:wrap;align-items:center;gap:10px 26px}
+.b-title{display:flex;align-items:center;gap:12px;min-width:0}
+.b-code{font-family:var(--f-display);font-weight:700;font-size:clamp(22px,2.4vw,42px);background:var(--accent);color:#1a1300;padding:4px 10px;border-radius:3px;line-height:1}
+.b-name{display:block;font-family:var(--f-display);font-weight:700;font-size:clamp(22px,2.4vw,42px);text-transform:uppercase;line-height:1}
+.b-dyn{display:block;color:var(--muted);font-size:clamp(12px,1vw,17px);margin-top:3px}
+.b-stat{display:flex;flex-wrap:wrap;align-items:center;gap:8px 28px;flex:1 1 480px}
+.board .pill{font-size:clamp(20px,2vw,36px)}
+.board .kv b{font-size:clamp(16px,1.7vw,30px)}
+.board .kv span{font-size:clamp(11px,.8vw,14px)}
+.board .kv small{font-size:clamp(12px,.9vw,16px)}
+.b-tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-left:auto}
+.b-lay{grid-template-columns:repeat(4,auto)}
+.b-lay button{padding:7px 12px}
+.b-btns{display:flex;flex-wrap:wrap;gap:6px}
+.b-msg{margin:0;padding:8px 12px;border-radius:4px;border:1px solid var(--accent);background:var(--accent-soft);font-size:14px}
+.b-main{flex:1;min-height:0;display:flex;gap:10px}
+.b-views{flex:1;min-width:0;display:grid;gap:10px;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);grid-template-rows:minmax(0,1fr) minmax(0,1fr)}
+.b-views[data-layout="all"] [data-v="side"]{grid-row:1/3}
+.b-views:not([data-layout="all"]){grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr)}
+.b-pane{position:relative;min-height:0;min-width:0;background:var(--sheet);border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.b-pane canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none}
+.b-lbl{position:absolute;left:12px;top:8px;z-index:1;font-family:var(--f-display);font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-size:clamp(13px,1vw,19px);pointer-events:none}
+.b-note{position:absolute;right:12px;top:10px;z-index:1;color:var(--muted);font-size:clamp(12px,.95vw,17px);pointer-events:none;text-align:right;max-width:60%}
+.b-pane .zm{position:absolute;left:10px;bottom:10px;z-index:1}
+.b-pane .zm button{padding:6px 12px;font-size:15px}
+.b-drawer{width:min(380px,40vw);flex:none;overflow-y:auto;background:var(--sheet);border:1px solid var(--line);border-radius:4px;padding:12px 14px}
+.b-drawer .controls{margin-top:16px}
+@media (max-width:760px){
+  .board{overflow-y:auto}
+  .b-main{flex-direction:column;flex:none}
+  .b-views[data-layout="all"]{grid-template-columns:minmax(0,1fr);grid-template-rows:60vh 40vh 50vh}
+  .b-views[data-layout="all"] [data-v="side"]{grid-row:auto}
+  .b-views:not([data-layout="all"]){grid-template-rows:70vh}
+  .b-drawer{width:auto}
+}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Truck<span>stabilitet</span></h1>
+    <p>Se hvordan felles tyngdepunkt for truck og last flytter seg, og hvor mye støtteflate som er igjen før trucken velter.</p>
+    <div class="present">
+      <button type="button" id="btnBoard" class="btn primary">Tavlemodus</button>
+      <button type="button" id="btnPopup" class="btn">Åpne visning i eget vindu</button>
+    </div>
+  </header>
+  <p class="pagemsg" id="pageMsg" role="status" hidden></p>
+  <div class="winnote" id="winNote" hidden>
+    <span>Visningen er åpen i et eget vindu. Dra det over på tavleskjermen og trykk <b>Fullskjerm</b> der. Alt du endrer her vises der.</span>
+    <button type="button" class="btn" id="btnPopupClose">Lukk vinduet</button>
+  </div>
+
+  <div class="app">
+    <section class="picker" aria-label="Velg truck">
+      <h2>Trucktype</h2>
+      <div class="types" id="types"></div>
+      <p class="note" id="typeNote"></p>
+    </section>
+
+    <main class="main">
+      <div class="status" aria-live="polite">
+        <div class="pill" id="pill">Stabil</div>
+        <div class="kv"><span>Reserve til tippekant</span><b id="rMargin">–</b><small id="rEdge"></small></div>
+        <div class="kv"><span>Felles tyngdepunkt</span><b id="rCog">–</b><small id="rCogSub"></small></div>
+        <div class="kv"><span>Største last her</span><b id="rMax">–</b><small id="rMaxSub"></small></div>
+      </div>
+
+      <div class="sheet">
+        <div class="hd"><h2>Sett fra siden</h2><small id="sideNote"></small>
+          <div class="zm" data-v="side"><button type="button" data-z="out" aria-label="Zoom ut">−</button><button type="button" data-z="in" aria-label="Zoom inn">+</button><button type="button" data-z="fit">Tilpass</button></div></div>
+        <canvas id="cvSide" aria-label="Sideriss av trucken med tyngdepunkter"></canvas>
+      </div>
+      <div class="views2">
+        <div class="sheet">
+          <div class="hd"><h2>Sett ovenfra</h2>
+            <div class="zm" data-v="top"><button type="button" data-z="out" aria-label="Zoom ut">−</button><button type="button" data-z="in" aria-label="Zoom inn">+</button><button type="button" data-z="fit">Tilpass</button></div></div>
+          <canvas id="cvTop" aria-label="Planriss med støtteflate"></canvas>
+        </div>
+        <div class="sheet">
+          <div class="hd"><h2>Sett bakfra</h2>
+            <div class="zm" data-v="rear"><button type="button" data-z="out" aria-label="Zoom ut">−</button><button type="button" data-z="in" aria-label="Zoom inn">+</button><button type="button" data-z="fit">Tilpass</button></div></div>
+          <canvas id="cvRear" aria-label="Bakriss av trucken"></canvas>
+        </div>
+      </div>
+      <div class="legend">
+        <span><i class="lg-cog"></i>Tyngdepunkt for truck og last hver for seg</span>
+        <span><i class="lg-tot"></i>Felles tyngdepunkt</span>
+        <span><i class="lg-dyn" id="lgDyn"></i>Der resultantkraften treffer bakken</span>
+        <span><i class="lg-sup"></i>Støtteflate</span>
+      </div>
+      <p class="zoomhint">Zoom med knappene eller Ctrl + rullehjul. Dra med musen for å flytte, dobbeltklikk for å tilpasse.</p>
+
+      <div class="lower">
+        <div class="sheet">
+          <div class="hd"><h2>Felles tyngdepunkt</h2><small>x fram, y mot venstre, z høyde (m)</small></div>
+          <div class="tbl"><table id="tbl"></table></div>
+          <p class="formula">x<sub>T</sub> = (m₁·x₁ + m₂·x₂ + …) / (m₁ + m₂ + …), tilsvarende for y og z</p>
+          <div class="axle">
+            <h2>Fordeling på hjulene</h2>
+            <div class="bar"><div class="f" id="axF"></div><div class="r" id="axR"></div></div>
+            <small id="axNote"></small>
+          </div>
+        </div>
+        <div class="sheet explain">
+          <h2>Slik henger det sammen</h2>
+          <p><b>Felles tyngdepunkt.</b> Trucken og lasten har hvert sitt tyngdepunkt. Sammen virker de som én masse i et felles punkt som ligger på linjen mellom dem, nærmest den tyngste delen. Jo høyere og lenger ut lasten er, jo høyere og lenger fram flytter det felles tyngdepunktet seg.</p>
+          <p><b>Støtteflate.</b> Trucken står stødig så lenge loddlinjen fra det felles tyngdepunktet treffer innenfor flaten mellom hjulenes kontaktpunkter. Motvektstruck og teleskoptruck har pendelaksel bak, så støtteflaten blir et stabilitetstriangel som er smalest bak.</p>
+          <p><b>Kjøring.</b> Brems, sving og helning legger til krefter som vipper resultanten. Forskyvningen langs bakken er tyngdepunktets høyde ganger forholdet mellom sidekraft og tyngdekraft. Derfor tåler trucken mye mindre med hevet last.</p>
+        </div>
+      </div>
+    </main>
+
+    <section class="controls" aria-label="Innstillinger">
+      <div class="group" id="loadCtl" style="border-top:none;margin-top:0;padding-top:0">
+        <h2>Last og løft</h2>
+      </div>
+      <div class="group">
+        <h2>Kjøring og underlag</h2>
+        <div class="ctl">
+          <div class="row"><label for="accel">Akselerasjon / brems</label><output id="o-accel"></output></div>
+          <input type="range" id="accel" min="-4" max="2.5" step="0.1" value="0">
+          <small>Negativ verdi er nedbremsing under kjøring forover.</small>
+        </div>
+        <div class="ctl">
+          <div class="row"><label>Sving</label><output id="o-ay"></output></div>
+          <div class="seg" id="turnSeg" role="group" aria-label="Svingretning">
+            <button type="button" data-turn="1">Venstre</button>
+            <button type="button" data-turn="0" aria-pressed="true">Rett fram</button>
+            <button type="button" data-turn="-1">Høyre</button>
+          </div>
+        </div>
+        <div class="ctl">
+          <div class="row"><label for="speed">Fart</label><output id="o-speed"></output></div>
+          <input type="range" id="speed" min="0" max="20" step="0.5" value="8">
+        </div>
+        <div class="ctl">
+          <div class="row"><label for="radius">Svingradius</label><output id="o-radius"></output></div>
+          <input type="range" id="radius" min="2" max="30" step="0.5" value="6">
+        </div>
+        <div class="ctl">
+          <div class="row"><label for="slope">Stigning i kjøreretningen</label><output id="o-slope"></output></div>
+          <input type="range" id="slope" min="-15" max="15" step="0.5" value="0">
+        </div>
+        <div class="ctl">
+          <div class="row"><label for="side">Sidehelning</label><output id="o-side"></output></div>
+          <input type="range" id="side" min="-10" max="10" step="0.5" value="0">
+        </div>
+      </div>
+      <div class="group">
+        <h2>Situasjoner</h2>
+        <div class="scen" id="scen">
+          <button type="button" data-s="base">Grunnstilling</button>
+          <button type="button" data-s="brake">Brå brems med hevet last</button>
+          <button type="button" data-s="turn">Sving med hevet last</button>
+          <button type="button" data-s="empty">Tom truck i krapp sving</button>
+          <button type="button" data-s="down">Kjører ned rampe med last</button>
+          <button type="button" data-s="sideslope">Hevet last i sidehelning</button>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<template id="boardTpl">
+  <div class="board" role="dialog" aria-label="Tavlevisning">
+    <div class="b-head">
+      <div class="b-title"><span class="b-code"></span><div><b class="b-name"></b><small class="b-dyn"></small></div></div>
+      <div class="b-stat">
+        <div class="pill"></div>
+        <div class="kv"><span>Reserve til tippekant</span><b class="b-margin"></b><small class="b-edge"></small></div>
+        <div class="kv"><span>Felles tyngdepunkt</span><b class="b-cog"></b></div>
+        <div class="kv"><span>Største last her</span><b class="b-max"></b></div>
+      </div>
+      <div class="b-tools">
+        <div class="seg b-lay" role="group" aria-label="Visning">
+          <button type="button" data-layout="all" title="Tast 1">Alle</button>
+          <button type="button" data-layout="side" title="Tast 2">Side</button>
+          <button type="button" data-layout="top" title="Tast 3">Ovenfra</button>
+          <button type="button" data-layout="rear" title="Tast 4">Bakfra</button>
+        </div>
+        <div class="b-btns">
+          <button type="button" data-act="text-" aria-label="Mindre tekst og streker">A−</button>
+          <button type="button" data-act="text+" aria-label="Større tekst og streker">A+</button>
+          <button type="button" data-act="drawer" aria-pressed="false">Innstillinger</button>
+          <button type="button" data-act="full" title="Tast F">Fullskjerm</button>
+          <button type="button" data-act="close">Lukk</button>
+        </div>
+      </div>
+    </div>
+    <p class="b-msg" role="status" hidden></p>
+    <div class="b-main">
+      <div class="b-views" data-layout="all">
+        <div class="b-pane" data-v="side"><span class="b-lbl">Sett fra siden</span><span class="b-note"></span><canvas aria-label="Sideriss"></canvas>
+          <div class="zm" data-v="side"><button type="button" data-z="out" aria-label="Zoom ut">−</button><button type="button" data-z="in" aria-label="Zoom inn">+</button><button type="button" data-z="fit">Tilpass</button></div></div>
+        <div class="b-pane" data-v="top"><span class="b-lbl">Sett ovenfra</span><canvas aria-label="Planriss"></canvas>
+          <div class="zm" data-v="top"><button type="button" data-z="out" aria-label="Zoom ut">−</button><button type="button" data-z="in" aria-label="Zoom inn">+</button><button type="button" data-z="fit">Tilpass</button></div></div>
+        <div class="b-pane" data-v="rear"><span class="b-lbl">Sett bakfra</span><canvas aria-label="Bakriss"></canvas>
+          <div class="zm" data-v="rear"><button type="button" data-z="out" aria-label="Zoom ut">−</button><button type="button" data-z="in" aria-label="Zoom inn">+</button><button type="button" data-z="fit">Tilpass</button></div></div>
+      </div>
+      <aside class="b-drawer" hidden></aside>
+    </div>
+  </div>
+</template>
+
+<script>
+const G = 9.81, DEG = Math.PI / 180;
+const B = (x0, x1, y0, y1, z0, z1, tone, o = {}) => ({ x0, x1, y0, y1, z0, z1, tone, ...o });
+
+function pitchP(p, pv, t) {
+  const dx = p[0] - pv[0], dz = p[2] - pv[1], c = Math.cos(t), s = Math.sin(t);
+  return [pv[0] + dx * c + dz * s, p[1], pv[1] - dx * s + dz * c];
+}
+function yawP(p, pv, a) {
+  const dx = p[0] - pv[0], dy = p[1] - pv[1], c = Math.cos(a), s = Math.sin(a);
+  return [pv[0] + dx * c - dy * s, pv[1] + dx * s + dy * c, p[2]];
+}
+function xf(p, b) {
+  if (b.yaw) p = yawP(p, b.yawPivot, b.yaw);
+  if (b.pitch) p = pitchP(p, b.pivot, b.pitch);
+  return p;
+}
+function corners(b) {
+  const out = [];
+  for (const x of [b.x0, b.x1]) for (const y of [b.y0, b.y1]) for (const z of [b.z0, b.z1]) out.push(xf([x, y, z], b));
+  return out;
+}
+// Pall + gods langs +x fra gaffelryggen
+function loadBoxes(face, lift, lc, lh, wid, o = {}) {
+  return {
+    parts: [
+      B(face, face + 2 * lc, -wid / 2, wid / 2, lift - 0.06, lift + 0.09, 'pallet', o),
+      B(face + 0.02, face + 2 * lc - 0.02, -wid / 2 + 0.02, wid / 2 - 0.02, lift + 0.09, lift + 0.09 + lh, 'load', o)
+    ],
+    cog: xf([face + lc, 0, lift + 0.09 + lh / 2], o)
+  };
+}
+function forks(face, lift, len, yIn, yOut, o = {}) {
+  return [B(face, face + len, yIn, yOut, lift - 0.05, lift, 'fork', o), B(face, face + len, -yOut, -yIn, lift - 0.05, lift, 'fork', o)];
+}
+
+/* Trucktyper. Koordinater i meter: x fram, y mot venstre, z opp. Origo på bakken. */
+const TYPES = [
+  {
+    id: 't1', code: 'T1', name: 'Lavtløftende plukktruck', sub: 'Palletruck med førerplattform',
+    note: 'Lasten står over lastrullene i gaflene. Støtteflaten er smal foran, så en høy last gir lite sidestabilitet i sving.',
+    rated: { m: 2000, lc: 0.6 },
+    view: { x: [-1.35, 2.35], y: [-0.85, 0.85], z: 2.6 },
+    def: { mass: 1200, lc: 0.6, lh: 1.2, lift: 0.1 },
+    ranges: { mass: [0, 2600], lc: [0.4, 1.0], lh: [0.2, 2.2], lift: [0.085, 0.205] },
+    ctrl: ['mass', 'lc', 'lh', 'lift'],
+    support: [[1.0, -0.2], [1.0, 0.2], [-0.42, 0.3], [-0.42, -0.3]],
+    edges: ['lastrullene foran', 'venstre side', 'drivhjul og støttehjul bak', 'høyre side'],
+    wheels: [
+      { x: 1.0, y: 0.2, r: 0.042, w: 0.07 }, { x: 1.0, y: -0.2, r: 0.042, w: 0.07 },
+      { x: -0.42, y: 0, r: 0.125, w: 0.08 }, { x: -0.42, y: 0.3, r: 0.05, w: 0.05 }, { x: -0.42, y: -0.3, r: 0.05, w: 0.05 }
+    ],
+    body: [
+      B(-0.8, 0, -0.38, 0.38, 0.06, 1.2, 'body'),
+      B(-1.15, -0.8, -0.36, 0.36, 0.06, 0.16, 'dark'),
+      B(-1.15, -0.8, -0.36, 0.36, 0.16, 1.15, 'guard'),
+      B(-0.62, -0.5, -0.05, 0.05, 1.2, 1.42, 'dark')
+    ],
+    comps: [{ n: 'Truck', m: 720, p: [-0.2, 0, 0.48], kind: 'truck' }, { n: 'Fører', m: 85, p: [-0.97, 0, 1.0], kind: 'part' }],
+    geom(st) {
+      const L = loadBoxes(0, st.lift, st.lc, st.lh, 0.8);
+      return {
+        parts: [...forks(0, st.lift, 1.15, 0.12, 0.28), ...L.parts],
+        comps: [{ n: 'Last', m: st.mass, p: L.cog, kind: 'load', load: true }],
+        forkZ: st.lift
+      };
+    }
+  },
+  {
+    id: 't2', code: 'T2', name: 'Skyvemasttruck', sub: 'Støttebein med lasthjul',
+    note: 'Masten skyves fram mellom støttebeina. Skjøvet helt ut står lasten foran lasthjulene, og med høyt løft blir trucken svært følsom for brems.',
+    rated: { m: 1600, lc: 0.6 },
+    view: { x: [-0.85, 3.6], y: [-1.15, 1.15], z: 10.9 },
+    def: { mass: 1000, lc: 0.6, lh: 1.0, lift: 0.3, reach: 0 },
+    ranges: { mass: [0, 2500], lc: [0.4, 1.0], lh: [0.2, 2.0], lift: [0.1, 8.5], reach: [0, 0.72] },
+    ctrl: ['mass', 'lc', 'lh', 'lift', 'reach'],
+    support: [[1.38, -0.49], [1.38, 0.49], [0, 0.32], [0, -0.24]],
+    edges: ['lasthjulene foran', 'venstre side', 'drivhjul og støttehjul bak', 'høyre side'],
+    wheels: [
+      { x: 1.38, y: 0.49, r: 0.15, w: 0.1 }, { x: 1.38, y: -0.49, r: 0.15, w: 0.1 },
+      { x: 0, y: -0.24, r: 0.17, w: 0.12 }, { x: 0, y: 0.32, r: 0.1, w: 0.08 }
+    ],
+    body: [
+      B(-0.5, 0.62, -0.6, 0.6, 0.08, 1.05, 'body'),
+      B(-0.45, 0.55, -0.58, 0.58, 1.05, 2.25, 'guard'),
+      B(0.62, 1.55, 0.42, 0.56, 0.05, 0.32, 'dark'),
+      B(0.62, 1.55, -0.56, -0.42, 0.05, 0.32, 'dark')
+    ],
+    comps: [{ n: 'Truck', m: 2550, p: [0.08, 0, 0.55], kind: 'truck' }, { n: 'Fører', m: 85, p: [0, 0, 1.35], kind: 'part' }],
+    geom(st) {
+      const mx = 0.62 + st.reach, face = mx + 0.2, top = Math.max(2.5, st.lift + 1.25);
+      const L = loadBoxes(face, st.lift, st.lc, st.lh, 0.8);
+      return {
+        parts: [
+          B(mx, mx + 0.13, -0.38, 0.38, 0.1, 2.5, 'mast'),
+          B(mx + 0.03, mx + 0.15, -0.32, 0.32, top - 2.4, top, 'mast2'),
+          B(face - 0.06, face, -0.42, 0.42, st.lift - 0.05, st.lift + 0.95, 'dark'),
+          ...forks(face, st.lift, 1.15, 0.14, 0.26), ...L.parts
+        ],
+        comps: [
+          { n: 'Mast', m: 650, p: [mx + 0.08, 0, (top + 0.1) / 2], kind: 'part' },
+          { n: 'Gaffelvogn', m: 180, p: [face - 0.03, 0, st.lift + 0.4], kind: 'part' },
+          { n: 'Last', m: st.mass, p: L.cog, kind: 'load', load: true }
+        ],
+        forkZ: st.lift
+      };
+    }
+  },
+  {
+    id: 't3', code: 'T3', name: 'Svinggaffeltruck', sub: 'Smalganger, gaffel dreies til siden',
+    note: 'Gaffelhodet dreier lasten 90° til siden. Da flytter tyngdepunktet seg mot den smale siden av støttetriangelet, høyt over bakken.',
+    rated: { m: 1250, lc: 0.6 },
+    view: { x: [-2.45, 3.2], y: [-3.15, 3.15], z: 13.4 },
+    def: { mass: 900, lc: 0.6, lh: 1.0, lift: 0.3, rot: 0 },
+    ranges: { mass: [0, 2000], lc: [0.4, 1.0], lh: [0.2, 2.0], lift: [0.1, 11], rot: [-90, 90] },
+    ctrl: ['mass', 'lc', 'lh', 'lift', 'rot'],
+    support: [[0, -0.6], [0, 0.6], [-1.85, 0]],
+    edges: ['lasthjulene foran', 'venstre side', 'høyre side'],
+    wheels: [{ x: 0, y: 0.6, r: 0.2, w: 0.14 }, { x: 0, y: -0.6, r: 0.2, w: 0.14 }, { x: -1.85, y: 0, r: 0.25, w: 0.2 }],
+    body: [
+      B(-2.15, 0.2, -0.72, 0.72, 0.1, 1.1, 'body'),
+      B(-2.25, -1.6, -0.7, 0.7, 0.12, 1.2, 'cw'),
+      B(-1.5, -0.2, -0.68, 0.68, 1.1, 2.3, 'guard')
+    ],
+    comps: [{ n: 'Truck', m: 5400, p: [-0.95, 0, 0.62], kind: 'truck' }, { n: 'Fører', m: 85, p: [-0.85, 0, 1.4], kind: 'part' }],
+    geom(st) {
+      const top = Math.max(3.2, st.lift + 1.4), hp = [0.95, 0], o = { yaw: st.rot * DEG, yawPivot: hp };
+      const face = hp[0] + 0.12;
+      const L = loadBoxes(face, st.lift, st.lc, st.lh, 0.8, o);
+      return {
+        parts: [
+          B(0.2, 0.45, -0.55, 0.55, 0.1, 3.2, 'mast'),
+          B(0.24, 0.47, -0.48, 0.48, top - 3.0, top, 'mast2'),
+          B(0.47, 0.88, -0.5, 0.5, st.lift + 0.05, st.lift + 1.0, 'dark'),
+          B(hp[0] + 0.05, face, -0.42, 0.42, st.lift - 0.05, st.lift + 0.9, 'dark', o),
+          ...forks(face, st.lift, 1.15, 0.14, 0.26, o), ...L.parts
+        ],
+        comps: [
+          { n: 'Mast', m: 900, p: [0.33, 0, (top + 0.1) / 2], kind: 'part' },
+          { n: 'Svinggaffelhode', m: 450, p: [0.8, 0, st.lift + 0.45], kind: 'part' },
+          { n: 'Last', m: st.mass, p: L.cog, kind: 'load', load: true }
+        ],
+        forkZ: st.lift
+      };
+    }
+  },
+  {
+    id: 't4', code: 'T4', name: 'Motvektstruck', sub: 'Pendelaksel bak, gir stabilitetstriangel',
+    note: 'Motvekten balanserer lasten over framakselen. Bakakselen er pendlende, så støtteflaten er et triangel. Tom truck i sving kan velte sidelengs.',
+    rated: { m: 2500, lc: 0.5 },
+    view: { x: [-2.5, 3.2], y: [-1.25, 1.25], z: 6.6 },
+    def: { mass: 1500, lc: 0.5, lh: 1.0, lift: 0.3, tilt: 0 },
+    ranges: { mass: [0, 3600], lc: [0.4, 1.0], lh: [0.2, 2.0], lift: [0.1, 4.5], tilt: [-10, 6] },
+    ctrl: ['mass', 'lc', 'lh', 'lift', 'tilt'],
+    support: [[0, -0.48], [0, 0.48], [-1.65, 0]],
+    edges: ['framakselen', 'venstre side av triangelet', 'høyre side av triangelet'],
+    pendulum: { x: -1.65, z: 0.36 },
+    wheels: [
+      { x: 0, y: 0.48, r: 0.32, w: 0.22 }, { x: 0, y: -0.48, r: 0.32, w: 0.22 },
+      { x: -1.65, y: 0.4, r: 0.23, w: 0.16 }, { x: -1.65, y: -0.4, r: 0.23, w: 0.16 }
+    ],
+    body: [
+      B(-1.85, 0.25, -0.56, 0.56, 0.22, 1.05, 'body'),
+      B(-2.3, -1.45, -0.56, 0.56, 0.25, 1.3, 'cw'),
+      B(-1.45, 0.15, -0.52, 0.52, 1.05, 2.15, 'guard'),
+      B(-1.05, -0.7, -0.25, 0.25, 1.05, 1.5, 'dark')
+    ],
+    comps: [{ n: 'Truck', m: 3300, p: [-1.0, 0, 0.72], kind: 'truck' }, { n: 'Fører', m: 85, p: [-0.85, 0, 1.3], kind: 'part' }],
+    geom(st) {
+      const pv = [0.4, 0.45], o = { pitch: st.tilt * DEG, pivot: pv }, face = 0.53, top = Math.max(2.15, st.lift + 1.1);
+      const L = loadBoxes(face, st.lift, st.lc, st.lh, 0.8, o);
+      return {
+        parts: [
+          B(0.33, 0.45, -0.36, 0.36, 0.12, 2.15, 'mast', o),
+          B(0.36, 0.47, -0.3, 0.3, top - 2.03, top, 'mast2', o),
+          B(0.47, face, -0.46, 0.46, st.lift - 0.05, st.lift + 0.95, 'dark', o),
+          ...forks(face, st.lift, 1.15, 0.18, 0.3, o), ...L.parts
+        ],
+        comps: [
+          { n: 'Mast', m: 450, p: xf([0.4, 0, (top + 0.12) / 2], o), kind: 'part' },
+          { n: 'Gaffelvogn', m: 150, p: xf([0.5, 0, st.lift + 0.4], o), kind: 'part' },
+          { n: 'Last', m: st.mass, p: L.cog, kind: 'load', load: true }
+        ],
+        forkZ: st.lift
+      };
+    }
+  },
+  {
+    id: 'sl', code: 'SL', name: 'Sidelaster', sub: 'Løfter lange laster fra siden',
+    note: 'Masten skyves ut til høyre for å hente lasten og trekkes inn over lasteplanet. Utskjøvet ligger lasten utenfor hjulene på lastesiden.',
+    rated: { m: 4000, lc: 0.6 },
+    view: { x: [-3.35, 3.35], y: [-3.55, 1.45], z: 5.9 },
+    def: { mass: 3000, lc: 0.6, lh: 0.8, lift: 1.1, reach: 0 },
+    ranges: { mass: [0, 9000], lc: [0.4, 1.0], lh: [0.2, 1.5], lift: [0.1, 4.0], reach: [0, 1.4] },
+    ctrl: ['mass', 'lc', 'lh', 'lift', 'reach'],
+    support: [[1.6, -0.95], [1.6, 0.95], [-1.6, 0.95], [-1.6, -0.95]],
+    edges: ['framhjulene', 'venstre side', 'bakhjulene', 'høyre side (lastesiden)'],
+    wheels: [
+      { x: 1.6, y: 0.95, r: 0.38, w: 0.3 }, { x: 1.6, y: -0.95, r: 0.38, w: 0.3 },
+      { x: -1.6, y: 0.95, r: 0.38, w: 0.3 }, { x: -1.6, y: -0.95, r: 0.38, w: 0.3 }
+    ],
+    body: [
+      B(0.6, 2.3, -1.05, 1.05, 0.45, 0.95, 'body'),
+      B(-2.3, -0.6, -1.05, 1.05, 0.45, 0.95, 'body'),
+      B(-0.6, 0.6, 0.25, 1.05, 0.45, 0.95, 'body'),
+      B(1.4, 2.3, 0.25, 1.05, 0.95, 2.6, 'guard'),
+      B(-2.3, -1.3, 0.2, 1.05, 0.95, 1.7, 'cw')
+    ],
+    comps: [{ n: 'Truck', m: 7600, p: [0.15, 0.3, 0.85], kind: 'truck' }, { n: 'Fører', m: 85, p: [1.85, 0.65, 1.6], kind: 'part' }],
+    geom(st) {
+      const my = 0.15 - st.reach, face = my - 0.14, top = Math.max(2.6, st.lift + 1.1);
+      return {
+        parts: [
+          B(-0.45, 0.45, my - 0.06, my + 0.08, 0.35, 2.6, 'mast'),
+          B(-0.38, 0.38, my - 0.08, my + 0.04, top - 2.25, top, 'mast2'),
+          B(-0.55, 0.55, my - 0.14, my - 0.08, st.lift - 0.05, st.lift + 0.9, 'dark'),
+          B(-0.65, -0.5, face - 1.2, face, st.lift - 0.05, st.lift, 'fork'),
+          B(0.5, 0.65, face - 1.2, face, st.lift - 0.05, st.lift, 'fork'),
+          B(-3.0, 3.0, face - 2 * st.lc, face, st.lift, st.lift + st.lh, 'load')
+        ],
+        comps: [
+          { n: 'Mast', m: 900, p: [0, my, (top + 0.35) / 2], kind: 'part' },
+          { n: 'Gaffelvogn', m: 220, p: [0, my - 0.1, st.lift + 0.4], kind: 'part' },
+          { n: 'Last', m: st.mass, p: [0, face - st.lc, st.lift + st.lh / 2], kind: 'load', load: true }
+        ],
+        forkZ: st.lift
+      };
+    }
+  },
+  {
+    id: 'th', code: 'TT', name: 'Teleskoptruck', sub: 'Bom med variabel rekkevidde',
+    note: 'Når bommen skyves ut, flytter både lasten og bommens egen vekt seg langt fram. Største last faller raskt med rekkevidden, slik lastdiagrammet viser.',
+    rated: { m: 3500, lc: 0.5 },
+    view: { x: [-4.1, 9.6], y: [-1.6, 1.6], z: 11.2 },
+    def: { mass: 2000, lc: 0.5, lh: 1.0, boomA: 0, boomL: 5 },
+    ranges: { mass: [0, 5000], lc: [0.4, 1.0], lh: [0.2, 2.0], boomA: [-3, 65], boomL: [5, 10] },
+    ctrl: ['mass', 'lc', 'lh', 'boomA', 'boomL'],
+    support: [[0, -0.95], [0, 0.95], [-2.85, 0]],
+    edges: ['framakselen', 'venstre side av triangelet', 'høyre side av triangelet'],
+    pendulum: { x: -2.85, z: 0.6 },
+    wheels: [
+      { x: 0, y: 0.95, r: 0.6, w: 0.4 }, { x: 0, y: -0.95, r: 0.6, w: 0.4 },
+      { x: -2.85, y: 0.95, r: 0.6, w: 0.4 }, { x: -2.85, y: -0.95, r: 0.6, w: 0.4 }
+    ],
+    body: [
+      B(-3.6, 0.5, -0.55, 0.55, 0.55, 1.25, 'body'),
+      B(-3.8, -2.9, -0.6, 0.6, 0.5, 1.6, 'cw'),
+      B(-2.2, -0.4, 0.35, 1.15, 0.9, 2.55, 'guard')
+    ],
+    comps: [{ n: 'Truck', m: 7300, p: [-1.75, 0.05, 1.0], kind: 'truck' }, { n: 'Fører', m: 85, p: [-1.2, 0.75, 1.75], kind: 'part' }],
+    geom(st) {
+      const pv = [-3.0, 1.45], L = st.boomL, o = { pitch: -st.boomA * DEG, pivot: pv };
+      const tip = xf([pv[0] + L, 0, pv[1]], o);
+      const fz = Math.max(0.05, tip[2] - 1.05), face = tip[0] + 0.2;
+      const LB = loadBoxes(face, fz, st.lc, st.lh, 1.0);
+      return {
+        parts: [
+          B(pv[0] - 0.2, pv[0] + 5.0, -0.22, 0.22, pv[1] - 0.25, pv[1] + 0.25, 'mast', o),
+          B(pv[0] + L - 4.6, pv[0] + L + 0.1, -0.17, 0.17, pv[1] - 0.19, pv[1] + 0.19, 'mast2', o),
+          B(tip[0] - 0.05, tip[0] + 0.15, -0.15, 0.15, fz + 1.0, tip[2] + 0.1, 'dark'),
+          B(tip[0] + 0.1, face, -0.6, 0.6, fz - 0.05, fz + 1.1, 'dark'),
+          ...forks(face, fz, 1.2, 0.3, 0.42), ...LB.parts
+        ],
+        comps: [
+          { n: 'Bom', m: 1650, p: xf([pv[0] + L * 0.45, 0, pv[1]], o), kind: 'part' },
+          { n: 'Gaffelvogn', m: 280, p: [tip[0] + 0.3, 0, fz + 0.5], kind: 'part' },
+          { n: 'Last', m: st.mass, p: LB.cog, kind: 'load', load: true }
+        ],
+        forkZ: fz
+      };
+    }
+  }
+];
+
+/* Glidere */
+const nf = (v, d = 0) => v.toLocaleString('nb-NO', { minimumFractionDigits: d, maximumFractionDigits: d });
+const CTL = {
+  mass: { label: 'Lastens masse', step: 50, fmt: v => nf(v) + ' kg' },
+  lc: { label: 'Lastsentrum', step: 0.05, fmt: v => nf(v * 1000) + ' mm', hint: 'Avstand fra gaffelryggen til lastens tyngdepunkt.' },
+  lh: { label: 'Lastens høyde', step: 0.05, fmt: v => nf(v, 2) + ' m' },
+  lift: { label: 'Løftehøyde', step: 0.05, fmt: v => nf(v, 2) + ' m', hint: 'Høyde fra bakken til gaffeltoppen.' },
+  reach: { label: 'Mast skjøvet ut', step: 0.02, fmt: v => nf(v * 1000) + ' mm' },
+  rot: { label: 'Svinggaffel', step: 5, fmt: v => v === 0 ? 'rett fram' : nf(Math.abs(v)) + '° ' + (v > 0 ? 'venstre' : 'høyre') },
+  tilt: { label: 'Masthelning', step: 0.5, fmt: v => v === 0 ? 'loddrett' : nf(Math.abs(v), 1) + '° ' + (v > 0 ? 'fram' : 'bak') },
+  boomA: { label: 'Bomvinkel', step: 1, fmt: v => nf(v) + '°' },
+  boomL: { label: 'Bomlengde', step: 0.1, fmt: v => nf(v, 1) + ' m' }
+};
+const TYPE_STEPS = { t1: { lift: 0.005 } };
+
+const dyn = { accel: 0, speed: 8, radius: 6, turn: 0, slope: 0, side: 0 };
+const states = {};
+TYPES.forEach(t => states[t.id] = { ...t.def });
+let T = TYPES[3];
+const st = () => states[T.id];
+
+/* Fysikk */
+function polyMargin(p, poly) {
+  let best = null;
+  for (let i = 0; i < poly.length; i++) {
+    const a = poly[i], b = poly[(i + 1) % poly.length];
+    const ex = b[0] - a[0], ey = b[1] - a[1], len = Math.hypot(ex, ey);
+    const nx = -ey / len, ny = ex / len;
+    const d = (p[0] - a[0]) * nx + (p[1] - a[1]) * ny;
+    if (!best || d < best.d) {
+      const t = Math.max(0, Math.min(1, ((p[0] - a[0]) * ex + (p[1] - a[1]) * ey) / (len * len)));
+      best = { d, i, n: [nx, ny], q: [a[0] + t * ex, a[1] + t * ey] };
+    }
+  }
+  return best;
+}
+function rangeAt(poly, axis, val) {
+  const o = 1 - axis;
+  let mn = Infinity, mx = -Infinity;
+  for (let i = 0; i < poly.length; i++) {
+    const a = poly[i], b = poly[(i + 1) % poly.length];
+    if (a[axis] === val) { mn = Math.min(mn, a[o]); mx = Math.max(mx, a[o]); }
+    if ((a[axis] - val) * (b[axis] - val) < 0) {
+      const w = a[o] + (val - a[axis]) / (b[axis] - a[axis]) * (b[o] - a[o]);
+      mn = Math.min(mn, w); mx = Math.max(mx, w);
+    }
+  }
+  return mn <= mx ? [mn, mx] : null;
+}
+const STILL = { accel: 0, speed: 0, radius: 6, turn: 0, slope: 0, side: 0 };
+function analyze(type, s, opt = {}) {
+  const g = type.geom(s);
+  const comps = [...type.comps.map(c => ({ ...c })), ...g.comps];
+  if (opt.mass != null) comps.forEach(c => { if (c.load) c.m = opt.mass; });
+  let M = 0, cx = 0, cy = 0, cz = 0;
+  for (const c of comps) { M += c.m; cx += c.m * c.p[0]; cy += c.m * c.p[1]; cz += c.m * c.p[2]; }
+  const C = [cx / M, cy / M, cz / M];
+  const d = opt.still ? STILL : dyn;
+  const a = d.slope * DEG, b = d.side * DEG;
+  const gx = -G * Math.sin(a), gy = -G * Math.cos(a) * Math.sin(b), gz = -G * Math.cos(a) * Math.cos(b);
+  const v = d.speed / 3.6, ay = d.turn ? d.turn * v * v / d.radius : 0;
+  const ex = gx - d.accel, ey = gy - ay, ez = gz;
+  const k = C[2] / -ez, kg = C[2] / -gz;
+  const P = [C[0] + k * ex, C[1] + k * ey];
+  const Pg = [C[0] + kg * gx, C[1] + kg * gy];
+  return { g, comps, M, C, P, Pg, ex, ey, ez, gx, gy, gz, ay, margin: polyMargin(P, type.support) };
+}
+function maxLoad(type, s, still) {
+  const U = type.rated.m * 4;
+  const f = m => analyze(type, s, { mass: m, still }).margin.d;
+  if (f(0) < 0) return { v: 0, none: true };
+  if (f(U) >= 0) return { v: U, over: true };
+  let lo = 0, hi = U;
+  for (let i = 0; i < 30; i++) { const m = (lo + hi) / 2; if (f(m) >= 0) lo = m; else hi = m; }
+  return { v: lo };
+}
+
+/* Tegning */
+const cv = { side: document.getElementById('cvSide'), top: document.getElementById('cvTop'), rear: document.getElementById('cvRear') };
+const KINDS = ['side', 'top', 'rear'];
+const MONO = "'IBM Plex Mono', ui-monospace, Consolas, monospace";
+let colors = {};
+function readColors() {
+  const cs = getComputedStyle(document.documentElement);
+  ['bg', 'sheet', 'ink', 'muted', 'line', 'grid', 'accent', 'accent-soft', 'accent-ink', 'ok', 'warn', 'bad',
+    't-body', 't-dark', 't-cw', 't-mast', 't-mast2', 't-fork', 't-load', 't-pallet', 't-guard', 'tire', 'hub', 'edge']
+    .forEach(k => colors[k] = cs.getPropertyValue('--' + k).trim());
+}
+const PJ = { side: p => [p[0], p[2]], top: p => [p[0], p[1]], rear: p => [-p[1], p[2]] };
+function hull(pts) {
+  pts = pts.slice().sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+  const cr = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
+  const lo = [], up = [];
+  for (const p of pts) { while (lo.length >= 2 && cr(lo[lo.length - 2], lo[lo.length - 1], p) <= 0) lo.pop(); lo.push(p); }
+  for (let i = pts.length - 1; i >= 0; i--) { const p = pts[i]; while (up.length >= 2 && cr(up[up.length - 2], up[up.length - 1], p) <= 0) up.pop(); up.push(p); }
+  lo.pop(); up.pop();
+  return lo.concat(up);
+}
+
+// K skalerer linjer og tekst: 1 på siden, større på tavla
+let K = 1;
+// Zoom deles mellom siden, tavlemodus og eget vindu
+const zoom = { side: { z: 1, pu: 0, pv: 0 }, top: { z: 1, pu: 0, pv: 0 }, rear: { z: 1, pu: 0, pv: 0 } };
+const resetZoom = kind => (kind ? [kind] : KINDS).forEach(k => Object.assign(zoom[k], { z: 1, pu: 0, pv: 0 }));
+function bounds(kind) {
+  const V = T.view;
+  if (kind === 'side') return [V.x[0], V.x[1], -0.4, V.z];
+  if (kind === 'top') return [V.x[0], V.x[1], V.y[0], V.y[1]];
+  return [-V.y[1], -V.y[0], -0.4, V.z];
+}
+function viewMap(kind, w, h, k) {
+  const [u0, u1, v0, v1] = bounds(kind), Z = zoom[kind];
+  const pad = 22 * k, lm = 26 * k;
+  const s = Math.max(1, Math.min((w - 2 * pad - lm) / (u1 - u0), (h - 2 * pad) / (v1 - v0))) * Z.z;
+  const cu = (u0 + u1) / 2 + Z.pu, cc = (v0 + v1) / 2 + Z.pv, ox = w / 2 + lm / 2;
+  const M = { s, w, h, k, cu, cv: cc, ox, X: u => ox + (u - cu) * s, Y: v => h / 2 - (v - cc) * s, U: x => cu + (x - ox) / s, V: y => cc - (y - h / 2) / s };
+  M.u0 = M.U(0); M.u1 = M.U(w); M.v0 = M.V(h); M.v1 = M.V(0);
+  return M;
+}
+function zoomAt(kind, M, x, y, f) {
+  const Z = zoom[kind], nz = Math.max(0.5, Math.min(10, Z.z * f));
+  const u = M.U(x), v = M.V(y), s2 = M.s / Z.z * nz;
+  Z.pu += u - (x - M.ox) / s2 - M.cu;
+  Z.pv += v + (y - M.h / 2) / s2 - M.cv;
+  Z.z = nz;
+  requestDraw();
+}
+function panBy(kind, M, dx, dy) { zoom[kind].pu -= dx / M.s; zoom[kind].pv += dy / M.s; requestDraw(); }
+function prepCanvas(c, w, h) {
+  const dpr = c.ownerDocument.defaultView.devicePixelRatio || 1;
+  const W = Math.max(1, Math.round(w * dpr)), H = Math.max(1, Math.round(h * dpr));
+  if (c.width !== W) c.width = W;
+  if (c.height !== H) c.height = H;
+  const ctx = c.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  return ctx;
+}
+function pageSize(kind) {
+  const [u0, u1, v0, v1] = bounds(kind), c = cv[kind];
+  const lim = { side: [260, 560], top: [170, 330], rear: [220, 430] }[kind];
+  const w = c.parentElement.clientWidth - 24;
+  const h = Math.round(Math.max(lim[0], Math.min(lim[1], w * (v1 - v0) / (u1 - u0))));
+  c.style.height = h + 'px';
+  return { w, h };
+}
+function cogSym(ctx, x, y, r, a, b, ring) {
+  ctx.save();
+  for (let i = 0; i < 4; i++) {
+    ctx.beginPath(); ctx.moveTo(x, y);
+    ctx.arc(x, y, r, -Math.PI / 2 + i * Math.PI / 2, i * Math.PI / 2);
+    ctx.closePath(); ctx.fillStyle = i % 2 ? b : a; ctx.fill();
+  }
+  ctx.beginPath(); ctx.arc(x, y, r, 0, 2 * Math.PI);
+  ctx.lineWidth = (ring || 1.5) * K; ctx.strokeStyle = a; ctx.stroke();
+  ctx.restore();
+}
+function arrow(ctx, x0, y0, x1, y1, color, w) {
+  const a = Math.atan2(y1 - y0, x1 - x0), L = Math.hypot(x1 - x0, y1 - y0);
+  if (L < 2) return;
+  ctx.save(); ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = w * K;
+  ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1 - Math.cos(a) * 8 * K, y1 - Math.sin(a) * 8 * K); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x1, y1);
+  ctx.lineTo(x1 - Math.cos(a - 0.4) * 11 * K, y1 - Math.sin(a - 0.4) * 11 * K);
+  ctx.lineTo(x1 - Math.cos(a + 0.4) * 11 * K, y1 - Math.sin(a + 0.4) * 11 * K);
+  ctx.closePath(); ctx.fill(); ctx.restore();
+}
+function label(ctx, txt, x, y, color, align = 'left', weight = 500) {
+  ctx.save();
+  ctx.font = `${weight} ${(11.5 * K).toFixed(1)}px ${MONO}`;
+  ctx.textAlign = align; ctx.textBaseline = 'middle';
+  ctx.lineWidth = 3.5 * K; ctx.strokeStyle = colors.sheet; ctx.strokeText(txt, x, y);
+  ctx.fillStyle = color; ctx.fillText(txt, x, y);
+  ctx.restore();
+}
+function drawGrid(ctx, M, w, h, kind) {
+  const step = [0.25, 0.5, 1, 2, 5].find(s => s * M.s >= 42 * K) || 5, dec = step < 1 ? 2 : 0;
+  ctx.save(); ctx.strokeStyle = colors.grid; ctx.lineWidth = 1;
+  for (let i = Math.ceil(M.u0 / step); i * step <= M.u1; i++) { const x = M.X(i * step); ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
+  const iv = Math.ceil(M.v0 / step), iStart = kind === 'top' ? iv : Math.max(0, iv);
+  for (let i = iStart; i * step <= M.v1; i++) { const y = M.Y(i * step); ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
+  ctx.restore();
+  if (kind !== 'top') for (let i = Math.max(1, iStart); i * step <= M.v1; i++) label(ctx, nf(i * step, dec) + ' m', 4 * K, M.Y(i * step), colors.muted);
+  // målestokk
+  const bl = step * M.s, bx = w - 14 * K - bl, by = h - 12 * K;
+  ctx.save(); ctx.strokeStyle = colors.muted; ctx.lineWidth = 1.5 * K;
+  ctx.beginPath(); ctx.moveTo(bx, by - 4 * K); ctx.lineTo(bx, by); ctx.lineTo(bx + bl, by); ctx.lineTo(bx + bl, by - 4 * K); ctx.stroke();
+  ctx.restore();
+  label(ctx, nf(step, dec) + ' m', bx + bl / 2, by - 9 * K, colors.muted, 'center');
+}
+function drawGround(ctx, M, w) {
+  ctx.save();
+  const y = M.Y(0);
+  ctx.strokeStyle = colors.ink; ctx.lineWidth = 1.5 * K;
+  ctx.beginPath(); ctx.moveTo(-w, y); ctx.lineTo(2 * w, y); ctx.stroke();
+  ctx.strokeStyle = colors.line; ctx.lineWidth = 1;
+  for (let x = -w; x < 2 * w; x += 9 * K) { ctx.beginPath(); ctx.moveTo(x, y + 1); ctx.lineTo(x - 8 * K, y + 9 * K); ctx.stroke(); }
+  ctx.restore();
+}
+function drawSupportBar(ctx, M, a, b) {
+  const y = M.Y(0) + 0.5;
+  ctx.save();
+  ctx.strokeStyle = colors.accent; ctx.lineWidth = 6 * K; ctx.lineCap = 'butt';
+  ctx.beginPath(); ctx.moveTo(M.X(a), y); ctx.lineTo(M.X(b), y); ctx.stroke();
+  ctx.lineWidth = 2 * K;
+  for (const u of [a, b]) { ctx.beginPath(); ctx.moveTo(M.X(u), y - 9 * K); ctx.lineTo(M.X(u), y + 7 * K); ctx.stroke(); }
+  ctx.restore();
+}
+function boxPath(ctx, b, kind, M) {
+  const h = hull(corners(b).map(p => { const q = PJ[kind](p); return [M.X(q[0]), M.Y(q[1])]; }));
+  ctx.beginPath(); h.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); ctx.closePath();
+}
+function drawBox(ctx, b, kind, M, alpha = 1) {
+  boxPath(ctx, b, kind, M);
+  ctx.save();
+  if (b.tone === 'guard') {
+    ctx.strokeStyle = colors['t-guard'];
+    if (kind === 'top') { ctx.setLineDash([4 * K, 3 * K]); ctx.lineWidth = 1.2 * K; } else ctx.lineWidth = 2.6 * K;
+    ctx.stroke(); ctx.restore(); return;
+  }
+  ctx.globalAlpha = alpha;
+  ctx.fillStyle = colors['t-' + b.tone]; ctx.fill();
+  ctx.globalAlpha = 1; ctx.strokeStyle = colors.edge; ctx.lineWidth = Math.max(1, 0.8 * K); ctx.stroke();
+  ctx.restore();
+}
+function drawWheel(ctx, wh, kind, M, ghost) {
+  ctx.save();
+  if (ghost) ctx.globalAlpha = 0.45;
+  ctx.fillStyle = colors.tire;
+  if (kind === 'side') {
+    const R = wh.r * M.s;
+    ctx.beginPath(); ctx.arc(M.X(wh.x), M.Y(wh.r), R, 0, 2 * Math.PI); ctx.fill();
+    ctx.fillStyle = colors.hub; ctx.beginPath(); ctx.arc(M.X(wh.x), M.Y(wh.r), Math.max(1.5 * K, R * 0.45), 0, 2 * Math.PI); ctx.fill();
+  } else if (kind === 'rear') {
+    const x0 = M.X(-wh.y - wh.w / 2), x1 = M.X(-wh.y + wh.w / 2);
+    ctx.fillRect(x0, M.Y(2 * wh.r), x1 - x0, 2 * wh.r * M.s);
+  } else {
+    ctx.fillRect(M.X(wh.x - wh.r), M.Y(wh.y + wh.w / 2), 2 * wh.r * M.s, wh.w * M.s);
+  }
+  ctx.restore();
+}
+function center(b) { const c = corners(b); return c.reduce((a, p) => [a[0] + p[0] / 8, a[1] + p[1] / 8, a[2] + p[2] / 8], [0, 0, 0]); }
+
+const tip = { side: 0, rear: 0, tside: 0, trear: 0 };
+let R = null;
+const statusColor = () => R.margin.d < 0 ? colors.bad : R.margin.d < 0.08 ? colors.warn : colors.ok;
+
+function drawSideOrRear(kind, c, w, h) {
+  const ctx = prepCanvas(c, w, h);
+  const M = viewMap(kind, w, h, K); c._M = M;
+  ctx.fillStyle = colors.sheet; ctx.fillRect(0, 0, w, h);
+  drawGrid(ctx, M, w, h, kind);
+  const side = kind === 'side';
+  const sc = statusColor();
+  // underlagets helning
+  const ang = side ? -dyn.slope * DEG : dyn.side * DEG;
+  const px0 = M.X(0), py0 = M.Y(0);
+  ctx.save();
+  ctx.translate(px0, py0); ctx.rotate(ang); ctx.translate(-px0, -py0);
+  drawGround(ctx, M, w);
+  // støtteflate langs bakken på tvers av tyngdepunktet
+  const poly = T.support, P = R.P;
+  if (side) {
+    const ys = poly.map(p => p[1]), yq = Math.max(Math.min(...ys) + 1e-6, Math.min(Math.max(...ys) - 1e-6, P[1]));
+    const r = rangeAt(poly, 1, yq); if (r) drawSupportBar(ctx, M, r[0], r[1]);
+  } else {
+    const xs = poly.map(p => p[0]), xq = Math.max(Math.min(...xs) + 1e-6, Math.min(Math.max(...xs) - 1e-6, P[0]));
+    const r = rangeAt(poly, 0, xq); if (r) drawSupportBar(ctx, M, -r[1], -r[0]);
+  }
+  // velting rundt tippekanten
+  const q = R.margin.q;
+  const pivX = side ? M.X(q[0]) : M.X(-q[1]);
+  ctx.translate(pivX, py0); ctx.rotate(side ? tip.side : tip.rear); ctx.translate(-pivX, -py0);
+
+  const items = [...T.body, ...R.g.parts].map(b => ({ b, c: center(b) }));
+  T.wheels.forEach(wh => items.push({ wh, c: [wh.x, wh.y, wh.r] }));
+  const depth = side ? it => it.c[1] : it => it.c[0];
+  items.sort((a, b) => depth(b) - depth(a));
+  const xs = T.wheels.map(wh => wh.x), xmid = (Math.min(...xs) + Math.max(...xs)) / 2;
+  for (const it of items) {
+    if (it.wh) drawWheel(ctx, it.wh, kind, M, side ? it.wh.y > 0.01 : it.wh.x > xmid);
+    else drawBox(ctx, it.b, kind, M);
+  }
+  if (!side && T.pendulum) {
+    ctx.save(); ctx.fillStyle = colors.accent; ctx.strokeStyle = colors.ink; ctx.lineWidth = 1.5 * K;
+    ctx.beginPath(); ctx.arc(M.X(0), M.Y(T.pendulum.z), 5 * K, 0, 2 * Math.PI); ctx.fill(); ctx.stroke(); ctx.restore();
+    label(ctx, 'pendelaksel', M.X(0) + 9 * K, M.Y(T.pendulum.z) + 12 * K, colors.muted);
+  }
+  // tyngdepunkter
+  const pj = p => { const u = PJ[kind](p); return [M.X(u[0]), M.Y(u[1])]; };
+  for (const cp of R.comps) {
+    if (cp.m <= 0) continue;
+    const [x, y] = pj(cp.p);
+    if (cp.kind === 'part') { ctx.fillStyle = colors.muted; ctx.beginPath(); ctx.arc(x, y, 2.8 * K, 0, 2 * Math.PI); ctx.fill(); continue; }
+    cogSym(ctx, x, y, 6.5 * K, colors.ink, colors.sheet);
+    label(ctx, cp.n, x + 10 * K, y - 9 * K, colors.ink);
+  }
+  const C = R.C, [cxs, cys] = pj(C);
+  const gU = side ? R.gx : -R.gy, eU = side ? R.ex : -R.ey;
+  const hitG = [M.X((side ? C[0] : -C[1]) + C[2] * gU / -R.gz), M.Y(0)];
+  const hitE = [M.X((side ? C[0] : -C[1]) + C[2] * eU / -R.ez), M.Y(0)];
+  ctx.save(); ctx.setLineDash([3 * K, 4 * K]); ctx.strokeStyle = colors.muted; ctx.lineWidth = 1.2 * K;
+  ctx.beginPath(); ctx.moveTo(cxs, cys); ctx.lineTo(hitG[0], hitG[1]); ctx.stroke(); ctx.restore();
+  arrow(ctx, cxs, cys, hitE[0], hitE[1], sc, 2.2);
+  ctx.save(); ctx.strokeStyle = sc; ctx.lineWidth = 3 * K; ctx.beginPath(); ctx.arc(hitE[0], hitE[1], 6 * K, 0, 2 * Math.PI); ctx.stroke(); ctx.restore();
+  cogSym(ctx, cxs, cys, 9.5 * K, colors.accent, colors.sheet, 2.5);
+  label(ctx, 'Felles', cxs - 14 * K, cys, colors['accent-ink'], 'right', 600);
+  ctx.restore();
+}
+
+function drawTop(c, w, h) {
+  const ctx = prepCanvas(c, w, h);
+  const M = viewMap('top', w, h, K); c._M = M;
+  ctx.fillStyle = colors.sheet; ctx.fillRect(0, 0, w, h);
+  drawGrid(ctx, M, w, h, 'top');
+  const poly = T.support, sc = statusColor();
+  const P2 = p => [M.X(p[0]), M.Y(p[1])];
+  ctx.save();
+  ctx.beginPath(); poly.forEach((p, i) => { const s = P2(p); i ? ctx.lineTo(s[0], s[1]) : ctx.moveTo(s[0], s[1]); }); ctx.closePath();
+  ctx.fillStyle = colors['accent-soft']; ctx.fill(); ctx.strokeStyle = colors.accent; ctx.lineWidth = 2 * K; ctx.stroke();
+  ctx.restore();
+  // kropp gjennomsiktig, hjul tydelig, så bevegelige deler
+  T.body.slice().sort((a, b) => a.z1 - b.z1).forEach(b => drawBox(ctx, b, 'top', M, 0.35));
+  T.wheels.forEach(wh => drawWheel(ctx, wh, 'top', M, false));
+  R.g.parts.slice().sort((a, b) => center(a)[2] - center(b)[2]).forEach(b => drawBox(ctx, b, 'top', M, b.tone === 'load' || b.tone === 'pallet' ? 0.55 : 0.85));
+  // nærmeste tippekant
+  const e = R.margin, a = poly[e.i], b = poly[(e.i + 1) % poly.length];
+  ctx.save(); ctx.strokeStyle = sc; ctx.lineWidth = 4 * K; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(...P2(a)); ctx.lineTo(...P2(b)); ctx.stroke(); ctx.restore();
+  if (T.pendulum) {
+    ctx.save(); ctx.fillStyle = colors.accent; ctx.strokeStyle = colors.ink; ctx.lineWidth = 1.5 * K;
+    ctx.beginPath(); ctx.arc(M.X(T.pendulum.x), M.Y(0), 4.5 * K, 0, 2 * Math.PI); ctx.fill(); ctx.stroke(); ctx.restore();
+  }
+  for (const cp of R.comps) {
+    if (cp.m <= 0) continue;
+    const [x, y] = P2(cp.p);
+    if (cp.kind === 'part') { ctx.fillStyle = colors.muted; ctx.beginPath(); ctx.arc(x, y, 2.6 * K, 0, 2 * Math.PI); ctx.fill(); }
+    else cogSym(ctx, x, y, 5.5 * K, colors.ink, colors.sheet);
+  }
+  const C = P2(R.C), Pd = P2(R.P);
+  ctx.save(); ctx.strokeStyle = sc; ctx.lineWidth = 2 * K; ctx.setLineDash([4 * K, 3 * K]);
+  ctx.beginPath(); ctx.moveTo(C[0], C[1]); ctx.lineTo(Pd[0], Pd[1]); ctx.stroke(); ctx.restore();
+  cogSym(ctx, C[0], C[1], 8 * K, colors.accent, colors.sheet, 2.2);
+  ctx.save(); ctx.strokeStyle = sc; ctx.lineWidth = 3 * K; ctx.beginPath(); ctx.arc(Pd[0], Pd[1], 6.5 * K, 0, 2 * Math.PI); ctx.stroke(); ctx.restore();
+  label(ctx, 'foran →', w - 12 * K, 16 * K, colors.muted, 'right');
+}
+const drawKind = (kind, c, w, h) => kind === 'top' ? drawTop(c, w, h) : drawSideOrRear(kind, c, w, h);
+
+function drawAll() {
+  if (!R) return;
+  K = 1;
+  for (const kind of KINDS) { const { w, h } = pageSize(kind); drawKind(kind, cv[kind], w, h); }
+  for (const bd of boards.slice()) drawBoard(bd);
+}
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+let raf = 0;
+function frame() {
+  raf = 0;
+  const k = reduceMotion ? 1 : 0.16;
+  tip.side += (tip.tside - tip.side) * k; tip.rear += (tip.trear - tip.rear) * k;
+  drawAll();
+  if (Math.abs(tip.tside - tip.side) > 1e-3 || Math.abs(tip.trear - tip.rear) > 1e-3) raf = rafHost().requestAnimationFrame(frame);
+}
+// Når hovedvinduet er skjult, tegner vi i takt med tavlevinduet
+const rafHost = () => { const p = document.hidden && boards.find(b => b.win && !b.win.closed); return p ? p.win : window; };
+const requestDraw = () => { if (!raf) raf = rafHost().requestAnimationFrame(frame); };
+
+/* Zoom med mus, rullehjul og fingre */
+function bindZoom(c, kind, board) {
+  const pts = new Map();
+  const fresh = () => c._M ? viewMap(kind, c._M.w, c._M.h, c._M.k) : null;
+  const pos = e => { const r = c.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
+  c.addEventListener('wheel', e => {
+    if (!board && !(e.ctrlKey || e.metaKey)) return;
+    const M = fresh(); if (!M) return;
+    e.preventDefault();
+    const [x, y] = pos(e);
+    zoomAt(kind, M, x, y, Math.exp(-e.deltaY * 0.0015));
+  }, { passive: false });
+  c.addEventListener('pointerdown', e => {
+    if (!board && e.pointerType !== 'mouse') return;
+    c.setPointerCapture(e.pointerId); pts.set(e.pointerId, pos(e));
+  });
+  c.addEventListener('pointermove', e => {
+    if (!pts.has(e.pointerId)) return;
+    const prev = [...pts.values()]; pts.set(e.pointerId, pos(e));
+    const now = [...pts.values()], M = fresh(); if (!M) return;
+    if (now.length === 1) { panBy(kind, M, now[0][0] - prev[0][0], now[0][1] - prev[0][1]); return; }
+    const mid = a => [(a[0][0] + a[1][0]) / 2, (a[0][1] + a[1][1]) / 2];
+    const dist = a => Math.hypot(a[0][0] - a[1][0], a[0][1] - a[1][1]);
+    const m0 = mid(prev), m1 = mid(now);
+    panBy(kind, M, m1[0] - m0[0], m1[1] - m0[1]);
+    if (dist(prev) > 0) zoomAt(kind, fresh(), m1[0], m1[1], dist(now) / dist(prev));
+  });
+  const up = e => pts.delete(e.pointerId);
+  c.addEventListener('pointerup', up); c.addEventListener('pointercancel', up);
+  c.addEventListener('dblclick', () => { resetZoom(kind); requestDraw(); });
+}
+function bindZoomButtons(el, c) {
+  const kind = el.dataset.v;
+  el.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    const M = c._M; if (!M) return;
+    if (b.dataset.z === 'fit') { resetZoom(kind); requestDraw(); }
+    else zoomAt(kind, viewMap(kind, M.w, M.h, M.k), M.w / 2, M.h / 2, b.dataset.z === 'in' ? 1.4 : 1 / 1.4);
+  }));
+}
+
+/* Tavlemodus og eget vindu */
+const boards = [];
+function boardK(bd) {
+  const win = bd.doc.defaultView;
+  return Math.max(1, Math.min(2.2, Math.min(win.innerWidth / 1100, win.innerHeight / 650))) * bd.text;
+}
+function drawBoard(bd) {
+  if (bd.win && bd.win.closed) { closeBoard(bd); return; }
+  K = boardK(bd);
+  for (const kind of KINDS) {
+    const c = bd.cv[kind];
+    if (c.parentElement.hidden) continue;
+    const w = c.clientWidth, h = c.clientHeight;
+    if (w && h) drawKind(kind, c, w, h);
+  }
+  K = 1;
+}
+function dynSummary() {
+  const s = st(), p = [nf(s.mass) + ' kg last', T.id === 'th' ? 'gaffel ' + nf(R.g.forkZ, 2) + ' m' : 'løftehøyde ' + nf(s.lift, 2) + ' m'];
+  if (dyn.accel) p.push(dyn.accel < 0 ? 'brems ' + nf(-dyn.accel, 1) + ' m/s²' : 'akselerasjon ' + nf(dyn.accel, 1) + ' m/s²');
+  if (dyn.turn) p.push('sving mot ' + (dyn.turn > 0 ? 'venstre' : 'høyre') + ' i ' + nf(dyn.speed, 1) + ' km/t, radius ' + nf(dyn.radius, 1) + ' m');
+  if (dyn.slope) p.push('stigning ' + DYN_FMT.slope(dyn.slope));
+  if (dyn.side) p.push('sidehelning ' + DYN_FMT.side(dyn.side));
+  if (!dyn.accel && !dyn.turn && !dyn.slope && !dyn.side) p.push('står stille på plant underlag');
+  return p.join(' · ');
+}
+function syncBoards() {
+  for (const bd of boards) {
+    const e = bd.el;
+    e.code.textContent = T.code; e.name.textContent = T.name; e.dyn.textContent = dynSummary();
+    e.pill.className = $('pill').className; e.pill.textContent = $('pill').textContent;
+    e.margin.textContent = $('rMargin').textContent; e.edge.textContent = $('rEdge').textContent;
+    e.cog.textContent = $('rCog').textContent; e.max.textContent = $('rMax').textContent;
+    e.note.textContent = $('sideNote').textContent;
+  }
+}
+function setLayout(bd, l) {
+  bd.layout = l;
+  bd.root.querySelector('.b-views').dataset.layout = l;
+  bd.root.querySelectorAll('.b-pane').forEach(p => p.hidden = l !== 'all' && p.dataset.v !== l);
+  bd.root.querySelectorAll('button[data-layout]').forEach(b => b.setAttribute('aria-pressed', b.dataset.layout === l));
+  requestDraw();
+}
+const FS_MSG = 'Fullskjerm er ikke tilgjengelig her. Trykk F11 i nettleseren i stedet.';
+function toggleFull(bd) {
+  const d = bd.doc;
+  try {
+    if (d.fullscreenElement) { d.exitFullscreen(); return; }
+    const el = bd.win ? d.documentElement : bd.root;
+    if (!el.requestFullscreen) { boardMsg(bd, FS_MSG); return; }
+    const pr = el.requestFullscreen();
+    if (pr && pr.catch) pr.catch(() => boardMsg(bd, FS_MSG));
+  } catch (err) { boardMsg(bd, FS_MSG); }
+}
+function boardMsg(bd, txt) {
+  const m = bd.root.querySelector('.b-msg');
+  m.textContent = txt; m.hidden = false;
+  clearTimeout(bd.msgT); bd.msgT = setTimeout(() => m.hidden = true, 5000);
+}
+const app = document.querySelector('.app'), pickerEl = document.querySelector('.picker'), controlsEl = document.querySelector('.controls');
+function toggleDrawer(bd, forceClose) {
+  const dr = bd.root.querySelector('.b-drawer'), btn = bd.root.querySelector('[data-act=drawer]');
+  if (dr.hidden && !forceClose) { dr.append(pickerEl, controlsEl); dr.hidden = false; }
+  else if (!dr.hidden) { app.prepend(pickerEl); app.append(controlsEl); dr.hidden = true; }
+  btn.setAttribute('aria-pressed', !dr.hidden);
+  requestDraw();
+}
+function makeBoard(root, win) {
+  const q = s => root.querySelector(s);
+  const bd = {
+    root, win, doc: root.ownerDocument, layout: 'all', text: 1,
+    cv: { side: q('[data-v=side] canvas'), top: q('[data-v=top] canvas'), rear: q('[data-v=rear] canvas') },
+    el: { code: q('.b-code'), name: q('.b-name'), dyn: q('.b-dyn'), pill: q('.pill'), margin: q('.b-margin'), edge: q('.b-edge'), cog: q('.b-cog'), max: q('.b-max'), note: q('.b-note') }
+  };
+  root.querySelectorAll('button[data-layout]').forEach(b => b.addEventListener('click', () => setLayout(bd, b.dataset.layout)));
+  q('[data-act="text-"]').addEventListener('click', () => { bd.text = Math.max(0.6, bd.text / 1.15); requestDraw(); });
+  q('[data-act="text+"]').addEventListener('click', () => { bd.text = Math.min(1.8, bd.text * 1.15); requestDraw(); });
+  q('[data-act=full]').addEventListener('click', () => toggleFull(bd));
+  q('[data-act=close]').addEventListener('click', () => closeBoard(bd));
+  if (win) q('[data-act=drawer]').hidden = true;
+  else q('[data-act=drawer]').addEventListener('click', () => toggleDrawer(bd));
+  for (const kind of KINDS) bindZoom(bd.cv[kind], kind, true);
+  root.querySelectorAll('.zm').forEach(z => bindZoomButtons(z, bd.cv[z.dataset.v]));
+  bd.onKey = e => {
+    if (e.target.tagName === 'INPUT' || e.ctrlKey || e.metaKey || e.altKey) return;
+    const l = { 1: 'all', 2: 'side', 3: 'top', 4: 'rear' }[e.key];
+    if (l) setLayout(bd, l);
+    else if (e.key === 'f' || e.key === 'F') toggleFull(bd);
+    else if (e.key === 'Escape' && !win && !bd.doc.fullscreenElement) closeBoard(bd);
+  };
+  bd.doc.addEventListener('keydown', bd.onKey);
+  boards.push(bd);
+  setLayout(bd, 'all'); syncBoards();
+  return bd;
+}
+function closeBoard(bd) {
+  const i = boards.indexOf(bd); if (i < 0) return;
+  boards.splice(i, 1);
+  bd.doc.removeEventListener('keydown', bd.onKey);
+  if (bd.win) { try { if (!bd.win.closed) bd.win.close(); } catch (err) {} }
+  else {
+    toggleDrawer(bd, true);
+    if (bd.doc.fullscreenElement) bd.doc.exitFullscreen().catch(() => {});
+    bd.root.remove(); document.body.style.overflow = '';
+    $('btnBoard').focus();
+  }
+  updateWinNote(); requestDraw();
+}
+function openOverlay() {
+  if (boards.some(b => !b.win)) return;
+  const node = $('boardTpl').content.firstElementChild.cloneNode(true);
+  document.body.appendChild(node); document.body.style.overflow = 'hidden';
+  const bd = makeBoard(node, null);
+  toggleFull(bd);
+  node.querySelector('button[data-layout=all]').focus();
+  requestDraw();
+}
+function pageMsg(txt) {
+  const m = $('pageMsg'); m.textContent = txt; m.hidden = false;
+  clearTimeout(pageMsg.t); pageMsg.t = setTimeout(() => m.hidden = true, 9000);
+}
+function openPopup() {
+  const open = boards.find(b => b.win);
+  if (open) { open.win.focus(); return; }
+  let w = null, doc = null;
+  try { w = window.open('', 'truckvisning', 'popup=yes,width=1280,height=800'); } catch (err) {}
+  try { doc = w && w.document; } catch (err) { doc = null; }
+  if (!w || !doc) {
+    try { if (w) w.close(); } catch (err) {}
+    pageMsg('Nettleseren åpnet ikke et eget vindu her. Tillat popup-vinduer, åpne index.html direkte fra disk, eller bruk Tavlemodus.');
+    return;
+  }
+  const theme = document.documentElement.getAttribute('data-theme');
+  const fonts = document.querySelector('link[href*="fonts.googleapis.com/css2"]');
+  const css = [...document.querySelectorAll('style')].map(s => s.textContent).join('\n');
+  doc.open();
+  doc.write(`<!doctype html><html lang="nb"${theme ? ` data-theme="${theme}"` : ''}><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Truckstabilitet · tavle</title>${fonts ? fonts.outerHTML : ''}<style>${css}</style></head><body class="popup"></body></html>`);
+  doc.close();
+  const node = doc.importNode($('boardTpl').content.firstElementChild, true);
+  doc.body.appendChild(node);
+  const bd = makeBoard(node, w);
+  w.addEventListener('resize', requestDraw);
+  w.addEventListener('pagehide', () => closeBoard(bd));
+  if (doc.fonts && doc.fonts.ready) doc.fonts.ready.then(requestDraw);
+  updateWinNote(); requestDraw();
+}
+function updateWinNote() { $('winNote').hidden = !boards.some(b => b.win); }
+
+/* Utlesning */
+const $ = id => document.getElementById(id);
+function update() {
+  R = analyze(T, st());
+  const m = R.margin, d = m.d;
+  const pill = $('pill');
+  pill.className = 'pill' + (d < 0 ? ' bad' : d < 0.08 ? ' warn' : '');
+  pill.textContent = d < 0 ? 'Trucken velter' : d < 0.08 ? 'Nær tippegrensen' : 'Stabil';
+  $('lgDyn').style.borderColor = d < 0 ? 'var(--bad)' : d < 0.08 ? 'var(--warn)' : 'var(--ok)';
+  $('rMargin').textContent = (d < 0 ? '−' : '') + nf(Math.abs(d) * 1000) + ' mm';
+  $('rEdge').textContent = (d < 0 ? 'Utenfor ' : 'Nærmeste kant: ') + T.edges[m.i];
+  $('rCog').textContent = 'høyde ' + nf(R.C[2], 2) + ' m';
+  $('rCogSub').textContent = nf(R.M) + ' kg totalt · ' + (R.C[0] >= 0 ? nf(R.C[0], 2) + ' m foran' : nf(-R.C[0], 2) + ' m bak') + ' framakselen';
+  const ms = maxLoad(T, st(), true), md = maxLoad(T, st(), false);
+  const fm = r => r.over ? '> ' + nf(r.v) + ' kg' : nf(Math.floor(r.v / 10) * 10) + ' kg';
+  $('rMax').textContent = fm(md);
+  $('rMaxSub').textContent = (md.none ? 'Velter uten last. ' : '') + 'Stillestående og plant: ' + fm(ms) + '. Merkelast ' + nf(T.rated.m) + ' kg ved ' + nf(T.rated.lc * 1000) + ' mm.';
+
+  // tabell
+  const rows = R.comps.map(c => `<tr><td>${c.n}</td><td>${nf(c.m)}</td><td>${nf(c.p[0], 2)}</td><td>${nf(c.p[1], 2)}</td><td>${nf(c.p[2], 2)}</td></tr>`).join('');
+  $('tbl').innerHTML = `<thead><tr><th>Del</th><th>Masse kg</th><th>x</th><th>y</th><th>z</th></tr></thead><tbody>${rows}
+    <tr class="tot"><td>Felles</td><td>${nf(R.M)}</td><td>${nf(R.C[0], 2)}</td><td>${nf(R.C[1], 2)}</td><td>${nf(R.C[2], 2)}</td></tr></tbody>`;
+
+  // fordeling foran/bak ut fra resultantens treffpunkt
+  const xs = T.support.map(p => p[0]), xf_ = Math.max(...xs), xr = Math.min(...xs);
+  const fr = (R.P[0] - xr) / (xf_ - xr), frc = Math.max(0, Math.min(1, fr));
+  $('axF').style.width = (frc * 100) + '%'; $('axR').style.width = ((1 - frc) * 100) + '%';
+  $('axF').textContent = frc > 0.12 ? 'Foran ' + nf(frc * 100) + ' %' : '';
+  $('axR').textContent = frc < 0.88 ? 'Bak ' + nf((1 - frc) * 100) + ' %' : '';
+  $('axNote').textContent = fr > 1 ? 'Bakhjulene er løftet fra bakken.' : fr < 0 ? 'Framhjulene er løftet fra bakken.'
+    : fr > 0.85 ? 'Lite trykk på bakre hjul. Styreevnen blir dårlig før trucken velter.' : 'Inkluderer brems, akselerasjon og stigning.';
+
+  const fwd = Math.atan2(R.ex, -R.ez) / DEG, lat = Math.atan2(-R.ey, -R.ez) / DEG;
+  const parts = [];
+  if (Math.abs(fwd) >= 0.1) parts.push(nf(Math.abs(fwd), 1) + '° ' + (fwd > 0 ? 'fram' : 'bak'));
+  if (Math.abs(lat) >= 0.1) parts.push(nf(Math.abs(lat), 1) + '° mot ' + (lat > 0 ? 'høyre' : 'venstre'));
+  $('sideNote').textContent = (T.id === 'th' ? 'Gaffelhøyde ' + nf(R.g.forkZ, 2) + ' m · ' : '') + (parts.length ? 'Resultanten heller ' + parts.join(' og ') : 'Resultanten peker rett ned');
+
+  // velteanimasjon
+  const t = d < 0 ? Math.min(22, 7 + -d * 60) * DEG : 0;
+  tip.tside = t * -m.n[0]; tip.trear = t * m.n[1];
+  syncBoards();
+  requestDraw();
+}
+
+/* Kontroller */
+function buildTypes() {
+  $('types').innerHTML = TYPES.map(t => `<button type="button" class="type" data-id="${t.id}" aria-pressed="${t === T}"><span class="code">${t.code}</span><span class="nm">${t.name}</span><span class="sb">${t.sub}</span></button>`).join('');
+  $('types').querySelectorAll('.type').forEach(b => b.addEventListener('click', () => selectType(b.dataset.id)));
+}
+function buildLoadCtl() {
+  const g = $('loadCtl');
+  g.querySelectorAll('.ctl').forEach(n => n.remove());
+  const s = st();
+  for (const k of T.ctrl) {
+    const c = CTL[k], r = T.ranges[k], step = (TYPE_STEPS[T.id] || {})[k] || c.step;
+    const div = document.createElement('div'); div.className = 'ctl';
+    div.innerHTML = `<div class="row"><label for="c-${k}">${c.label}</label><output id="o-${k}"></output></div>
+      <input type="range" id="c-${k}" min="${r[0]}" max="${r[1]}" step="${step}" value="${s[k]}">${c.hint ? `<small>${c.hint}</small>` : ''}`;
+    g.appendChild(div);
+    const inp = div.querySelector('input'), out = div.querySelector('output');
+    out.textContent = c.fmt(s[k]);
+    inp.addEventListener('input', () => { s[k] = +inp.value; out.textContent = c.fmt(s[k]); update(); });
+  }
+}
+function syncLoadCtl() {
+  const s = st();
+  for (const k of T.ctrl) { $('c-' + k).value = s[k]; $('o-' + k).textContent = CTL[k].fmt(s[k]); }
+}
+function selectType(id) {
+  T = TYPES.find(t => t.id === id);
+  tip.side = tip.rear = 0;
+  resetZoom();
+  $('types').querySelectorAll('.type').forEach(b => b.setAttribute('aria-pressed', b.dataset.id === id));
+  $('typeNote').textContent = T.note;
+  buildLoadCtl(); update();
+}
+const DYN_FMT = {
+  accel: v => v === 0 ? 'jevn fart' : nf(v, 1) + ' m/s² ' + (v < 0 ? '(brems)' : ''),
+  speed: v => nf(v, 1) + ' km/t',
+  radius: v => nf(v, 1) + ' m',
+  slope: v => v === 0 ? 'flatt' : nf(Math.abs(v), 1) + '° ' + (v > 0 ? 'oppover' : 'nedover'),
+  side: v => v === 0 ? 'flatt' : nf(Math.abs(v), 1) + '° ned mot ' + (v > 0 ? 'høyre' : 'venstre')
+};
+function syncDyn() {
+  for (const k of Object.keys(DYN_FMT)) { $(k).value = dyn[k]; $('o-' + k).textContent = DYN_FMT[k](dyn[k]); }
+  document.querySelectorAll('#turnSeg button').forEach(b => b.setAttribute('aria-pressed', +b.dataset.turn === dyn.turn));
+  $('speed').disabled = $('radius').disabled = dyn.turn === 0;
+  const v = dyn.speed / 3.6;
+  $('o-ay').textContent = dyn.turn ? 'sentripetal ' + nf(v * v / dyn.radius, 2) + ' m/s²' : 'ingen sidekraft';
+}
+Object.keys(DYN_FMT).forEach(k => $(k).addEventListener('input', () => { dyn[k] = +$(k).value; syncDyn(); update(); }));
+document.querySelectorAll('#turnSeg button').forEach(b => b.addEventListener('click', () => { dyn.turn = +b.dataset.turn; syncDyn(); update(); }));
+
+function liftTo(frac) {
+  const s = st();
+  if (T.id === 'th') { s.boomA = Math.round(10 + 50 * frac); s.boomL = +(5 + 4 * frac).toFixed(1); }
+  else { const r = T.ranges.lift; s.lift = +(r[0] + (r[1] - r[0]) * frac).toFixed(3); }
+}
+document.querySelectorAll('#scen button').forEach(b => b.addEventListener('click', () => {
+  Object.assign(states[T.id], T.def);
+  Object.assign(dyn, STILL, { speed: 8, radius: 6 });
+  const s = st();
+  switch (b.dataset.s) {
+    case 'brake': s.mass = T.rated.m * 0.8; liftTo(0.75); dyn.accel = -2.5; break;
+    case 'turn': s.mass = T.rated.m * 0.6; liftTo(0.5); dyn.turn = 1; dyn.speed = 10; dyn.radius = 5; break;
+    case 'empty': s.mass = 0; liftTo(0); dyn.turn = -1; dyn.speed = 13; dyn.radius = 3.5; break;
+    case 'down': s.mass = T.rated.m; liftTo(0.05); dyn.slope = -12; dyn.accel = -1; break;
+    case 'sideslope': s.mass = T.rated.m * 0.7; liftTo(0.8); dyn.side = 4; break;
+  }
+  syncLoadCtl(); syncDyn(); update();
+}));
+
+readColors();
+buildTypes(); selectType(T.id); syncDyn();
+KINDS.forEach(k => bindZoom(cv[k], k, false));
+document.querySelectorAll('.main .zm').forEach(z => bindZoomButtons(z, cv[z.dataset.v]));
+$('btnBoard').addEventListener('click', openOverlay);
+$('btnPopup').addEventListener('click', openPopup);
+$('btnPopupClose').addEventListener('click', () => boards.filter(b => b.win).forEach(closeBoard));
+window.addEventListener('pagehide', () => boards.filter(b => b.win).forEach(closeBoard));
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { readColors(); requestDraw(); });
+new MutationObserver(() => { readColors(); requestDraw(); }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+window.addEventListener('resize', requestDraw);
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(requestDraw);
+</script>
