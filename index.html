@@ -35,7 +35,18 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);fo
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
   padding-block:calc(28px + env(safe-area-inset-top,0px)) calc(48px + env(safe-area-inset-bottom,0px))}
 .wrap{max-width:1180px;margin:0 auto}
-header{display:grid;gap:8px;margin-bottom:30px}
+header{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:8px 24px;margin-bottom:30px}
+header .t{display:grid;gap:8px}
+/* QR-kode: liten i toppen, stor over hele skjermen ved klikk så klassen kan skanne fra tavla */
+.qr{all:unset;cursor:zoom-in;display:grid;justify-items:center;gap:4px;font-size:12px;color:var(--muted);text-align:center}
+.qr img{display:block;width:112px;height:112px;border-radius:4px;border:1px solid var(--line)}
+.qr:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:4px}
+dialog.qrbig{border:0;padding:24px;border-radius:8px;background:#fff;color:#17201D;text-align:center;max-width:none}
+dialog.qrbig::backdrop{background:rgba(0,0,0,.75)}
+dialog.qrbig img{display:block;width:min(80vmin,720px);height:auto;margin:0 auto 12px}
+dialog.qrbig p{margin:0;font-family:var(--f-display);font-weight:700;font-size:clamp(20px,3vmin,32px)}
+dialog.qrbig small{display:block;margin-top:4px;font-size:15px;color:#56625D}
+@media (max-width:640px){header{grid-template-columns:minmax(0,1fr)}.qr{display:none}}
 h1{font-family:var(--f-display);font-weight:700;font-size:clamp(34px,5vw,54px);text-transform:uppercase;line-height:.95;margin:0;letter-spacing:.01em;text-wrap:balance}
 h1 span{color:var(--accent)}
 header p{margin:0;color:var(--muted);max-width:62ch}
@@ -69,9 +80,20 @@ footer{margin-top:40px;color:var(--muted);font-size:13px;max-width:70ch}
 <body>
 <div class="wrap">
   <header>
-    <h1>Transport <span>og logistikk</span></h1>
-    <p>Simulatorer og spill til undervisningen. De øverste virker for én elev eller på tavla uten internett. Spillene nederst kjøres for hele klassen med lærerinnlogging.</p>
+    <div class="t">
+      <h1>Transport <span>og logistikk</span></h1>
+      <p>Simulatorer og spill til undervisningen. De øverste virker for én elev eller på tavla uten internett. Spillene nederst kjøres for hele klassen med lærerinnlogging.</p>
+    </div>
+    <button class="qr" id="qrBtn" aria-haspopup="dialog" aria-label="Vis QR-koden stort">
+      <img src="qr/qr-hovedside.svg" alt="QR-kode til seiknes-ui.github.io/simmulator">
+      <span>Skann for å åpne<br>på mobilen</span>
+    </button>
   </header>
+  <dialog class="qrbig" id="qrBig" aria-label="QR-kode">
+    <img src="qr/qr-hovedside.svg" alt="QR-kode til seiknes-ui.github.io/simmulator">
+    <p>Skann for å åpne på mobilen</p>
+    <small>seiknes-ui.github.io/simmulator · trykk hvor som helst for å lukke</small>
+  </dialog>
 
   <!-- Lenker: sett href til nettadressen når en app er lagt ut. Et kort uten href vises som «Adresse mangler». -->
 
@@ -161,6 +183,10 @@ document.querySelectorAll('a.open:not([href])').forEach(a => {
   a.textContent = 'Adresse mangler';
   a.setAttribute('aria-disabled', 'true');
 });
+// QR-koden vises stort ved klikk; klikk eller Esc lukker
+const qrBig = document.getElementById('qrBig');
+document.getElementById('qrBtn').addEventListener('click', () => qrBig.showModal());
+qrBig.addEventListener('click', () => qrBig.close());
 </script>
 </body>
 </html>
