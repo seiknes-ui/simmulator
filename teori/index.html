@@ -205,7 +205,7 @@ select{font:inherit;padding:6px 8px;border-radius:4px;border:1px solid var(--lin
       <div class="modes">
         <article class="mode">
           <div class="top"><span class="badge">FS</span><div><h3 data-i18n="factsTitle">Fagstoff</h3><p class="muted" data-i18n="factsSub">Det du må kunne, kort fortalt</p></div></div>
-          <p data-i18n="factsDesc">Faktakort for emnene du har valgt.</p>
+          <p id="factsDesc">Faktakort for emnene du har valgt.</p>
           <div class="row"><button class="btn primary" data-start="facts" data-i18n="factsBtn">Les fagstoff</button><span class="muted" id="factCount"></span></div>
         </article>
         <article class="mode">
@@ -581,6 +581,8 @@ function renderHome() {
   $('#ovCount').textContent = t('ovCount', { n: p.length, m: p.filter(q => !mastered(q)).length });
   const gaps = fp.filter(f => f.gap).length;
   $('#factCount').textContent = t('factCount', { n: fp.length }) + (gaps ? t('factGaps', { n: gaps }) : '');
+  // Bare modul 1.1 har kort merket «Ikke i lysbildene», så beskrivelsen følger modulen
+  $('#factsDesc').textContent = t(sel.mod === 'm1' ? 'factsDesc' : 'factsDesc2');
   document.querySelectorAll('[data-start]').forEach(b => b.disabled = !['match', 'plate'].includes(b.dataset.start) && !(b.dataset.start === 'facts' ? fp.length : p.length));
   $('#mastery').innerHTML = Object.entries(MODS[sel.mod].lessons).map(([n, x]) => {
     const qs = QS.filter(q => q.m === sel.mod && q.l === +n), m = qs.filter(mastered).length, pct = Math.round(100 * m / qs.length);

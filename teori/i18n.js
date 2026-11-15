@@ -16,6 +16,7 @@ I18N.ui = {
   factsTitle: { nb: 'Fagstoff', en: 'Study notes', uk: 'Навчальний матеріал' },
   factsSub: { nb: 'Det du må kunne, kort fortalt', en: 'What you need to know, in brief', uk: 'Що треба знати, коротко' },
   factsDesc: { nb: 'Faktakort for emnene du har valgt. Kort merket «Ikke i lysbildene» dekker stoff som kommer på prøven, men som presentasjonene ikke tar opp.', en: 'Fact cards for the topics you have chosen. Cards marked "Not in the slides" cover material that is on the test but not in the presentations.', uk: 'Картки з фактами за обраними темами. Картки з позначкою «Немає в презентації» містять матеріал, що є на іспиті, але не в презентаціях.' },
+  factsDesc2: { nb: 'Faktakort for emnene du har valgt, med det du må kunne til prøven.', en: 'Fact cards for the topics you have chosen, with what you need to know for the test.', uk: 'Картки з фактами за обраними темами — усе, що треба знати до іспиту.' },
   factsBtn: { nb: 'Les fagstoff', en: 'Read study notes', uk: 'Читати матеріал' },
   ovTitle: { nb: 'Øv til du kan det', en: 'Practise until you know it', uk: 'Тренуйтеся, доки не засвоїте' },
   ovSub: { nb: 'Svar og forklaring med en gang', en: 'Answer and explanation straight away', uk: 'Відповідь і пояснення одразу' },
