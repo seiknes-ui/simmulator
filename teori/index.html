@@ -242,6 +242,7 @@ select{font:inherit;padding:6px 8px;border-radius:4px;border:1px solid var(--lin
       <h2 data-i18n="hTeacher">Til læreren</h2>
       <p class="note" lang="nb">Spørsmålene er skrevet med egne ord og er ikke kopier av eksamensoppgavene. De dekker likevel hvert tema i de avsluttende teoriprøvene for 1.1 og 2.2, også temaene lysbildene ikke tar opp. Engelsk og ukrainsk oversettelse vises med den norske teksten under, siden prøven i Dugga er på norsk.</p>
       <p class="note" lang="nb">Paragrafene er kontrollert mot Lovdata i november 2026. Lysbildene oppgir at arbeidsgiver kan få fengsel inntil 3 år ved særlig skjerpende omstendigheter. Etter arbeidsmiljøloven § 19-1 er det nå inntil 5 år. Lysbildene plasserer også 17-årsregelen i forskrift om utførelse av arbeid kapittel 10, men den står i forskrift om organisering, ledelse og medvirkning § 12-7. Her brukes gjeldende regler.</p>
+      <p class="note" data-i18n="anonNote">Anonyme svar (hvilke spørsmål som besvares feil) sendes til læreren for å forbedre oppgavene. Ingen navn eller personopplysninger lagres.</p>
     </section>
   </main>
 
@@ -249,6 +250,7 @@ select{font:inherit;padding:6px 8px;border-radius:4px;border:1px solid var(--lin
 </div>
 
 <script src="i18n.js"></script>
+<script src="../kvalitet/kvalitet.js"></script>
 <script>
 // ---------- Spørsmålsbank ----------
 // Riktig svar står alltid først i o[]; rekkefølgen stokkes ved visning.
@@ -786,6 +788,7 @@ function nextPractice(run, keepScroll) {
     const i = +b.dataset.i, ok = i === 0;
     p.querySelectorAll('.opt').forEach(x => { x.disabled = true; const j = +x.dataset.i; x.classList.add(j === 0 ? 'right' : j === i ? 'wrong' : 'dim'); });
     record(q, ok);
+    kvSvar(q, i, 'øving');
     run.queue.shift(); delete q._order;
     if (ok) run.right++; else { run.wrong++; run.queue.splice(Math.min(3, run.queue.length), 0, q); }
     $('#fb').innerHTML = `<div class="fb ${ok ? 'ok' : 'no'}"><b>${ok ? t('right') : t('wrongAns') + ' ' + bi(q.o[0])}</b>${q.ex ? `<span>${bi(q.ex)}</span>` : ''}${srcHTML(q)}</div>
@@ -832,12 +835,18 @@ function showExam(run, keepScroll) {
   $('#nxt').onclick = () => { if (run.i < run.qs.length - 1) { run.i++; showExam(run); } else finishExam(run); };
   $('#hand').onclick = () => finishExam(run);
 }
+// Kvalitet: anonym logg av svar til kvalitetsdelen (se ../kvalitet/kvalitet.js). Ingen navn eller ID.
+function kv(h, d) { try { if (window.Kvalitet) Kvalitet.logg('teori', h, d); } catch (e) {} }
+// Riktig svar står alltid først i q.o, så indeks 0 er riktig. Ubesvart regnes som feil.
+const kvSvar = (q, i, kilde) => kv(i === 0 ? 'riktig' : 'feil', { k: q.id, t: q.q, a: i === 0 ? '' : i == null ? '(ubesvart)' : q.o[i], m: q.m + '.' + q.l + ' ' + kilde });
 function finishExam(run) {
   const left = run.qs.length - Object.keys(run.ans).length;
   if (left && !confirm(t('confirmHand', { n: left }))) return;
   clearInterval(run.timer);
   run.t1 = Date.now();
-  run.qs.forEach(q => record(q, run.ans[q.id] === 0));
+  run.qs.forEach(q => { record(q, run.ans[q.id] === 0); kvSvar(q, run.ans[q.id], 'prøve'); });
+  const riktige = run.qs.filter(q => run.ans[q.id] === 0).length;
+  kv('prove', { k: sel.mod, a: String(Math.round(10 * riktige / run.qs.length) * 10), m: String(run.qs.length) });
   showResult(run);
 }
 function showResult(run) {
@@ -1036,6 +1045,7 @@ function runPlate(run, keepScroll) {
     const i = +b.dataset.i, ok = i === 0;
     p.querySelectorAll('.opt').forEach(x => { x.disabled = true; const j = +x.dataset.i; x.classList.add(j === 0 ? 'right' : j === i ? 'wrong' : 'dim'); });
     if (ok) run.right++;
+    kv('skilt', { k: tk.q[0], a: ok ? 'riktig' : 'feil', m: run.p.a.k });
     run.task = null;
     $('#fb').innerHTML = `<div class="fb ${ok ? 'ok' : 'no'}"><b>${ok ? t('right') : t('wrongAns') + ' ' + q.html[0]}</b><span>${biT(...tk.ex)}</span></div>
       <div class="row" style="margin-top:10px"><button class="btn primary" id="next">${run.i < run.n - 1 ? t('next') : t('seeResult')}</button></div>`;

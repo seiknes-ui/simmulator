@@ -241,7 +241,7 @@ body.popup{padding:0;overflow:hidden}
         <span><i class="lg-dyn" id="lgDyn"></i>Der resultantkraften treffer bakken</span>
         <span><i class="lg-sup"></i>Støtteflate</span>
       </div>
-      <p class="zoomhint">Zoom med knappene eller Ctrl + rullehjul. Dra med musen for å flytte, dobbeltklikk for å tilpasse.</p>
+      <p class="zoomhint">Zoom med knappene eller Ctrl + rullehjul. Dra med musen for å flytte, dobbeltklikk for å tilpasse. Bruken (trucktype, situasjoner, utstyr og velting) sendes anonymt til læreren for å forbedre opplæringen.</p>
 
       <div class="lower">
         <div class="sheet">
@@ -357,7 +357,11 @@ body.popup{padding:0;overflow:hidden}
   </div>
 </template>
 
+<script src="../kvalitet/kvalitet.js"></script>
 <script>
+// Kvalitet: anonym logg av bruk til kvalitetsdelen (se ../kvalitet/kvalitet.js). Ingen navn eller ID.
+function kv(h, d) { try { if (window.Kvalitet) Kvalitet.logg('truck', h, d); } catch (e) {} }
+let kvVeltet = false, kvSist = 0;
 const G = 9.81, DEG = Math.PI / 180;
 const B = (x0, x1, y0, y1, z0, z1, tone, o = {}) => ({ x0, x1, y0, y1, z0, z1, tone, ...o });
 
@@ -1305,6 +1309,13 @@ function update() {
   $('sideNote').textContent = (T.id === 'th' ? 'Gaffelhøyde ' + nf(R.g.forkZ, 2) + ' m · ' : '') + (parts.length ? 'Resultanten heller ' + parts.join(' og ') : 'Resultanten peker rett ned');
 
   // velteanimasjon
+  // Kvalitet: hva fikk trucken til å velte? Logges når den går over fra stabil til velt, høyst hvert tredje sekund.
+  if (d < 0 && !kvVeltet && Date.now() - kvSist > 3000) {
+    kvSist = Date.now();
+    const arsak = [dyn.accel < 0 && 'brems', dyn.accel > 0 && 'akselerasjon', dyn.turn && 'sving', dyn.slope && 'stigning', dyn.side && 'sidehelning'].filter(Boolean).join('+') || 'stille';
+    kv('velt', { k: T.id, a: T.edges[m.i], m: arsak });
+  }
+  kvVeltet = d < 0;
   const t = d < 0 ? Math.min(22, 7 + -d * 60) * DEG : 0;
   tip.tside = t * -m.n[0]; tip.trear = t * m.n[1];
   syncBoards();
@@ -1314,7 +1325,7 @@ function update() {
 /* Kontroller */
 function buildTypes() {
   $('types').innerHTML = TYPES.map(t => `<button type="button" class="type" data-id="${t.id}" aria-pressed="${t === T}"><span class="code">${t.code}</span><span class="nm">${t.name}</span><span class="sb">${t.sub}</span></button>`).join('');
-  $('types').querySelectorAll('.type').forEach(b => b.addEventListener('click', () => selectType(b.dataset.id)));
+  $('types').querySelectorAll('.type').forEach(b => b.addEventListener('click', () => { selectType(b.dataset.id); kv('type', { k: b.dataset.id }); }));
 }
 function buildLoadCtl() {
   const g = $('loadCtl');
@@ -1357,8 +1368,8 @@ function buildEqCtl() {
     const A = FRONT[eq.front];
     $('eqFrontHint').textContent = A ? A.hint : 'Gaflene sitter rett på gaffelvogna. Lastsentrumet måles fra gaffelryggen.';
   };
-  if (sel) { hint(); sel.addEventListener('change', () => { eq.front = sel.value; hint(); update(); }); }
-  g.querySelectorAll('input[data-x]').forEach(c => c.addEventListener('change', () => { eq.x[c.dataset.x] = c.checked; update(); }));
+  if (sel) { hint(); sel.addEventListener('change', () => { eq.front = sel.value; hint(); update(); kv('utstyr', { k: eq.front, m: T.id }); }); }
+  g.querySelectorAll('input[data-x]').forEach(c => c.addEventListener('change', () => { eq.x[c.dataset.x] = c.checked; update(); if (c.checked) kv('utstyr', { k: c.dataset.x, m: T.id }); }));
 }
 function syncLoadCtl() {
   const s = st();
@@ -1395,6 +1406,7 @@ function liftTo(frac) {
   else { const r = T.ranges.lift; s.lift = +(r[0] + (r[1] - r[0]) * frac).toFixed(3); }
 }
 document.querySelectorAll('#scen button').forEach(b => b.addEventListener('click', () => {
+  kv('scenario', { k: b.dataset.s, m: T.id });
   Object.assign(states[T.id], T.def);
   Object.assign(dyn, STILL, { speed: 8, radius: 6 });
   const s = st();
