@@ -957,7 +957,31 @@ function plateTask(p) {
   // Riktig svar først, så de beste distraktorene, fylt opp fra reserven til fire ulike verdier
   const four = (r, cands, pool) => { const out = [r]; for (const v of [...cands, ...shuffle(pool)]) if (v > 0 && !out.includes(v) && out.length < 4) out.push(v); return out; };
   const A = '@' + p.a.k;
-  const kind = pick(['exact', 'exact', 'between', 'box', 'nom', 'att', 'attBox', 'attWhich']);
+  const kind = pick(['exact', 'exact', 'between', 'box', 'nom', 'att', 'attBox', 'attWhich', 'attBetween', 'attLoss', 'attMax', 'attWorst', 'attRemove']);
+  if (kind === 'attBetween') {
+    const d = pick([520, 550, 580, 650, 700, 750]), h = p.H[0] + 200 + Math.floor(Math.random() * (p.H[2] - p.H[0] - 400) / 100) * 100;
+    const hI = upIdx(p.H, h), dI = upIdx(p.D, d), r = p.att[hI][dI];
+    // Typiske feil: runder ned i stedet for opp, eller bruker standardtabellen
+    return { q: ['tAttBetween', { a: A, d, h }], ...kg(four(r, [p.att[Math.max(0, hI - 1)][Math.max(0, dI - 1)], p.vert[hI][dI]], p.att.flat())), ex: ['tAttBetweenEx', { d: p.D[dI], h: p.H[hI] }] };
+  }
+  if (kind === 'attLoss') {
+    // Typisk feil: tror tapet er lik utstyrets egenvekt. Utstyret flytter også lasten fram.
+    const v = p.vert[hi][di], c = p.att[hi][di], r = v - c, other = p.vert[(hi + 1) % 3][(di + 1) % 3] - p.att[(hi + 1) % 3][(di + 1) % 3];
+    return { q: ['tLoss', { a: A, m: p.a.m, d: p.D[di], h: p.H[hi] }], ...kg(four(r, [p.a.m, other, round10(r / 2)], p.att.flat().map(x => round10(x / 4)))), ex: ['tLossEx', { v, c, r, m: p.a.m }] };
+  }
+  if (kind === 'attMax') {
+    const L = pick([1000, 1200, 1600]), d = L / 2, dI = upIdx(p.D, d), r = p.att[hi][dI];
+    // Typiske feil: bruker hele kasselengden som tyngdepunktavstand, eller standardtabellen
+    return { q: ['tAttMax', { a: A, l: L, h: p.H[hi] }], ...kg(four(r, [p.att[hi][2], p.vert[hi][dI], p.att[(hi + 1) % 3][dI]], p.att.flat())), ex: ['tAttBoxEx', { a: A, d, dd: p.D[dI], c: r, h: p.H[hi] }] };
+  }
+  if (kind === 'attWorst') {
+    // Regner med samme modell som skiltet og spør hvilket av fire utstyr som gir lavest kapasitet
+    const d = p.D[di], four4 = shuffle(PLATE_ATT).slice(0, 4);
+    const cap = x => (p.nom * 950 - x.m * (450 + x.arm)) / (450 + x.off + d);
+    const worst = four4.reduce((a, b) => cap(b) < cap(a) ? b : a);
+    return { q: ['tWorst', { d, nom: p.nom }], keys: [worst, ...four4.filter(x => x !== worst)].map(x => 'o' + x.k.slice(1)), ex: ['tWorstEx', { a: '@' + worst.k }] };
+  }
+  if (kind === 'attRemove') return { q: ['tRemove', { a: A }], keys: ['rStd', 'rAtt', 'rLow', 'rNom'], ex: ['tRemoveEx', {}] };
   if (kind === 'exact') { const r = p.vert[hi][di]; return { q: ['tExact', { d: p.D[di], h: p.H[hi] }], ...kg([r, ...near(p.vert, r)]), ex: ['tExactEx', { d: p.D[di], h: p.H[hi] }] }; }
   if (kind === 'att') {
     // Typiske feil: leser standardtabellen, eller feil rad eller kolonne i tilleggsskiltet
