@@ -10,7 +10,7 @@
   --accent:#D49500; --accent-soft:rgba(212,149,0,.18); --accent-ink:#6B4C00;
   --ok:#1D7A4C; --warn:#B26600; --bad:#C0352B;
   --t-body:#3F5661; --t-dark:#27343B; --t-cw:#1C2428; --t-mast:#6C7E87; --t-mast2:#8B9BA3;
-  --t-fork:#2E393F; --t-load:#C79A63; --t-pallet:#8E6A42; --t-guard:#27343B;
+  --t-fork:#2E393F; --t-load:#C79A63; --t-pallet:#8E6A42; --t-guard:#27343B; --t-att:#B4532A;
   --tire:#1A1F21; --hub:#A3AEB3; --edge:rgba(0,0,0,.32);
   --f-display:'Barlow Condensed','Arial Narrow',sans-serif;
   --f-body:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
@@ -22,7 +22,7 @@
     --accent:#F0B21A; --accent-soft:rgba(240,178,26,.16); --accent-ink:#F5C54A;
     --ok:#4CC38A; --warn:#F0A030; --bad:#FF6B5E;
     --t-body:#5C7885; --t-dark:#3B4B53; --t-cw:#2C383E; --t-mast:#81939C; --t-mast2:#9CADB5;
-    --t-fork:#A8B5BB; --t-load:#C99A62; --t-pallet:#98724A; --t-guard:#8EA0A9;
+    --t-fork:#A8B5BB; --t-load:#C99A62; --t-pallet:#98724A; --t-guard:#8EA0A9; --t-att:#D0784F;
     --tire:#0A0D0E; --hub:#6E7B81; --edge:rgba(0,0,0,.55);
     color-scheme:dark;
   }
@@ -32,7 +32,7 @@
   --accent:#F0B21A; --accent-soft:rgba(240,178,26,.16); --accent-ink:#F5C54A;
   --ok:#4CC38A; --warn:#F0A030; --bad:#FF6B5E;
   --t-body:#5C7885; --t-dark:#3B4B53; --t-cw:#2C383E; --t-mast:#81939C; --t-mast2:#9CADB5;
-  --t-fork:#A8B5BB; --t-load:#C99A62; --t-pallet:#98724A; --t-guard:#8EA0A9;
+  --t-fork:#A8B5BB; --t-load:#C99A62; --t-pallet:#98724A; --t-guard:#8EA0A9; --t-att:#D0784F;
   --tire:#0A0D0E; --hub:#6E7B81; --edge:rgba(0,0,0,.55);
   color-scheme:dark;
 }
@@ -74,6 +74,16 @@ input[type=range]:disabled{opacity:.4}
 .seg button+button{border-left:1px solid var(--line)}
 .seg button[aria-pressed="true"]{background:var(--ink);color:var(--sheet);font-weight:600}
 .seg button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+select{width:100%;font:inherit;font-size:13px;padding:6px 8px;border:1px solid var(--line);border-radius:4px;background:var(--sheet);color:var(--ink)}
+select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.chk{display:grid;gap:8px}
+.eqx{display:grid;grid-template-columns:auto 1fr;gap:2px 8px;align-items:start;cursor:pointer;font-size:13px}
+.eqx input{accent-color:var(--accent);margin:3px 0 0;width:15px;height:15px}
+.eqx b{font-weight:500}
+.eqx em{font-style:normal;font-family:var(--f-mono);font-size:12px;color:var(--muted);margin-left:4px}
+.eqx small{display:block;color:var(--muted);font-size:11.5px;line-height:1.3}
+.eqsum{margin:0;font-size:12.5px;line-height:1.4;padding:8px 10px;border-left:3px solid var(--accent);background:var(--accent-soft)}
+.eqsum b{font-family:var(--f-mono);font-weight:500}
 .scen{display:grid;grid-template-columns:1fr 1fr;gap:6px}
 .scen button{all:unset;cursor:pointer;padding:7px 9px;border:1px solid var(--line);border-radius:4px;font-size:12.5px;line-height:1.25;background:var(--sheet)}
 .scen button:hover{border-color:var(--accent)}
@@ -249,6 +259,7 @@ body.popup{padding:0;overflow:hidden}
           <p><b>Felles tyngdepunkt.</b> Trucken og lasten har hvert sitt tyngdepunkt. Sammen virker de som én masse i et felles punkt som ligger på linjen mellom dem, nærmest den tyngste delen. Jo høyere og lenger ut lasten er, jo høyere og lenger fram flytter det felles tyngdepunktet seg.</p>
           <p><b>Støtteflate.</b> Trucken står stødig så lenge loddlinjen fra det felles tyngdepunktet treffer innenfor flaten mellom hjulenes kontaktpunkter. Motvektstruck og teleskoptruck har pendelaksel bak, så støtteflaten blir et stabilitetstriangel som er smalest bak.</p>
           <p><b>Kjøring.</b> Brems, sving og helning legger til krefter som vipper resultanten. Forskyvningen langs bakken er tyngdepunktets høyde ganger forholdet mellom sidekraft og tyngdekraft. Derfor tåler trucken mye mindre med hevet last.</p>
+          <p><b>Ekstrautstyr.</b> Utstyr foran på gaffelvogna veier selv og skyver lasten lenger fram. Både utstyret og lasten virker da på en lengre arm foran tippekanten, så restkapasiteten blir lavere. Truck med slikt utstyr skal ha et eget kapasitetsskilt for kombinasjonen. Ekstra motvekt og bredere hjulsett gir mer stabilitet, et lettere batteri gir mindre.</p>
         </div>
       </div>
     </main>
@@ -257,6 +268,7 @@ body.popup{padding:0;overflow:hidden}
       <div class="group" id="loadCtl" style="border-top:none;margin-top:0;padding-top:0">
         <h2>Last og løft</h2>
       </div>
+      <div class="group" id="eqCtl"></div>
       <div class="group">
         <h2>Kjøring og underlag</h2>
         <div class="ctl">
@@ -381,6 +393,76 @@ function forks(face, lift, len, yIn, yOut, o = {}) {
   return [B(face, face + len, yIn, yOut, lift - 0.05, lift, 'fork', o), B(face, face + len, -yOut, -yIn, lift - 0.05, lift, 'fork', o)];
 }
 
+/* Ekstrautstyr. Typiske verdier: m = egenvekt (kg), off = hvor mye lasten skyves fram (m), cz = høyde over gaffeltopp for utstyrets tyngdepunkt */
+const FRONT = {
+  side: { n: 'Påbygd sideforskyver', m: 90, off: 0.1, cz: 0.4, on: ['t2', 't4', 'th'],
+    hint: 'Henges utenpå gaffelvogna. Bygger ca. 100 mm, så lasten kommer lenger fram.' },
+  pos: { n: 'Gaffelposisjonerer', m: 200, off: 0.13, cz: 0.35, on: ['t2', 't4', 'th'],
+    hint: 'Justerer gaffelavstanden hydraulisk. Tung og bygger ca. 130 mm.' },
+  rot: { n: 'Rotator', m: 380, off: 0.22, cz: 0.4, on: ['t4', 'th'],
+    hint: 'Dreier gaflene for å tømme kasser. Bygger ca. 220 mm og veier mye.' },
+  clamp: { n: 'Balleklemme', m: 650, off: 0.32, cz: 0.3, clamp: true, on: ['t4'],
+    hint: 'Klemmer lasten uten pall. De tunge armene ligger langt fram, langs hele lasten.' },
+  ext: { n: 'Gaffelforlengere', m: 140, off: 0, ext: 0.6, shift: 0.3, cz: -0.03, on: ['t2', 't3', 't4', 'th'],
+    hint: 'Tres utenpå gaflene for lange laster. Lasten havner gjerne 300 mm lenger ut, og forlengerne veier selv.' }
+};
+const EXTRA = {
+  cw: { n: 'Ekstra motvekt', hint: 'Mer vekt bak tippekanten gir høyere kapasitet, men også høyere akseltrykk og mer belastning på bakken.',
+    on: { t4: { m: 300, p: [-2.38, 0, 0.75], box: B(-2.45, -2.3, -0.5, 0.5, 0.3, 1.2, 'cw') },
+          th: { m: 500, p: [-3.9, 0, 1.0], box: B(-4.0, -3.8, -0.55, 0.55, 0.55, 1.45, 'cw') } } },
+  cab: { n: 'Lukket førerhus', hint: 'Tak, dører og vinduer veier mye og sitter høyt. Det løfter tyngdepunktet, men ligger bak framakselen.',
+    on: { t4: { m: 220, p: [-0.65, 0, 1.95], box: B(-1.45, 0.15, -0.53, 0.53, 2.08, 2.18, 'dark') } } },
+  batt: { n: 'Lettere batteri', hint: 'Gjelder eltruck. Batteriet er en del av motvekten. Et lettere litiumbatteri uten ballast gir lavere kapasitet.',
+    on: { t1: { m: -60, p: [-0.3, 0, 0.35] }, t2: { m: -250, p: [-0.15, 0, 0.5] }, t3: { m: -400, p: [-1.0, 0, 0.5] }, t4: { m: -350, p: [-1.0, 0, 0.6] } } },
+  twin: { n: 'Tvillinghjul foran', hint: 'Doble hjul på framakselen gjør stabilitetstriangelet bredere foran, så trucken tåler mer sidekraft.',
+    on: { t4: { m: 140, p: [0, 0, 0.32], twin: 0.72 } } }
+};
+const NOEQ = { front: 'none', x: {} };
+// Trekker trucken med tilleggsutstyr: ekstra masser, ekstra deler og eventuelt endret støtteflate
+function rig(type, s) {
+  const eq = s.eq || NOEQ;
+  let support = type.support, wheels = type.wheels, body = type.body;
+  const comps = [];
+  for (const k of Object.keys(EXTRA)) {
+    const e = EXTRA[k].on[type.id];
+    if (!eq.x[k] || !e) continue;
+    comps.push({ n: EXTRA[k].n, m: e.m, p: e.p, kind: 'part', eq: true });
+    if (e.box) body = [...body, e.box];
+    if (e.twin) {
+      const xf0 = Math.max(...support.map(p => p[0]));
+      support = support.map(p => p[0] === xf0 ? [p[0], Math.sign(p[1]) * e.twin] : p);
+      wheels = [...wheels, { x: xf0, y: e.twin, r: 0.32, w: 0.2 }, { x: xf0, y: -e.twin, r: 0.32, w: 0.2 }];
+    }
+  }
+  return { support, wheels, body, comps };
+}
+// Gafler, eventuelt utstyr og last foran gaffelvogna
+function front(st, face, lift, fl, yIn, yOut, wid, o = {}) {
+  const A = FRONT[(st.eq || NOEQ).front], off = A ? A.off : 0, f2 = face + off;
+  const parts = [], comps = [];
+  if (A && off) parts.push(B(face, f2, -0.46, 0.46, lift - 0.08, lift + 0.85, 'att', o));
+  let L;
+  if (A && A.clamp) {
+    L = loadBoxes(f2, lift - 0.09, st.lc, st.lh, wid, o);
+    L.parts = L.parts.filter(b => b.tone !== 'pallet');
+    const ay = wid / 2, az = lift + Math.max(0.35, st.lh * 0.75);
+    parts.push(B(f2, f2 + 2 * st.lc, ay + 0.01, ay + 0.07, lift + 0.05, az, 'att', o), B(f2, f2 + 2 * st.lc, -ay - 0.07, -ay - 0.01, lift + 0.05, az, 'att', o));
+  } else {
+    L = loadBoxes(f2 + (A && A.shift || 0), lift, st.lc, st.lh, wid, o);
+    parts.push(...forks(f2, lift, fl, yIn, yOut, o));
+    if (A && A.ext) parts.push(
+      B(f2 + fl - 0.5, f2 + fl + A.ext, yIn - 0.01, yOut + 0.01, lift - 0.065, lift + 0.01, 'att', o),
+      B(f2 + fl - 0.5, f2 + fl + A.ext, -yOut - 0.01, -yIn + 0.01, lift - 0.065, lift + 0.01, 'att', o));
+  }
+  if (A) {
+    const cx = A.clamp ? off + st.lc : A.ext ? fl + 0.05 : off / 2;
+    comps.push({ n: A.n, m: A.m, p: xf([face + cx, 0, lift + A.cz], o), kind: 'part', eq: true });
+  }
+  parts.push(...L.parts);
+  comps.push({ n: 'Last', m: st.mass, p: L.cog, kind: 'load', load: true });
+  return { parts, comps };
+}
+
 /* Trucktyper. Koordinater i meter: x fram, y mot venstre, z opp. Origo på bakken. */
 const TYPES = [
   {
@@ -436,18 +518,18 @@ const TYPES = [
     comps: [{ n: 'Truck', m: 2550, p: [0.08, 0, 0.55], kind: 'truck' }, { n: 'Fører', m: 85, p: [0, 0, 1.35], kind: 'part' }],
     geom(st) {
       const mx = 0.62 + st.reach, face = mx + 0.2, top = Math.max(2.5, st.lift + 1.25);
-      const L = loadBoxes(face, st.lift, st.lc, st.lh, 0.8);
+      const F = front(st, face, st.lift, 1.15, 0.14, 0.26, 0.8);
       return {
         parts: [
           B(mx, mx + 0.13, -0.38, 0.38, 0.1, 2.5, 'mast'),
           B(mx + 0.03, mx + 0.15, -0.32, 0.32, top - 2.4, top, 'mast2'),
           B(face - 0.06, face, -0.42, 0.42, st.lift - 0.05, st.lift + 0.95, 'dark'),
-          ...forks(face, st.lift, 1.15, 0.14, 0.26), ...L.parts
+          ...F.parts
         ],
         comps: [
           { n: 'Mast', m: 650, p: [mx + 0.08, 0, (top + 0.1) / 2], kind: 'part' },
           { n: 'Gaffelvogn', m: 180, p: [face - 0.03, 0, st.lift + 0.4], kind: 'part' },
-          { n: 'Last', m: st.mass, p: L.cog, kind: 'load', load: true }
+          ...F.comps
         ],
         forkZ: st.lift
       };
@@ -473,19 +555,19 @@ const TYPES = [
     geom(st) {
       const top = Math.max(3.2, st.lift + 1.4), hp = [0.95, 0], o = { yaw: st.rot * DEG, yawPivot: hp };
       const face = hp[0] + 0.12;
-      const L = loadBoxes(face, st.lift, st.lc, st.lh, 0.8, o);
+      const F = front(st, face, st.lift, 1.15, 0.14, 0.26, 0.8, o);
       return {
         parts: [
           B(0.2, 0.45, -0.55, 0.55, 0.1, 3.2, 'mast'),
           B(0.24, 0.47, -0.48, 0.48, top - 3.0, top, 'mast2'),
           B(0.47, 0.88, -0.5, 0.5, st.lift + 0.05, st.lift + 1.0, 'dark'),
           B(hp[0] + 0.05, face, -0.42, 0.42, st.lift - 0.05, st.lift + 0.9, 'dark', o),
-          ...forks(face, st.lift, 1.15, 0.14, 0.26, o), ...L.parts
+          ...F.parts
         ],
         comps: [
           { n: 'Mast', m: 900, p: [0.33, 0, (top + 0.1) / 2], kind: 'part' },
           { n: 'Svinggaffelhode', m: 450, p: [0.8, 0, st.lift + 0.45], kind: 'part' },
-          { n: 'Last', m: st.mass, p: L.cog, kind: 'load', load: true }
+          ...F.comps
         ],
         forkZ: st.lift
       };
@@ -515,18 +597,18 @@ const TYPES = [
     comps: [{ n: 'Truck', m: 3300, p: [-1.0, 0, 0.72], kind: 'truck' }, { n: 'Fører', m: 85, p: [-0.85, 0, 1.3], kind: 'part' }],
     geom(st) {
       const pv = [0.4, 0.45], o = { pitch: st.tilt * DEG, pivot: pv }, face = 0.53, top = Math.max(2.15, st.lift + 1.1);
-      const L = loadBoxes(face, st.lift, st.lc, st.lh, 0.8, o);
+      const F = front(st, face, st.lift, 1.15, 0.18, 0.3, 0.8, o);
       return {
         parts: [
           B(0.33, 0.45, -0.36, 0.36, 0.12, 2.15, 'mast', o),
           B(0.36, 0.47, -0.3, 0.3, top - 2.03, top, 'mast2', o),
           B(0.47, face, -0.46, 0.46, st.lift - 0.05, st.lift + 0.95, 'dark', o),
-          ...forks(face, st.lift, 1.15, 0.18, 0.3, o), ...L.parts
+          ...F.parts
         ],
         comps: [
           { n: 'Mast', m: 450, p: xf([0.4, 0, (top + 0.12) / 2], o), kind: 'part' },
           { n: 'Gaffelvogn', m: 150, p: xf([0.5, 0, st.lift + 0.4], o), kind: 'part' },
-          { n: 'Last', m: st.mass, p: L.cog, kind: 'load', load: true }
+          ...F.comps
         ],
         forkZ: st.lift
       };
@@ -599,19 +681,19 @@ const TYPES = [
       const pv = [-3.0, 1.45], L = st.boomL, o = { pitch: -st.boomA * DEG, pivot: pv };
       const tip = xf([pv[0] + L, 0, pv[1]], o);
       const fz = Math.max(0.05, tip[2] - 1.05), face = tip[0] + 0.2;
-      const LB = loadBoxes(face, fz, st.lc, st.lh, 1.0);
+      const F = front(st, face, fz, 1.2, 0.3, 0.42, 1.0);
       return {
         parts: [
           B(pv[0] - 0.2, pv[0] + 5.0, -0.22, 0.22, pv[1] - 0.25, pv[1] + 0.25, 'mast', o),
           B(pv[0] + L - 4.6, pv[0] + L + 0.1, -0.17, 0.17, pv[1] - 0.19, pv[1] + 0.19, 'mast2', o),
           B(tip[0] - 0.05, tip[0] + 0.15, -0.15, 0.15, fz + 1.0, tip[2] + 0.1, 'dark'),
           B(tip[0] + 0.1, face, -0.6, 0.6, fz - 0.05, fz + 1.1, 'dark'),
-          ...forks(face, fz, 1.2, 0.3, 0.42), ...LB.parts
+          ...F.parts
         ],
         comps: [
           { n: 'Bom', m: 1650, p: xf([pv[0] + L * 0.45, 0, pv[1]], o), kind: 'part' },
           { n: 'Gaffelvogn', m: 280, p: [tip[0] + 0.3, 0, fz + 0.5], kind: 'part' },
-          { n: 'Last', m: st.mass, p: LB.cog, kind: 'load', load: true }
+          ...F.comps
         ],
         forkZ: fz
       };
@@ -636,7 +718,7 @@ const TYPE_STEPS = { t1: { lift: 0.005 } };
 
 const dyn = { accel: 0, speed: 8, radius: 6, turn: 0, slope: 0, side: 0 };
 const states = {};
-TYPES.forEach(t => states[t.id] = { ...t.def });
+TYPES.forEach(t => states[t.id] = { ...t.def, eq: { front: 'none', x: {} } });
 let T = TYPES[3];
 const st = () => states[T.id];
 
@@ -670,8 +752,8 @@ function rangeAt(poly, axis, val) {
 }
 const STILL = { accel: 0, speed: 0, radius: 6, turn: 0, slope: 0, side: 0 };
 function analyze(type, s, opt = {}) {
-  const g = type.geom(s);
-  const comps = [...type.comps.map(c => ({ ...c })), ...g.comps];
+  const g = type.geom(s), rg = rig(type, s);
+  const comps = [...type.comps.map(c => ({ ...c })), ...rg.comps, ...g.comps];
   if (opt.mass != null) comps.forEach(c => { if (c.load) c.m = opt.mass; });
   let M = 0, cx = 0, cy = 0, cz = 0;
   for (const c of comps) { M += c.m; cx += c.m * c.p[0]; cy += c.m * c.p[1]; cz += c.m * c.p[2]; }
@@ -684,7 +766,7 @@ function analyze(type, s, opt = {}) {
   const k = C[2] / -ez, kg = C[2] / -gz;
   const P = [C[0] + k * ex, C[1] + k * ey];
   const Pg = [C[0] + kg * gx, C[1] + kg * gy];
-  return { g, comps, M, C, P, Pg, ex, ey, ez, gx, gy, gz, ay, margin: polyMargin(P, type.support) };
+  return { g, rig: rg, comps, M, C, P, Pg, ex, ey, ez, gx, gy, gz, ay, margin: polyMargin(P, rg.support) };
 }
 function maxLoad(type, s, still) {
   const U = type.rated.m * 4;
@@ -704,7 +786,7 @@ let colors = {};
 function readColors() {
   const cs = getComputedStyle(document.documentElement);
   ['bg', 'sheet', 'ink', 'muted', 'line', 'grid', 'accent', 'accent-soft', 'accent-ink', 'ok', 'warn', 'bad',
-    't-body', 't-dark', 't-cw', 't-mast', 't-mast2', 't-fork', 't-load', 't-pallet', 't-guard', 'tire', 'hub', 'edge']
+    't-body', 't-dark', 't-cw', 't-mast', 't-mast2', 't-fork', 't-load', 't-pallet', 't-guard', 't-att', 'tire', 'hub', 'edge']
     .forEach(k => colors[k] = cs.getPropertyValue('--' + k).trim());
 }
 const PJ = { side: p => [p[0], p[2]], top: p => [p[0], p[1]], rear: p => [-p[1], p[2]] };
@@ -879,7 +961,7 @@ function drawSideOrRear(kind, c, w, h) {
   ctx.translate(px0, py0); ctx.rotate(ang); ctx.translate(-px0, -py0);
   drawGround(ctx, M, w);
   // støtteflate langs bakken på tvers av tyngdepunktet
-  const poly = T.support, P = R.P;
+  const poly = R.rig.support, P = R.P;
   if (side) {
     const ys = poly.map(p => p[1]), yq = Math.max(Math.min(...ys) + 1e-6, Math.min(Math.max(...ys) - 1e-6, P[1]));
     const r = rangeAt(poly, 1, yq); if (r) drawSupportBar(ctx, M, r[0], r[1]);
@@ -892,11 +974,11 @@ function drawSideOrRear(kind, c, w, h) {
   const pivX = side ? M.X(q[0]) : M.X(-q[1]);
   ctx.translate(pivX, py0); ctx.rotate(side ? tip.side : tip.rear); ctx.translate(-pivX, -py0);
 
-  const items = [...T.body, ...R.g.parts].map(b => ({ b, c: center(b) }));
-  T.wheels.forEach(wh => items.push({ wh, c: [wh.x, wh.y, wh.r] }));
+  const items = [...R.rig.body, ...R.g.parts].map(b => ({ b, c: center(b) }));
+  R.rig.wheels.forEach(wh => items.push({ wh, c: [wh.x, wh.y, wh.r] }));
   const depth = side ? it => it.c[1] : it => it.c[0];
   items.sort((a, b) => depth(b) - depth(a));
-  const xs = T.wheels.map(wh => wh.x), xmid = (Math.min(...xs) + Math.max(...xs)) / 2;
+  const xs = R.rig.wheels.map(wh => wh.x), xmid = (Math.min(...xs) + Math.max(...xs)) / 2;
   for (const it of items) {
     if (it.wh) drawWheel(ctx, it.wh, kind, M, side ? it.wh.y > 0.01 : it.wh.x > xmid);
     else drawBox(ctx, it.b, kind, M);
@@ -933,15 +1015,15 @@ function drawTop(c, w, h) {
   const M = viewMap('top', w, h, K); c._M = M;
   ctx.fillStyle = colors.sheet; ctx.fillRect(0, 0, w, h);
   drawGrid(ctx, M, w, h, 'top');
-  const poly = T.support, sc = statusColor();
+  const poly = R.rig.support, sc = statusColor();
   const P2 = p => [M.X(p[0]), M.Y(p[1])];
   ctx.save();
   ctx.beginPath(); poly.forEach((p, i) => { const s = P2(p); i ? ctx.lineTo(s[0], s[1]) : ctx.moveTo(s[0], s[1]); }); ctx.closePath();
   ctx.fillStyle = colors['accent-soft']; ctx.fill(); ctx.strokeStyle = colors.accent; ctx.lineWidth = 2 * K; ctx.stroke();
   ctx.restore();
   // kropp gjennomsiktig, hjul tydelig, så bevegelige deler
-  T.body.slice().sort((a, b) => a.z1 - b.z1).forEach(b => drawBox(ctx, b, 'top', M, 0.35));
-  T.wheels.forEach(wh => drawWheel(ctx, wh, 'top', M, false));
+  R.rig.body.slice().sort((a, b) => a.z1 - b.z1).forEach(b => drawBox(ctx, b, 'top', M, 0.35));
+  R.rig.wheels.forEach(wh => drawWheel(ctx, wh, 'top', M, false));
   R.g.parts.slice().sort((a, b) => center(a)[2] - center(b)[2]).forEach(b => drawBox(ctx, b, 'top', M, b.tone === 'load' || b.tone === 'pallet' ? 0.55 : 0.85));
   // nærmeste tippekant
   const e = R.margin, a = poly[e.i], b = poly[(e.i + 1) % poly.length];
@@ -1049,6 +1131,8 @@ function dynSummary() {
   if (dyn.slope) p.push('stigning ' + DYN_FMT.slope(dyn.slope));
   if (dyn.side) p.push('sidehelning ' + DYN_FMT.side(dyn.side));
   if (!dyn.accel && !dyn.turn && !dyn.slope && !dyn.side) p.push('står stille på plant underlag');
+  const eqn = eqNames();
+  if (eqn.length) p.push('med ' + eqn.join(', '));
   return p.join(' · ');
 }
 function syncBoards() {
@@ -1190,6 +1274,15 @@ function update() {
   const fm = r => r.over ? '> ' + nf(r.v) + ' kg' : nf(Math.floor(r.v / 10) * 10) + ' kg';
   $('rMax').textContent = fm(md);
   $('rMaxSub').textContent = (md.none ? 'Velter uten last. ' : '') + 'Stillestående og plant: ' + fm(ms) + '. Merkelast ' + nf(T.rated.m) + ' kg ved ' + nf(T.rated.lc * 1000) + ' mm.';
+  if (!$('eqCtl').hidden) {
+    const names = eqNames();
+    if (!names.length) $('eqSum').innerHTML = 'Velg utstyr for å se hvordan det endrer kapasiteten.';
+    else {
+      const m0 = maxLoad(T, { ...st(), eq: NOEQ }, true), dm = Math.floor(ms.v / 10) * 10 - Math.floor(m0.v / 10) * 10;
+      $('eqSum').innerHTML = `Største last stillestående og plant med denne løftehøyden og dette lastsentrumet:<br>uten utstyr <b>${fm(m0)}</b>, med utstyr <b>${fm(ms)}</b> `
+        + (ms.over || m0.over ? '' : `(<b>${dm > 0 ? '+' : dm < 0 ? '−' : '±'}${nf(Math.abs(dm))} kg</b>)`);
+    }
+  }
 
   // tabell
   const rows = R.comps.map(c => `<tr><td>${c.n}</td><td>${nf(c.m)}</td><td>${nf(c.p[0], 2)}</td><td>${nf(c.p[1], 2)}</td><td>${nf(c.p[2], 2)}</td></tr>`).join('');
@@ -1197,7 +1290,7 @@ function update() {
     <tr class="tot"><td>Felles</td><td>${nf(R.M)}</td><td>${nf(R.C[0], 2)}</td><td>${nf(R.C[1], 2)}</td><td>${nf(R.C[2], 2)}</td></tr></tbody>`;
 
   // fordeling foran/bak ut fra resultantens treffpunkt
-  const xs = T.support.map(p => p[0]), xf_ = Math.max(...xs), xr = Math.min(...xs);
+  const xs = R.rig.support.map(p => p[0]), xf_ = Math.max(...xs), xr = Math.min(...xs);
   const fr = (R.P[0] - xr) / (xf_ - xr), frc = Math.max(0, Math.min(1, fr));
   $('axF').style.width = (frc * 100) + '%'; $('axR').style.width = ((1 - frc) * 100) + '%';
   $('axF').textContent = frc > 0.12 ? 'Foran ' + nf(frc * 100) + ' %' : '';
@@ -1238,6 +1331,35 @@ function buildLoadCtl() {
     inp.addEventListener('input', () => { s[k] = +inp.value; out.textContent = c.fmt(s[k]); update(); });
   }
 }
+function eqNames() {
+  const eq = st().eq, out = [];
+  const A = FRONT[eq.front]; if (A && A.on.includes(T.id)) out.push(A.n.toLowerCase());
+  for (const k of Object.keys(EXTRA)) if (eq.x[k] && EXTRA[k].on[T.id]) out.push(EXTRA[k].n.toLowerCase());
+  return out;
+}
+function buildEqCtl() {
+  const g = $('eqCtl'), eq = st().eq;
+  const fr = Object.entries(FRONT).filter(([, a]) => a.on.includes(T.id));
+  const ex = Object.entries(EXTRA).filter(([, e]) => e.on[T.id]);
+  g.hidden = !fr.length && !ex.length;
+  if (g.hidden) { g.innerHTML = ''; return; }
+  const kg = m => (m > 0 ? '+' : '−') + nf(Math.abs(m)) + ' kg';
+  let h = '<h2>Ekstrautstyr</h2>';
+  if (fr.length) h += `<div class="ctl"><label for="eqFront">Utstyr på gaffelvogna</label>
+    <select id="eqFront"><option value="none">Ingen, vanlige gafler</option>${fr.map(([k, a]) => `<option value="${k}"${eq.front === k ? ' selected' : ''}>${a.n} (${kg(a.m)})</option>`).join('')}</select>
+    <small id="eqFrontHint"></small></div>`;
+  if (ex.length) h += `<div class="chk">${ex.map(([k, e]) => `<label class="eqx"><input type="checkbox" data-x="${k}"${eq.x[k] ? ' checked' : ''}>
+    <span><b>${e.n}</b><em>${kg(e.on[T.id].m)}</em><small>${e.hint}</small></span></label>`).join('')}</div>`;
+  h += '<p class="eqsum" id="eqSum"></p>';
+  g.innerHTML = h;
+  const sel = $('eqFront');
+  const hint = () => {
+    const A = FRONT[eq.front];
+    $('eqFrontHint').textContent = A ? A.hint : 'Gaflene sitter rett på gaffelvogna. Lastsentrumet måles fra gaffelryggen.';
+  };
+  if (sel) { hint(); sel.addEventListener('change', () => { eq.front = sel.value; hint(); update(); }); }
+  g.querySelectorAll('input[data-x]').forEach(c => c.addEventListener('change', () => { eq.x[c.dataset.x] = c.checked; update(); }));
+}
 function syncLoadCtl() {
   const s = st();
   for (const k of T.ctrl) { $('c-' + k).value = s[k]; $('o-' + k).textContent = CTL[k].fmt(s[k]); }
@@ -1248,7 +1370,7 @@ function selectType(id) {
   resetZoom();
   $('types').querySelectorAll('.type').forEach(b => b.setAttribute('aria-pressed', b.dataset.id === id));
   $('typeNote').textContent = T.note;
-  buildLoadCtl(); update();
+  buildLoadCtl(); buildEqCtl(); update();
 }
 const DYN_FMT = {
   accel: v => v === 0 ? 'jevn fart' : nf(v, 1) + ' m/s² ' + (v < 0 ? '(brems)' : ''),
