@@ -159,6 +159,43 @@ button{font:inherit;color:inherit}
 .eq.wrong{border-color:var(--bad);background:var(--bad-soft)}
 .calc{font-size:14px;display:grid;gap:2px}
 .navrow #hand{margin-left:auto}
+/* Merk bilen */
+.views{display:grid;gap:10px;max-width:760px}
+.view{margin:0;background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:6px;display:grid;gap:2px}
+.view svg{width:100%;height:auto;display:block}
+.view figcaption{font-size:12px;color:var(--muted);text-align:center}
+.ends{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.slot{cursor:pointer}
+.slot:focus{outline:none}
+.slot .hit{fill:rgba(255,255,255,.04);stroke:var(--muted);stroke-dasharray:6 5;stroke-width:2.5}
+.slot:hover .hit,.slot:focus-visible .hit{stroke:var(--accent);stroke-width:4}
+.slot.ok .hit{stroke:var(--ok);stroke-dasharray:none;stroke-width:5}
+.slot.bad .hit{stroke:var(--bad);stroke-dasharray:none;stroke-width:5}
+.pal{display:flex;flex-wrap:wrap;gap:8px}
+.pal button{all:unset;cursor:pointer;display:grid;justify-items:center;align-content:start;gap:4px;padding:8px 6px;border:1px solid var(--line);border-radius:4px;background:var(--bg);font-size:12px;line-height:1.25;width:86px;text-align:center}
+.pal button svg{width:56px;height:44px}
+.pal button[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 2px var(--accent);background:var(--accent-soft)}
+.pal button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.pal button[disabled]{opacity:.5;cursor:default}
+/* Ulykke på vegen */
+.acc svg{width:100%;height:auto;display:block;border-radius:4px}
+.steps{display:flex;flex-wrap:wrap;gap:4px}
+.steps i{flex:1 1 20px;height:6px;border-radius:3px;background:var(--line)}
+.steps i.ok{background:var(--ok)}.steps i.no{background:var(--bad)}.steps i.cur{background:var(--accent)}
+@keyframes blink{50%{opacity:.1}}
+@keyframes drift{from{transform:translate(0,0);opacity:.85}to{transform:translate(var(--dx),-40px);opacity:0}}
+@keyframes grow{from{transform:scale(.3)}to{transform:scale(1)}}
+@keyframes flick{50%{transform:scaleY(.75)}}
+@keyframes puff{from{transform:translate(0,0);opacity:.6}to{transform:translate(-14px,-40px);opacity:0}}
+@keyframes drive{from{transform:translateX(var(--from))}to{transform:translateX(0)}}
+.blink{animation:blink 1s steps(1) infinite}
+.drift{animation:drift 4.5s linear infinite}
+.grow{transform-box:fill-box;transform-origin:center;animation:grow 5s ease-out forwards}
+.flick{transform-box:fill-box;transform-origin:bottom;animation:flick .35s ease-in-out infinite}
+.puff{animation:puff 1.6s linear infinite}
+.drive{animation:drive 2.2s ease-out}
+.walker{transition:transform 1.6s ease-in-out}
+@media (prefers-reduced-motion:reduce){.blink,.drift,.grow,.flick,.puff,.drive{animation:none}.walker{transition:none}}
 @media (max-width:560px){
   .quiz{padding:14px;gap:12px}
   .qtext{font-size:18px}
@@ -213,15 +250,15 @@ const EMNER = {
   m: 'Håndtering og stuing av kolli', n: 'Tunneler', o: 'Sikring (security)'
 };
 const STATIONS = [
-  { id: 'bok', day: 1, title: 'Regelverket og ADR-boka', emner: ['a', 'l'], desc: 'Hvem lager reglene, hvordan boka er bygd opp, og hvordan du slår opp i Tabell A.', lab: 'tabA', match: 'kolonner' },
-  { id: 'farer', day: 1, title: 'Fareklassene og farene', emner: ['b', 'c'], desc: 'De ni fareklassene, faresedlene, emballasjegruppene og miljøfarlig gods og avfall.', lab: 'sedler', match: 'klasser' },
+  { id: 'bok', day: 1, title: 'Regelverket og ADR-boka', emner: ['a', 'l'], desc: 'Hvem lager reglene, hvordan boka er bygd opp, og hvordan du slår opp i Tabell A.', labs: ['tabA'], match: 'kolonner' },
+  { id: 'farer', day: 1, title: 'Fareklassene og farene', emner: ['b', 'c'], desc: 'De ni fareklassene, faresedlene, emballasjegruppene og miljøfarlig gods og avfall.', labs: ['sedler'], match: 'klasser' },
   { id: 'forebygg', day: 1, title: 'Forebygging og sikkerhet', emner: ['d'], desc: 'Tennkilder, røykeforbud, verneutstyr og trygg drift av kjøretøyet.' },
-  { id: 'merking', day: 2, title: 'Merking og oransje skilt', emner: ['f'], desc: 'Oransje skilt, farenummer, store faresedler og LQ-merket.', lab: 'skilt', match: 'farenr' },
-  { id: 'unntak', day: 2, title: 'Unntak og 1000 poeng', emner: ['a'], desc: 'Mengdeunntaket i 1.1.3.6, begrensede og unntatte mengder, og de andre unntakene.', lab: 'poeng' },
-  { id: 'forer', day: 2, title: 'Dokumenter og utstyr', emner: ['g', 'h'], desc: 'Hva som skal være i førerhuset, skriftlige instruksjoner, brannslukkere og utstyr.', lab: 'utstyr' },
-  { id: 'lasting', day: 3, title: 'Lasting, samlasting og stuing', emner: ['i', 'j', 'm'], desc: 'Hva som kan lastes sammen, kontroll før lasting, matvarer og lastsikring.', lab: 'samlast' },
+  { id: 'merking', day: 2, title: 'Merking og oransje skilt', emner: ['f'], desc: 'Oransje skilt, farenummer, store faresedler og LQ-merket.', labs: ['merk', 'skilt'], match: 'farenr' },
+  { id: 'unntak', day: 2, title: 'Unntak og 1000 poeng', emner: ['a'], desc: 'Mengdeunntaket i 1.1.3.6, begrensede og unntatte mengder, og de andre unntakene.', labs: ['poeng'] },
+  { id: 'forer', day: 2, title: 'Dokumenter og utstyr', emner: ['g', 'h'], desc: 'Hva som skal være i førerhuset, skriftlige instruksjoner, brannslukkere og utstyr.', labs: ['utstyr'] },
+  { id: 'lasting', day: 3, title: 'Lasting, samlasting og stuing', emner: ['i', 'j', 'm'], desc: 'Hva som kan lastes sammen, kontroll før lasting, matvarer og lastsikring.', labs: ['samlast'] },
   { id: 'ansvar', day: 3, title: 'Ansvar og sikring', emner: ['k', 'o'], desc: 'Pliktene til avsender, transportør, laster og sjåfør, og sikring mot misbruk.', match: 'aktor' },
-  { id: 'ulykke', day: 3, title: 'Ulykke, brann og tunnel', emner: ['e', 'n'], desc: 'De skriftlige instruksjonene, brann og førstehjelp, og tunnelkategoriene.', lab: 'tunnel' }
+  { id: 'ulykke', day: 3, title: 'Ulykke, brann og tunnel', emner: ['e', 'n'], desc: 'De skriftlige instruksjonene, brann og førstehjelp, og tunnelkategoriene.', labs: ['ulykke', 'tunnel'] }
 ];
 const ST = Object.fromEntries(STATIONS.map((s, i) => [s.id, { ...s, n: i + 1 }]));
 const DAYS = { 1: 'Dag 1', 2: 'Dag 2', 3: 'Dag 3' };
@@ -232,7 +269,9 @@ const LABS = {
   poeng: { name: 'Regn 1000 poeng', desc: 'Regn ut poengene for lasten og avgjør om den er innenfor 1.1.3.6.' },
   utstyr: { name: 'Pakk utstyret', desc: 'Kryss av utstyret transportenheten skal ha for lasten.' },
   samlast: { name: 'Kan de lastes sammen?', desc: 'Avgjør om kolliene kan samlastes etter tabellen i 7.5.2.1.' },
-  tunnel: { name: 'Tunnelkontroll', desc: 'Kan bilen kjøre gjennom tunnelen med denne lasten?' }
+  tunnel: { name: 'Tunnelkontroll', desc: 'Kan bilen kjøre gjennom tunnelen med denne lasten?' },
+  merk: { name: 'Merk bilen', desc: 'Sett oransje skilt, store faresedler og merker på riktig sted på bilen.', run: () => startMerk() },
+  ulykke: { name: 'Ulykke på vegen', desc: 'Følg de skriftlige instruksjonene steg for steg når det lekker fra lasten.', run: () => startUlykke() }
 };
 const PRACTICAL = [
   ['fa', 'Førstehjelp', 'Frie luftveier, sideleie, HLR og skylling av øyne og hud.'],
@@ -358,7 +397,7 @@ const QS = [
   ['merking', 'f', 'ADR 5.3.2.3.1', 'Hva betyr 0 som andre siffer, for eksempel 30 eller 80?', ['Ett siffer er nok til å beskrive faren', 'At stoffet er ufarlig', 'At tanken er tom', 'At stoffet er miljøfarlig'], ''],
   ['merking', 'f', 'ADR 5.3.2.1.1', 'Stykkgods over grensen i 1.1.3.6: hvordan skal de oransje skiltene se ut?', ['Blanke, uten tall', 'Med farenummer og UN-nummer for det farligste stoffet', 'Med fareklassen', 'Stykkgods trenger ikke oransje skilt'], 'Skilt med tall brukes på tank og bulk.'],
   ['merking', 'f', 'ADR 5.3.1.5', 'Når skal en bil med stykkgods ha store faresedler på sidene og bak?', ['Ved klasse 1 (unntatt 1.4S) og klasse 7', 'Alltid ved farlig gods', 'Ved klasse 3 over 1000 liter', 'Aldri'], ''],
-  ['merking', 'f', 'ADR 5.3.2.1.2', 'Hvor skal oransje skilt med tall sitte på en tankbil?', ['På begge sider av hver tank eller hvert tankrom, i tillegg til foran og bak', 'Bare foran og bak', 'Bare bak', 'På førerhusdøra'], 'Tankbiler med bare diesel, bensin, parafin eller flydrivstoff kan nøye seg med skilt med tall foran og bak (5.3.2.1.3).'],
+  ['merking', 'f', 'ADR 5.3.2.1.2', 'Hvor skal oransje skilt med tall sitte på en tankbil?', ['På begge sider av hver tank eller hvert tankrom, i tillegg til foran og bak', 'Bare foran og bak', 'Bare bak', 'På førerhusdøra'], 'Frakter bilen bare ett stoff, holder det med skilt med tall foran og bak (5.3.2.1.6).'],
   ['merking', 'f', 'ADR 3.4.7', 'Hvordan ser merket for begrensede mengder (LQ) ut?', ['Et kvadrat på høykant, svart øverst og nederst og hvitt i midten', 'En oransje firkant', 'En rød rombe med flamme', 'Bokstavene LQ i en sirkel'], ''],
   ['merking', 'f', 'ADR 3.4.13 og 3.4.14', 'Når skal transportenheten merkes med LQ-merket foran og bak?', ['Når den er over 12 tonn og kolliene med begrensede mengder veier over 8 tonn brutto', 'Alltid', 'Når lasten er over 1000 poeng', 'Aldri'], ''],
   ['merking', 'f', 'ADR 5.3.6', 'En tankbil har UN 3082. Hvilket merke skal den ha i tillegg til faresedlene?', ['Merket for miljøfarlige stoffer', 'LQ-merket', 'Merket for oppvarmede stoffer', 'Ingen'], ''],
@@ -478,7 +517,7 @@ const FACTS = [
   { st: 'forebygg', em: 'd', title: 'Utstyr på alle transportenheter (8.1.5.2)', pts: ['Minst én stoppekloss per kjøretøy', 'To frittstående varselsignaler', 'Øyeskyllemiddel – ikke nødvendig for faresedlene 1, 1.4, 1.5, 1.6, 2.1, 2.2 og 2.3', 'Til hver i mannskapet: varselvest, lommelykt, vernehansker og øyebeskyttelse'] },
   { st: 'forebygg', em: 'd', title: 'Utstyr for bestemte faresedler (8.1.5.3)', pts: ['Fluktmaske til alle i mannskapet ved fareseddel 2.3 eller 6.1', 'Spade, tetning for sluk og oppsamlingsbeholder for faste stoffer og væsker med fareseddel 3, 4.1, 4.3, 8 eller 9'] },
   { st: 'forebygg', em: 'd', title: 'Trygg drift', pts: ['Parkeringsbremsen på når bilen står. Tilhenger uten brems sikres med stoppekloss (8.3.7)', 'Ikke åpne kolli med farlig gods (8.3.3)', 'Ingen passasjerer, bare mannskapet (8.3.1)', 'ABS-kabelen til tilhenger over 3,5 tonn alltid tilkoblet (8.3.8)', 'Mannskapet skal kunne bruke brannslukkerne (8.3.2)'] },
-  { st: 'merking', em: 'f', title: 'Oransje skilt', pts: ['40 × 30 cm, reflekterende og med svart ramme', 'Ett foran og ett bak på transportenheten', 'Stykkgods: blanke skilt', 'Tank og bulk: farenummer øverst og UN-nummer nederst', 'Skilt som ikke gjelder lasten, skal fjernes eller dekkes til (5.3.2.1.8)'] },
+  { st: 'merking', em: 'f', title: 'Oransje skilt', pts: ['40 × 30 cm, reflekterende og med svart ramme', 'Ett foran og ett bak på transportenheten', 'Stykkgods: blanke skilt', 'Tank og bulk: farenummer øverst og UN-nummer nederst, på sidene av tanken', 'Bare ett stoff i tanken: skilt med tall foran og bak er nok (5.3.2.1.6)', 'Skilt som ikke gjelder lasten, skal fjernes eller dekkes til (5.3.2.1.8)'] },
   { st: 'merking', em: 'f', title: 'Slik leser du farenummeret', pts: ['2 gass under trykk · 3 brannfarlig væske eller gass · 4 brannfarlig fast stoff', '5 oksiderende · 6 giftig eller smittefare · 7 radioaktiv · 8 etsende · 9 voldsom reaksjon', 'Doblet siffer betyr forsterket fare (33, 88)', '0 som andre siffer: ett siffer er nok (30, 80)', 'X foran: reagerer farlig med vann (X423)'] },
   { st: 'merking', em: 'f', title: 'Skilt du ser ofte', pts: ['30 / 1202 diesel', '33 / 1203 bensin', '23 / 1965 LPG og 23 / 1978 propan', '80 / 1830 svovelsyre', '90 / 3082 miljøfarlig væske', '99 / 3257 oppvarmet stoff, for eksempel asfalt'] },
   { st: 'merking', em: 'f', title: 'Store faresedler på kjøretøyet', pts: ['Stykkgods: bare ved klasse 1 (unntatt 1.4S) og klasse 7, på begge sider og bak (5.3.1.5)', 'Tankbiler: på begge sider og bak', 'Containere: på alle fire sider', 'Miljømerket kommer i tillegg når store faresedler kreves og lasten er miljøfarlig (5.3.6)'] },
@@ -601,12 +640,11 @@ function renderHome() {
     html += `<div class="day"><h3>${DAYS[d]}</h3><ol class="path">`;
     for (const s of STATIONS.filter(x => x.day === d)) {
       const p = stProgress(s.id), status = stDone(s.id) ? 'done' : p.m ? 'started' : '';
-      const lab = s.lab ? LABS[s.lab] : null, lb = s.lab ? store.labs[s.lab] : null;
       html += `<li class="stn ${status} ${nx && nx.id === s.id ? 'next' : ''}"><span class="dot">${stDone(s.id) ? '✓' : ST[s.id].n}</span>
         <article class="card"><div class="hd"><h3>${esc(s.title)}</h3><div class="emner">${s.emner.map(e => `<span class="em" title="${esc(EMNER[e])}">Emne ${e}: ${esc(EMNER[e])}</span>`).join('')}</div></div>
         <p>${esc(s.desc)}</p>
         <div class="prog"><div class="bar"><i style="width:${p.pct}%"></i></div><span>${p.m}/${p.n} mestret</span></div>
-        <div class="row"><button class="btn" data-go="facts" data-st="${s.id}">Fagstoff</button><button class="btn primary" data-go="ov" data-st="${s.id}">Øv</button>${lab ? `<button class="btn" data-go="lab" data-st="${s.id}" title="${esc(lab.desc)}">Lab: ${esc(lab.name)}${lb != null ? ` · ${lb} %` : ''}</button>` : ''}${s.match ? `<button class="btn" data-go="match" data-st="${s.id}">Koble: ${esc(SETS[s.match].name)}</button>` : ''}</div></article></li>`;
+        <div class="row"><button class="btn" data-go="facts" data-st="${s.id}">Fagstoff</button><button class="btn primary" data-go="ov" data-st="${s.id}">Øv</button>${labBtns(s, 'data-go="lab" data-st="' + s.id + '"', true)}${s.match ? `<button class="btn" data-go="match" data-st="${s.id}">Koble: ${esc(SETS[s.match].name)}</button>` : ''}</div></article></li>`;
     }
     if (d === 3) {
       html += `<li class="stn ${prak === PRACTICAL.length ? 'done' : prak ? 'started' : ''}"><span class="dot">${prak === PRACTICAL.length ? '✓' : 'P'}</span>
@@ -626,7 +664,7 @@ $('#path').addEventListener('click', e => {
   const b = e.target.closest('[data-go]'); if (!b) return;
   const st = b.dataset.st;
   if (st) { store.last = st; save(); }
-  ({ facts: () => showFacts(st), ov: () => startPractice(st), lab: () => startLab(ST[st].lab), match: () => startMatch(ST[st].match), prove: startExam, ovall: () => startPractice(null) })[b.dataset.go]();
+  ({ facts: () => showFacts(st), ov: () => startPractice(st), lab: () => startLab(b.dataset.lab), match: () => startMatch(ST[st].match), prove: startExam, ovall: () => startPractice(null) })[b.dataset.go]();
 });
 $('#path').addEventListener('change', e => {
   const c = e.target.closest('[data-prak]'); if (!c) return;
@@ -635,6 +673,9 @@ $('#path').addEventListener('change', e => {
 $('#cont').addEventListener('click', () => { const nx = nextStation(); if (!nx) return startExam(); store.last = nx.id; save(); stProgress(nx.id).m ? startPractice(nx.id) : showFacts(nx.id); });
 $('#resetM').addEventListener('click', () => { if (confirm('Nullstille fremdriften på denne maskinen?')) { store = { streak: {}, labs: {}, prak: {}, last: null }; save(); renderHome(); } });
 
+// Knapper for stasjonens laber. På stien vises beste resultat.
+const labBtns = (s, attr, score) => (s.labs || []).map(k => { const b = store.labs[k]; return `<button class="btn" ${attr} data-lab="${k}" title="${esc(LABS[k].desc)}">Lab: ${esc(LABS[k].name)}${score && b != null ? ` · ${b} %` : ''}</button>`; }).join('');
+const bindLabBtns = () => document.querySelectorAll('[data-lab-go]').forEach(b => b.onclick = () => startLab(b.dataset.lab));
 function goHome() { $('#play').hidden = true; $('#home').hidden = false; renderHome(); scrollTo(0, 0); }
 function goPlay(html, keepScroll) { $('#home').hidden = true; const p = $('#play'); p.hidden = false; p.innerHTML = html; if (!keepScroll) scrollTo(0, 0); return p; }
 const tagsHTML = q => `<div class="tags"><span class="tag">${ST[q.st].n}. ${esc(ST[q.st].title)}</span><span class="tag">Emne ${q.em}: ${esc(EMNER[q.em])}</span></div>`;
@@ -659,10 +700,10 @@ function showFacts(st) {
   goPlay(`<div class="quiz">
     <div class="qbar"><span>Fagstoff · <b>${s.n}. ${esc(s.title)}</b></span><div class="row"><button class="btn" onclick="window.print()">Skriv ut</button><button class="btn" id="quit">Tilbake</button></div></div>
     <div class="facts">${list.map(f => `<article class="fact"><span class="em">Emne ${f.em}: ${esc(EMNER[f.em])}</span><h4>${esc(f.title)}</h4><ul>${f.pts.map(p => `<li>${esc(p)}</li>`).join('')}</ul></article>`).join('')}</div>
-    <div class="row noprint"><button class="btn primary" id="ovNow">Øv på denne stasjonen</button>${s.lab ? `<button class="btn" id="labNow">Lab: ${esc(LABS[s.lab].name)}</button>` : ''}</div></div>`);
+    <div class="row noprint"><button class="btn primary" id="ovNow">Øv på denne stasjonen</button>${labBtns(s, 'data-lab-go')}</div></div>`);
   $('#quit').onclick = goHome;
   $('#ovNow').onclick = () => startPractice(st);
-  if (s.lab) $('#labNow').onclick = () => startLab(s.lab);
+  bindLabBtns();
 }
 
 // ---------- Øving ----------
@@ -701,9 +742,9 @@ function endPractice(run) {
     <div class="tile"><div class="v">${run.wrong}</div><div class="l">feil underveis</div></div>
     <div class="tile"><div class="v">${pool.filter(mastered).length}/${pool.length}</div><div class="l">mestret${s ? ' på stasjonen' : ''}</div></div></div>
     ${s && stDone(run.st) ? `<div class="fb ok"><b>Stasjon ${s.n} er fullført.</b>${nx ? `<span>Neste stasjon: ${nx.n}. ${esc(nx.title)}</span>` : '<span>Du er klar for prøven.</span>'}</div>` : ''}
-    <div class="row"><button class="btn primary" id="again">Ny runde</button>${s && s.lab ? `<button class="btn" id="lab2">Lab: ${esc(LABS[s.lab].name)}</button>` : ''}<button class="btn" id="home2">Til stien</button></div></div>`);
+    <div class="row"><button class="btn primary" id="again">Ny runde</button>${s ? labBtns(s, 'data-lab-go') : ''}<button class="btn" id="home2">Til stien</button></div></div>`);
   $('#again').onclick = () => startPractice(run.st); $('#home2').onclick = goHome;
-  if (s && s.lab) $('#lab2').onclick = () => startLab(s.lab);
+  bindLabBtns();
 }
 
 // ---------- Prøve: 25 spørsmål, 45 minutter (8.2.2.7.1.6) ----------
@@ -811,7 +852,7 @@ function showMatch(run) {
 // ---------- Laber ----------
 // Hver lab lager én oppgave om gangen: { q, o (riktig først) eller html, ex, show (HTML over spørsmålet) }
 const LAB_N = 10;
-function startLab(key) { runLab({ key, i: 0, right: 0 }); }
+function startLab(key) { LABS[key].run ? LABS[key].run() : runLab({ key, i: 0, right: 0 }); }
 function runLab(run, keepScroll) {
   const L = LABS[run.key];
   if (run.i === LAB_N) {
@@ -993,6 +1034,257 @@ function runMulti(run, keepScroll) {
       <div class="row" style="margin-top:10px"><button class="btn primary" id="next">${run.i < LAB_N - 1 ? 'Neste' : 'Se resultat'}</button></div>`;
     $('#next').focus(); $('#next').onclick = () => { run.i++; run.task = null; runLab(run); };
   };
+}
+
+// ---------- Lab: Merk bilen (5.3.1, 5.3.2, 5.3.6, 3.4.13) ----------
+// Merket for miljøfarlige stoffer og LQ-merket, sentrert i 0,0 som faresedlene
+const envMark = () => `<path d="M0,-100 L100,0 L0,100 L-100,0Z" fill="#fff" stroke="#000" stroke-width="5"/>
+  <rect x="-40" y="-40" width="8" height="40" fill="#000"/><path d="M-36,-82 C-8,-78 -6,-48 -36,-40 C-66,-48 -64,-78 -36,-82Z" fill="#000"/>
+  <line x1="-50" y1="0" x2="58" y2="0" stroke="#000" stroke-width="5"/>
+  <path d="M-8,26 C10,8 40,8 52,26 C40,44 10,44 -8,26Z M-8,26 L-22,12 L-22,40Z" fill="#000"/><circle cx="38" cy="22" r="4" fill="#fff"/><path d="M30,30 l8,6 M34,30 l8,6" stroke="#fff" stroke-width="2"/>`;
+const lqMark = () => `<path d="M0,-100 L100,0 L0,100 L-100,0Z" fill="#fff" stroke="#000" stroke-width="5"/><path d="M0,-100 L58,-42 L-58,-42Z M0,100 L58,42 L-58,42Z" fill="#000"/>`;
+const markSVG = inner => `<svg viewBox="-104 -104 208 208">${inner}</svg>`;
+// Plasserer en ferdig <svg> inne i en annen svg
+const placeSVG = (svg, x, y, w, h) => svg.replace('<svg ', `<svg x="${x}" y="${y}" width="${w}" height="${h}" `);
+
+const MERK_N = 6;
+function merkTask() {
+  const type = pick(['kolli', 'kolli', 'tank', 'tank', 'tank', 'under', 'lq', 'eks', 'miljo']);
+  const E = v => new Set([v]), none = E('');
+  const base = { F: none, B: none, SP: none, SM: none, BP: none, BM: none, S: none };
+  let t;
+  if (type === 'tank') {
+    const un = pick(['1978', '1965', '1830', '3082']), s = SUBST.find(x => x.un === un);
+    const env = s.un === '3082', pl = 'pl:' + s.lab[0];
+    t = { s, veh: 'tank', text: `Tankbil med <b>UN ${s.un} ${esc(lc(s.name))}</b> (${esc(labTxt(s))}), ingen andre stoffer.`,
+      exp: { ...base, F: new Set(['blank', 'num']), B: new Set(['blank', 'num']), SP: E(pl), BP: E(pl), SM: env ? E('env') : none, BM: env ? E('env') : none, S: E('num') },
+      ex: ['Tankbiler skal ha store faresedler på begge sider og bak (5.3.1.4).', `Oransje skilt med ${s.hz} over ${s.un} på sidene av tanken (5.3.2.1.2). Frakter bilen bare ett stoff, kan sidene være uten skilt hvis skiltene foran og bak har tallene (5.3.2.1.6).`, env ? 'UN 3082 er miljøfarlig, så miljømerket skal være der de store faresedlene er (5.3.6).' : 'Stoffet er ikke miljøfarlig, så miljømerket skal ikke på.'] };
+  } else if (type === 'eks') {
+    t = { s: null, veh: 'boks', text: 'Lastebil med kolli i <b>klasse 1.1D</b> (eksplosiver), over grensen i 1.1.3.6.',
+      exp: { ...base, F: E('blank'), B: E('blank'), SP: E('pl:1'), BP: E('pl:1') }, labs: ['1'],
+      ex: ['Stykkgods over grensen: blanke oransje skilt foran og bak (5.3.2.1.1).', 'Klasse 1 (unntatt 1.4S) er ett av to unntak der bilen med stykkgods også skal ha store faresedler på begge sider og bak (5.3.1.5.1).'] };
+  } else if (type === 'lq') {
+    t = { s: null, veh: 'boks', text: 'Lastebil på 18 tonn med <b>9 tonn brutto maling i begrensede mengder</b> (LQ) og ikke annet farlig gods.',
+      exp: { ...base, F: E('lq'), B: E('lq') }, labs: ['3'],
+      ex: ['Over 12 tonn og over 8 tonn LQ brutto: LQ-merket foran og bak (3.4.13 og 3.4.14).', 'Begrensede mengder gir ikke krav om oransje skilt eller store faresedler.'] };
+  } else {
+    const s = type === 'miljo' ? SUBST.find(x => x.un === '3082') : pick(SUBST.filter(x => x.packs.length && !x.noPts && x.tk >= 1 && x.un !== '3082'));
+    const under = type === 'under';
+    t = { s, veh: 'boks', text: `Lastebil med kolli: <b>UN ${s.un} ${esc(lc(s.name))}</b> (${esc(labTxt(s))}), ${under ? '<b>innenfor 1000 poeng</b>' : '<b>over 1000 poeng</b>'}.`,
+      exp: under ? { ...base } : { ...base, F: E('blank'), B: E('blank') },
+      ex: under ? ['Innenfor 1000 poeng slipper bilen oransje skilt (1.1.3.6.2), og stykkgods gir ikke store faresedler på bilen.', 'Faresedlene sitter på kolliene.']
+        : ['Stykkgods over grensen: blanke oransje skilt foran og bak (5.3.2.1.1). Skilt med tall brukes på tank og bulk.', 'Bilen skal ikke ha store faresedler – det gjelder bare klasse 1 og 7 i kolli (5.3.1.5).', ...(type === 'miljo' ? ['Miljømerket på kjøretøyet kreves bare når store faresedler kreves (5.3.6.1). Her sitter det på kolliene.'] : [])] };
+  }
+  t.type = type;
+  const s = t.s || SUBST.find(x => x.un === '1203');
+  // Paletten: alltid de samme typene merker, og tre faresedler der én er riktig når det trengs
+  const right = t.labs || (t.s ? [t.s.lab[0]] : ['3']);
+  const decoys = shuffle(['2.1', '2.2', '3', '6.1', '8', '9', '1', '5.1'].filter(c => !right.includes(c))).slice(0, 3 - right.length);
+  t.items = [
+    ['blank', 'Blankt oransje skilt', plateSVG(null, null)],
+    ['num', `Oransje skilt ${s.hz} / ${s.un}`, plateSVG(s.hz, s.un)],
+    ['swap', `Oransje skilt ${s.un} / ${s.hz}`, plateSVG(s.un, s.hz)],
+    ['lq', 'LQ-merke', markSVG(lqMark())],
+    ['env', 'Miljømerke', markSVG(envMark())],
+    ...shuffle([...right, ...decoys]).map(c => ['pl:' + c, 'Stor fareseddel ' + c, labelSVG(c)])
+  ];
+  return t;
+}
+// Sjekk per plass. Tank med ett stoff: tomme sider er riktig når skiltene foran og bak har tall (5.3.2.1.6).
+function merkCheck(t, put) {
+  const res = {};
+  for (const k of Object.keys(t.exp)) res[k] = t.exp[k].has(put[k] || '');
+  if (t.veh === 'tank' && !put.S && put.F === 'num' && put.B === 'num') res.S = true;
+  if (t.veh !== 'tank') delete res.S;
+  return res;
+}
+const MERK_SLOTS = { F: 'Oransje skilt foran', B: 'Oransje skilt bak', S: 'Oransje skilt på siden av tanken', SP: 'Stor fareseddel på siden', SM: 'Merke på siden', BP: 'Stor fareseddel bak', BM: 'Merke bak' };
+function slotG(k, x, y, w, h, put, items, shape) {
+  const it = put[k] && items.find(i => i[0] === put[k]);
+  const hit = shape === 'dia' ? `<path class="hit" d="M${x + w / 2},${y} L${x + w},${y + h / 2} L${x + w / 2},${y + h} L${x},${y + h / 2}Z"/>` : `<rect class="hit" x="${x}" y="${y}" width="${w}" height="${h}" rx="3"/>`;
+  return `<g class="slot" data-slot="${k}" tabindex="0" role="button" aria-label="${MERK_SLOTS[k]}${it ? ': ' + esc(it[1]) : ', tom'}">${hit}${it ? placeSVG(it[2], x + 2, y + 2, w - 4, h - 4) : ''}</g>`;
+}
+function truckViews(t, put) {
+  const W = '#2B3A4A', G = '#7B858C', D = '#1E2326', L = 'var(--line)';
+  const wheel = (x, y, r = 22) => `<circle cx="${x}" cy="${y}" r="${r}" fill="${D}"/><circle cx="${x}" cy="${y}" r="${r * .45}" fill="${G}"/>`;
+  const tank = t.veh === 'tank';
+  const body = tank
+    ? `<rect x="20" y="70" width="370" height="120" rx="58" fill="#C9CFD3" stroke="${G}" stroke-width="3"/><rect x="60" y="60" width="30" height="12" fill="${G}"/><rect x="300" y="60" width="30" height="12" fill="${G}"/>`
+    : `<rect x="20" y="40" width="370" height="155" fill="#E4E6E3" stroke="${G}" stroke-width="3"/><line x1="205" y1="40" x2="205" y2="195" stroke="${G}" stroke-width="1.5"/>`;
+  const side = `<svg viewBox="0 0 520 260" role="group" aria-label="Bilen sett fra venstre side">
+    <rect x="10" y="195" width="500" height="14" fill="${G}"/>${body}
+    <path d="M400 80 H470 L505 130 V205 H400Z" fill="${W}"/><path d="M412 92 H462 L490 130 H412Z" fill="#9FC3DA"/>
+    ${wheel(80, 215)}${wheel(135, 215)}${wheel(455, 215)}
+    ${slotG('SP', 95, 82, 80, 80, put, t.items, 'dia')}${slotG('SM', 190, 82, 80, 80, put, t.items, 'dia')}${tank ? slotG('S', 288, 97, 72, 54, put, t.items) : ''}</svg>`;
+  const front = `<svg viewBox="0 0 220 230" role="group" aria-label="Bilen sett forfra">
+    <rect x="30" y="30" width="160" height="150" rx="10" fill="${W}"/><rect x="45" y="45" width="130" height="58" rx="4" fill="#9FC3DA"/>
+    <rect x="60" y="112" width="100" height="22" fill="${D}"/><circle cx="50" cy="150" r="9" fill="#F2E6A0"/><circle cx="170" cy="150" r="9" fill="#F2E6A0"/>
+    <rect x="22" y="178" width="176" height="14" fill="${G}"/>${wheel(55, 205, 18)}${wheel(165, 205, 18)}
+    ${slotG('F', 72, 138, 76, 57, put, t.items)}</svg>`;
+  const rear = `<svg viewBox="0 0 220 230" role="group" aria-label="Bilen sett bakfra">
+    ${tank ? `<circle cx="110" cy="95" r="70" fill="#C9CFD3" stroke="${G}" stroke-width="3"/>` : `<rect x="20" y="15" width="180" height="160" fill="#E4E6E3" stroke="${G}" stroke-width="3"/><line x1="110" y1="15" x2="110" y2="175" stroke="${G}" stroke-width="1.5"/>`}
+    <rect x="15" y="172" width="190" height="14" fill="${G}"/>${wheel(45, 205, 18)}${wheel(175, 205, 18)}<circle cx="28" cy="190" r="6" fill="#C8102E"/><circle cx="192" cy="190" r="6" fill="#C8102E"/>
+    ${slotG('BP', 32, 40, 68, 68, put, t.items, 'dia')}${slotG('BM', 120, 40, 68, 68, put, t.items, 'dia')}${slotG('B', 72, 118, 76, 57, put, t.items)}</svg>`;
+  return `<div class="views"><figure class="view">${side}<figcaption>Venstre side – høyre side merkes likt</figcaption></figure>
+    <div class="ends"><figure class="view">${front}<figcaption>Forfra</figcaption></figure><figure class="view">${rear}<figcaption>Bakfra</figcaption></figure></div></div>`;
+}
+function startMerk() { runMerk({ i: 0, right: 0 }); }
+function runMerk(run) {
+  if (run.i === MERK_N) return labDone('merk', run.right, MERK_N, startMerk);
+  if (!run.t) { run.t = merkTask(); run.put = {}; run.sel = 'blank'; run.res = null; }
+  const t = run.t;
+  const p = goPlay(`<div class="quiz">
+    <div class="qbar"><span>${esc(LABS.merk.name)} · bil <b>${run.i + 1}</b> av <b>${MERK_N}</b></span><span>Riktig <b>${run.right}</b></span><button class="btn" id="quit">Avslutt</button></div>
+    <div class="load"><span>${t.text}</span></div>
+    <p class="qtext">Velg et merke og trykk der det skal sitte. Trykk på et merke på bilen for å ta det bort. Plasser som skal være tomme, lar du stå tomme.</p>
+    <div class="pal" role="group" aria-label="Merker">${t.items.map(([k, n, svg]) => `<button data-item="${k}" aria-pressed="${run.sel === k}" ${run.res ? 'disabled' : ''}>${svg}<span>${esc(n)}</span></button>`).join('')}</div>
+    <div id="views">${truckViews(t, run.put)}</div>
+    <div class="row"><button class="btn primary" id="check" ${run.res ? 'hidden' : ''}>Sjekk</button></div><div id="fb"></div></div>`);
+  $('#quit').onclick = goHome;
+  p.querySelector('.pal').addEventListener('click', e => {
+    const b = e.target.closest('[data-item]'); if (!b || run.res) return;
+    run.sel = b.dataset.item;
+    p.querySelectorAll('[data-item]').forEach(x => x.setAttribute('aria-pressed', x === b));
+  });
+  const place = g => {
+    if (!g || run.res) return;
+    const k = g.dataset.slot;
+    run.put[k] = run.put[k] === run.sel ? '' : run.sel;
+    $('#views').innerHTML = truckViews(t, run.put);
+    const again = $(`#views [data-slot="${k}"]`); if (again) again.focus();
+  };
+  $('#views').addEventListener('click', e => place(e.target.closest('.slot')));
+  $('#views').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); place(e.target.closest('.slot')); } });
+  const showRes = () => {
+    for (const [k, ok] of Object.entries(run.res)) { const g = $(`#views [data-slot="${k}"]`); if (g) g.classList.add(ok ? 'ok' : 'bad'); }
+    const ok = Object.values(run.res).every(Boolean);
+    $('#fb').innerHTML = `<div class="fb ${ok ? 'ok' : 'no'}"><b>${ok ? 'Riktig merket' : 'Ikke helt. Grønne plasser er riktige, røde er feil.'}</b>${t.ex.map(x => `<span>${x}</span>`).join('')}<span class="src">Kilde: ADR 5.3.1, 5.3.2, 5.3.6 og 3.4.13</span></div>
+      <div class="row" style="margin-top:10px"><button class="btn primary" id="next">${run.i < MERK_N - 1 ? 'Neste bil' : 'Se resultat'}</button></div>`;
+    $('#next').onclick = () => { run.i++; run.t = null; runMerk(run); };
+    return ok;
+  };
+  if (run.res) return showRes();
+  $('#check').onclick = () => {
+    run.res = merkCheck(t, run.put);
+    p.querySelectorAll('[data-item]').forEach(x => x.disabled = true);
+    $('#check').hidden = true;
+    const ok = showRes();
+    if (ok) run.right++;
+    kv('lab', { k: 'merk.' + t.type, a: ok ? 'riktig' : 'feil', m: t.s ? t.s.un : '' });
+    $('#next').focus();
+  };
+}
+// Felles sluttside for laber med eget oppsett
+function labDone(key, right, n, again) {
+  const pct = Math.round(100 * right / n);
+  store.labs[key] = Math.max(store.labs[key] || 0, pct); save();
+  kv('lab', { k: key, a: String(pct), m: String(n) });
+  goPlay(`<div class="quiz"><h3>${esc(LABS[key].name)}: ${right} av ${n} riktige</h3><div class="row"><button class="btn primary" id="again">Prøv igjen</button><button class="btn" id="home2">Til stien</button></div></div>`);
+  $('#again').onclick = again; $('#home2').onclick = goHome;
+}
+
+// ---------- Lab: Ulykke på vegen (skriftlige instruksjoner, 5.4.3.4) ----------
+// Tilleggsveiledningen per fareseddel, kolonne (3) i de skriftlige instruksjonene, eller farene når kolonnen er tom
+const GUIDE = {
+  '2.1': 'Ta dekning og unngå lavtliggende områder', '3': 'Ta dekning og unngå lavtliggende områder',
+  '2.3': 'Bruk fluktmaske, ta dekning og unngå lavtliggende områder', '4.3': 'Hold utlekket stoff tørt ved å dekke det til',
+  '8': 'Fare for etseskader – stoffet kan reagere kraftig med vann og gi etsende damper', '9': 'Farlig for vannmiljø og avløp – hindre at det renner ut'
+};
+const GUIDE_DECOYS = ['Spyl utlekket stoff bort med mye vann', 'Gå nærmere og tett lekkasjen med hendene', 'Begrens tiden du er utsatt for stråling', 'Unngå blanding med brannfarlige stoffer som sagflis'];
+const ACCIDENTS = [
+  { un: '1203', what: 'bensin', veh: 'tank', phase: 'L', lab: '3', leak: 'Bensin renner ut fra en ventil bak på tanken.' },
+  { un: '1978', what: 'propan', veh: 'boks', phase: 'G', lab: '2.1', leak: 'En propanflaske er skadd og gass siver ut.' },
+  { un: '1830', what: 'svovelsyre', veh: 'boks', phase: 'L', lab: '8', leak: 'En kanne med svovelsyre har sprukket og syra renner ut.' },
+  { un: '1005', what: 'ammoniakk', veh: 'tank', phase: 'G', lab: '2.3', leak: 'Det lekker ammoniakkgass fra en ventil på tanken.' },
+  { un: '1402', what: 'kalsiumkarbid', veh: 'boks', phase: 'S', lab: '4.3', leak: 'Et fat med kalsiumkarbid har sprukket, og det begynner å regne.' },
+  { un: '3082', what: 'miljøfarlig væske', veh: 'tank', phase: 'L', lab: '9', leak: 'Miljøfarlig væske renner ut fra en ventil på tanken.' }
+];
+function ulykkeSteps(sc) {
+  // Punktene beskrives med plassering, så de kan leses også på liten skjerm. Eleven må bruke vindpila for å velge.
+  const pts = shuffle(['up', 'down', 'low']), side = { up: sc.wind > 0 ? 'venstre' : 'høyre', down: sc.wind > 0 ? 'høyre' : 'venstre' };
+  const num = k => `Punkt ${pts.indexOf(k) + 1} – ${k === 'low' ? 'i grøfta nedenfor vegen' : `på jordet til ${side[k]} for bilen`}`;
+  sc.pts = pts;
+  const lekk = sc.event === 'lekk';
+  const guide = GUIDE[sc.lab];
+  const steps = [
+    { q: 'Bilen står. Hva gjør du først?', o: ['Setter på bremsene, stopper motoren og slår av hovedstrømbryteren', 'Går bort til lasten for å se hvor ille det er', 'Kjører videre til nærmeste rasteplass', 'Ringer arbeidsgiveren og spør hva du skal gjøre'], ex: 'Bremser, motor av og hovedstrømbryteren av. Da stopper bilen å lage gnister og varme.' },
+    { q: 'Du er stresset og har lyst på en røyk. Hva gjelder?', o: ['Ikke røyk, ikke bruk e-sigarett og ikke slå på elektrisk utstyr', 'Røyken er grei hvis du står et stykke fra bilen', 'Slå på arbeidslysene så du ser bedre', 'Start motoren igjen så du holder varmen'], ex: 'Unngå alle tennkilder.' },
+    { q: 'Du ringer 110. Hva sier du?', o: [`Hvor du er, hva som har skjedd, at det er UN ${sc.un} ${sc.what}, og om noen er skadd`, 'At det har vært en ulykke, og at de må komme', 'Navnet på firmaet du kjører for', 'At du klarer deg selv og bare vil melde fra'], ex: 'Gi nødetatene så mye informasjon som mulig om hendelsen og stoffet.' },
+    { q: 'Før du går ut i vegen – hva gjør du?', o: ['Tar på varselvesten og setter ut de frittstående varselsignalene', 'Setter ut varselsignalene i de klærne du har på', 'Venter i førerhuset til politiet kommer', 'Stiller deg i vegen og dirigerer trafikken forbi'], ex: 'Varselvest først, så varselsignalene på en hensiktsmessig måte.' },
+    { pos: true, q: 'Hvor stiller du deg mens du venter? Se på vindpila.', o: [num('up'), num('down'), num('low')], ex: `Gå bort fra ulykkesstedet og hold deg der vinden blåser fra, så du ikke puster inn gass, røyk eller damp. ${sc.lab === '2.1' || sc.lab === '2.3' || sc.lab === '3' ? 'Unngå lavtliggende områder som grøfta – tung gass og damp samler seg der.' : 'Grøfta er lavtliggende, og der kan damp og utlekket stoff samle seg.'}` },
+    { q: `Lasten har fareseddel ${sc.lab}. Hva sier de skriftlige instruksjonene i tillegg?`, o: [guide, ...shuffle([...Object.values(GUIDE).filter(g => g !== guide), ...GUIDE_DECOYS]).filter((g, i, a) => a.indexOf(g) === i).slice(0, 3)], ex: `Tilleggsveiledningen for fareseddel ${sc.lab}: ${guide.toLowerCase()}.` },
+    lekk
+      ? (sc.phase === 'L'
+        ? { q: 'Det renner mot et sluk i vegkanten. Hva gjør du?', o: ['Tetter sluket med tetningen fra bilen hvis det er trygt, uten å gå i stoffet', 'Spyler stoffet ned i sluket så det blir borte fra vegen', 'Går gjennom søla for å se hvor det lekker fra', 'Ingenting, det er brannvesenets jobb'], ex: 'Bruk utstyret på bilen til å hindre lekkasje til vann og avløp, hvis det er trygt. Gå aldri i utlekket stoff.' }
+        : sc.phase === 'S'
+          ? { q: 'Det begynner å regne på stoffet som har rent ut. Hva gjør du?', o: ['Dekker det til så det holdes tørt, hvis det er trygt', 'Spyler det bort med vann', 'Feier det sammen med hendene', 'Ingenting, regnet vasker det bort'], ex: 'Stoffer med fareseddel 4.3 utvikler brannfarlig gass med vann. Utlekket stoff holdes tørt ved tildekking.' }
+          : { q: 'Gassen siver fortsatt ut. Hva gjør du?', o: ['Holder avstand, unngår tennkilder og venter på brannvesenet', 'Prøver å stenge ventilen med bare hender', 'Flytter bilen bort fra lekkasjen', 'Tenner en fakkel så andre ser faren'], ex: 'Mannskapet skal gå vekk fra ulykkesstedet, råde andre til å gjøre det samme og følge rådene fra nødetatene.' })
+      : { q: 'Det brenner i et bakdekk, og brannen er liten. Hva gjør du?', o: ['Slukker med brannslukkeren hvis det er trygt', 'Åpner lasterommet og slukker der', 'Kjører videre så fartsvinden slukker brannen', 'Heller vann fra en kanne på dekket'], ex: 'Mannskapet kan slukke mindre branner i dekk, bremser og motorrom med brannslukkerne hvis det er trygt – men aldri brann i lasterommet.' },
+    { q: 'Brannvesenet kommer. Hva gir du dem?', o: ['Transportdokumentet, så de ser nøyaktig hva lasten er', 'Vognkortet', 'Kompetansebeviset ditt', 'Ingenting, de finner ut av det selv'], ex: 'Ha transportdokumentene lett tilgjengelig for utrykningspersonellet.' }
+  ];
+  return steps;
+}
+// Tegner ulykkesstedet. done = antall steg som er gjennomført.
+function ulykkeScene(sc, done, walk) {
+  const w = sc.wind, upX = w > 0 ? 70 : 830, P = { up: [upX, 172], down: [900 - upX, 172], low: [420, 300] };
+  const fire = sc.event === 'brann', firedOut = fire && done >= 7;
+  const leakX = 290, dx = w * 340;
+  const cloud = (n, col, x, y) => Array.from({ length: n }, (_, i) => `<circle class="drift" style="--dx:${dx}px;animation-delay:${(-i * 4.5 / n).toFixed(2)}s" cx="${x}" cy="${y}" r="${16 + (i % 3) * 7}" fill="${col}"/>`).join('');
+  const tank = sc.veh === 'tank';
+  const truck = `<g>${tank ? `<rect x="230" y="152" width="250" height="78" rx="38" fill="#C9CFD3" stroke="#7B858C" stroke-width="3"/>` : `<rect x="230" y="128" width="250" height="102" fill="#E4E6E3" stroke="#7B858C" stroke-width="3"/>`}
+    <path d="M488 160 H545 L575 198 V240 H488Z" fill="#2B3A4A"/><path d="M498 170 H540 L562 198 H498Z" fill="#9FC3DA"/>
+    <rect x="225" y="230" width="355" height="10" fill="#555"/>${[275, 320, 545].map(x => `<circle cx="${x}" cy="245" r="17" fill="#1E2326"/><circle cx="${x}" cy="245" r="7" fill="#7B858C"/>`).join('')}
+    ${done < 1 ? `<circle class="blink" cx="572" cy="225" r="6" fill="#FFB300"/><circle class="blink" cx="232" cy="225" r="6" fill="#FFB300"/>${[0, .5, 1].map(d => `<circle class="puff" style="animation-delay:${d}s" cx="485" cy="236" r="6" fill="#9AA"/>`).join('')}` : ''}</g>`;
+  const leak = fire ? (firedOut ? `<circle cx="275" cy="236" r="10" fill="#555" opacity=".6"/>` : `<g class="flick"><path d="M258 248 C255 220 270 215 275 196 C282 214 296 222 292 248Z" fill="#FF7A1A"/><path d="M266 248 C265 230 273 226 276 214 C281 228 288 232 285 248Z" fill="#FFD23F"/></g>${cloud(5, '#555', 275, 200)}`)
+    : sc.phase === 'L' ? `<ellipse class="grow" cx="${leakX - 10}" cy="262" rx="80" ry="12" fill="${sc.lab === '8' ? '#B7D36B' : sc.lab === '9' ? '#6B5A3A' : '#C9B26B'}" opacity=".85"/>${cloud(4, sc.lab === '8' ? '#D6E6B0' : '#E2D7B0', leakX, 225)}`
+      : sc.phase === 'S' ? `<path class="grow" d="M150 262 Q195 228 240 262Z" fill="#D9D9D9" stroke="#999" stroke-width="2"/>${Array.from({ length: 14 }, (_, i) => `<line class="drift" style="--dx:0px;animation-duration:1s;animation-delay:${(-i / 14).toFixed(2)}s" x1="${60 + i * 60}" y1="40" x2="${52 + i * 60}" y2="56" stroke="#8AB" stroke-width="2"/>`).join('')}`
+        : cloud(7, sc.lab === '2.3' ? '#D8E8C8' : '#DDE3E8', leakX, 200);
+  const drain = !fire && sc.phase === 'L' ? `<rect x="350" y="262" width="34" height="10" fill="${done >= 7 ? '#111' : '#444'}" stroke="#222"/>${done >= 7 ? '<rect x="344" y="258" width="46" height="18" rx="3" fill="#1D1D1D"/>' : ''}` : '';
+  const cover = !fire && sc.phase === 'S' && done >= 7 ? '<path d="M140 266 Q195 222 250 266Z" fill="#2E5E8A"/>' : '';
+  const signals = done >= 4 ? [150, 660].map(x => `<path d="M${x} 222 l14 26 h-28Z" fill="#fff" stroke="#C8102E" stroke-width="5"/>`).join('') : '';
+  const pos = walk || done >= 5 ? P[sc.choice || 'up'] : [600, 252];
+  const driver = `<g id="driver" class="walker" style="transform:translate(${walk ? '600px,252px' : pos[0] + 'px,' + pos[1] + 'px'})">
+    <circle cx="0" cy="-46" r="8" fill="#E8C6A0"/><rect x="-9" y="-37" width="18" height="24" rx="4" fill="${done >= 4 ? '#FF8A00' : '#334'}"/>${done >= 4 ? '<rect x="-9" y="-28" width="18" height="3" fill="#E6E6E6"/>' : ''}
+    <line x1="-5" y1="-13" x2="-7" y2="0" stroke="#223" stroke-width="5"/><line x1="5" y1="-13" x2="7" y2="0" stroke="#223" stroke-width="5"/>
+    ${done >= 3 && done < 8 ? '<rect x="10" y="-44" width="7" height="12" rx="2" fill="#111"/>' : ''}${done >= 8 ? '<rect x="9" y="-34" width="14" height="10" fill="#fff" stroke="#999"/>' : ''}</g>`;
+  const marks = done === 4 || walk ? Object.entries(P).map(([k, [x, y]]) => `<g><circle cx="${x}" cy="${y - 22}" r="23" fill="var(--sheet)" stroke="var(--accent)" stroke-width="4"/><text x="${x}" y="${y - 12}" text-anchor="middle" font-family="Barlow Condensed,Arial Narrow,sans-serif" font-weight="700" font-size="30" fill="currentColor">${sc.pts.indexOf(k) + 1}</text></g>`).join('') : '';
+  const fireTruck = done >= 8 ? `<g class="drive" style="--from:${w > 0 ? -320 : 320}px"><g transform="translate(${w > 0 ? 20 : 690} 196)"><rect x="0" y="0" width="150" height="44" rx="4" fill="#C8102E"/><rect x="${w > 0 ? 110 : 0}" y="-18" width="40" height="22" fill="#C8102E"/><rect class="blink" x="${w > 0 ? 118 : 8}" y="-26" width="16" height="8" fill="#3D7BFF"/>${[25, 120].map(x => `<circle cx="${x}" cy="48" r="13" fill="#1E2326"/>`).join('')}</g></g>` : '';
+  return `<svg viewBox="0 0 900 330" role="img" aria-label="Ulykkesstedet. Vinden blåser mot ${w > 0 ? 'høyre' : 'venstre'}.">
+    <rect width="900" height="330" fill="#9CC7E4"/><rect y="150" width="900" height="180" fill="#6E9A4E"/>
+    <path d="M0 278 Q420 330 900 278 V330 H0Z" fill="#4E7A36"/><text x="420" y="324" text-anchor="middle" font-size="13" fill="#E8F0E0" font-family="IBM Plex Sans,sans-serif">grøft</text>
+    <rect y="210" width="900" height="56" fill="#5A5F63"/><line x1="0" y1="238" x2="900" y2="238" stroke="#E8E8E8" stroke-width="3" stroke-dasharray="26 22"/>
+    <g transform="translate(${w > 0 ? 330 : 570} 40) scale(${w} 1)"><line x1="-90" y1="0" x2="80" y2="0" stroke="#fff" stroke-width="6"/><path d="M80 -14 L104 0 L80 14Z" fill="#fff"/></g>
+    <text x="450" y="30" text-anchor="middle" font-family="Barlow Condensed,Arial Narrow,sans-serif" font-weight="700" font-size="20" fill="#fff">VIND</text>
+    ${drain}${truck}${leak}${cover}${signals}${marks}${driver}${fireTruck}</svg>`;
+}
+function startUlykke() {
+  const sc = { ...pick(ACCIDENTS), event: Math.random() < .3 ? 'brann' : 'lekk', wind: pick([1, -1]), choice: null };
+  sc.steps = ulykkeSteps(sc);
+  runUlykke({ sc, i: 0, right: 0, marks: [] });
+}
+function runUlykke(run) {
+  const sc = run.sc, n = sc.steps.length;
+  if (run.i === n) return labDone('ulykke', run.right, n, startUlykke);
+  const st = sc.steps[run.i];
+  if (!st._order) st._order = shuffle(st.o.map((x, i) => ({ x, i })));
+  const p = goPlay(`<div class="quiz">
+    <div class="qbar"><span>${esc(LABS.ulykke.name)} · steg <b>${run.i + 1}</b> av <b>${n}</b></span><span>Riktig <b>${run.right}</b></span><button class="btn" id="quit">Avslutt</button></div>
+    <div class="steps">${sc.steps.map((_, k) => `<i class="${run.marks[k] === true ? 'ok' : run.marks[k] === false ? 'no' : k === run.i ? 'cur' : ''}"></i>`).join('')}</div>
+    <div class="load"><span><b>${sc.event === 'brann' ? 'Det brenner i et bakdekk.' : esc(sc.leak)}</b> Du kjører ${sc.veh === 'tank' ? 'tankbil' : 'lastebil med kolli'} med UN ${sc.un} ${esc(sc.what)} (fareseddel ${sc.lab}) og har stoppet i vegkanten.</span></div>
+    <div class="acc" id="acc">${ulykkeScene(sc, run.i)}</div>
+    <p class="qtext">${esc(st.q)}</p>${optsHTML(st)}<div id="fb"></div></div>`, run.i > 0);
+  $('#quit').onclick = goHome;
+  p.querySelector('.opts').addEventListener('click', e => {
+    const b = e.target.closest('.opt'); if (!b || b.disabled) return;
+    const i = +b.dataset.i;
+    if (st.pos) sc.choice = sc.pts[[0, 1, 2].find(k => st.o[i].startsWith(`Punkt ${k + 1} `))];
+    const ok = answer(p, st, i, `<span>${esc(st.ex)}</span><span class="src">Kilde: skriftlige instruksjoner, ADR 5.4.3.4</span>`, run.i < n - 1 ? 'Neste steg' : 'Se resultat', () => { run.i++; runUlykke(run); });
+    run.marks[run.i] = ok; if (ok) run.right++;
+    kv('lab', { k: 'ulykke.' + (run.i + 1), a: ok ? 'riktig' : 'feil', m: sc.un + ' ' + sc.event });
+    // Vis det riktige tiltaket i scenen. På posisjonssteget går sjåføren dit eleven valgte.
+    $('#acc').innerHTML = ulykkeScene(sc, run.i + 1, st.pos);
+    if (st.pos) { const d = $('#driver'), [x, y] = ({ up: [sc.wind > 0 ? 70 : 830, 172], down: [sc.wind > 0 ? 830 : 70, 172], low: [420, 300] })[sc.choice]; requestAnimationFrame(() => requestAnimationFrame(() => { d.style.transform = `translate(${x}px,${y}px)`; })); }
+  });
 }
 
 renderHome();
