@@ -177,6 +177,34 @@ button{font:inherit;color:inherit}
 .pal button[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 2px var(--accent);background:var(--accent-soft)}
 .pal button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .pal button[disabled]{opacity:.5;cursor:default}
+/* Poengmåler */
+.gauge svg{width:min(420px,100%);height:auto;display:block;margin:0 auto}
+.needle{transform-box:view-box;transform-origin:200px 200px;transition:transform .8s cubic-bezier(.3,1.4,.5,1)}
+.needle.swing{animation:swing 1.4s cubic-bezier(.3,1.3,.5,1)}
+@keyframes swing{from{transform:rotate(-90deg)}}
+.itms{display:grid;gap:6px}
+.itm{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px 12px;padding:8px 10px;border:1px solid var(--line);border-radius:4px;background:var(--bg)}
+.itm.fix{opacity:.85}
+.itm .nm{display:flex;gap:8px;align-items:center;min-width:0;flex:1 1 240px}
+.itm .nm svg{width:34px;height:34px;flex:none}
+.itm .nm span{display:grid;font-size:14px;line-height:1.3}
+.itm small{color:var(--muted);font-size:12.5px}
+.stp{display:flex;align-items:center;gap:8px}
+.stp .btn{min-width:40px;font-size:18px;padding:4px 10px}
+.stp b{font-family:var(--f-display);font-size:22px;min-width:2ch;text-align:center}
+.reqs{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:10px;font-size:14px}
+.reqs ul{margin:6px 0 0;padding-left:18px;display:grid;gap:3px}
+.reqs li.off{color:var(--muted);opacity:.6}
+.reqs li.hot{color:var(--bad);font-weight:600}
+/* Branntrekanten */
+.tri svg{width:min(340px,100%);height:auto;display:block;margin:0 auto}
+.side{cursor:pointer}.side:focus{outline:none}
+.side .edge{stroke:var(--accent)}
+.side:hover .edge,.side:focus-visible .edge{stroke:var(--ink)}
+.side.gone{animation:fade .9s forwards}
+@keyframes fade{to{opacity:.12}}
+.fire.out{transform-box:view-box;transform-origin:200px 250px;animation:douse 1.2s forwards}
+@keyframes douse{to{transform:scale(0);opacity:0}}
 /* Last bilen */
 .ramp{display:grid;gap:6px;background:var(--bg);border:1px dashed var(--line);border-radius:4px;padding:10px;min-height:60px;cursor:pointer}
 .pks{display:flex;flex-wrap:wrap;gap:8px}
@@ -202,7 +230,7 @@ button{font:inherit;color:inherit}
 .puff{animation:puff 1.6s linear infinite}
 .drive{animation:drive 2.2s ease-out}
 .walker{transition:transform 1.6s ease-in-out}
-@media (prefers-reduced-motion:reduce){.blink,.drift,.grow,.flick,.puff,.drive{animation:none}.walker{transition:none}}
+@media (prefers-reduced-motion:reduce){.blink,.drift,.grow,.flick,.puff,.drive,.swing{animation:none}.walker,.needle{transition:none}.side.gone{animation:none;opacity:.12}.fire.out{animation:none;opacity:0}}
 @media (max-width:560px){
   .quiz{padding:14px;gap:12px}
   .qtext{font-size:18px}
@@ -259,9 +287,9 @@ const EMNER = {
 const STATIONS = [
   { id: 'bok', day: 1, title: 'Regelverket og ADR-boka', emner: ['a', 'l'], desc: 'Hvem lager reglene, hvordan boka er bygd opp, og hvordan du slår opp i Tabell A.', labs: ['tabA'], match: 'kolonner' },
   { id: 'farer', day: 1, title: 'Fareklassene og farene', emner: ['b', 'c'], desc: 'De ni fareklassene, faresedlene, emballasjegruppene og miljøfarlig gods og avfall.', labs: ['sedler'], match: 'klasser' },
-  { id: 'forebygg', day: 1, title: 'Forebygging og sikkerhet', emner: ['d'], desc: 'Tennkilder, røykeforbud, verneutstyr og trygg drift av kjøretøyet.' },
+  { id: 'forebygg', day: 1, title: 'Forebygging og sikkerhet', emner: ['d'], desc: 'Tennkilder, røykeforbud, verneutstyr og trygg drift av kjøretøyet.', labs: ['brann'] },
   { id: 'merking', day: 2, title: 'Merking og oransje skilt', emner: ['f'], desc: 'Oransje skilt, farenummer, store faresedler og LQ-merket.', labs: ['merk', 'skilt'], match: 'farenr' },
-  { id: 'unntak', day: 2, title: 'Unntak og 1000 poeng', emner: ['a'], desc: 'Mengdeunntaket i 1.1.3.6, begrensede og unntatte mengder, og de andre unntakene.', labs: ['poeng'] },
+  { id: 'unntak', day: 2, title: 'Unntak og 1000 poeng', emner: ['a'], desc: 'Mengdeunntaket i 1.1.3.6, begrensede og unntatte mengder, og de andre unntakene.', labs: ['maaler', 'poeng'] },
   { id: 'forer', day: 2, title: 'Dokumenter og utstyr', emner: ['g', 'h'], desc: 'Hva som skal være i førerhuset, skriftlige instruksjoner, brannslukkere og utstyr.', labs: ['utstyr'] },
   { id: 'lasting', day: 3, title: 'Lasting, samlasting og stuing', emner: ['i', 'j', 'm'], desc: 'Hva som kan lastes sammen, kontroll før lasting, matvarer og lastsikring.', labs: ['lasteplan', 'samlast'] },
   { id: 'ansvar', day: 3, title: 'Ansvar og sikring', emner: ['k', 'o'], desc: 'Pliktene til avsender, transportør, laster og sjåfør, og sikring mot misbruk.', match: 'aktor' },
@@ -278,6 +306,8 @@ const LABS = {
   samlast: { name: 'Kan de lastes sammen?', desc: 'Avgjør om kolliene kan samlastes etter tabellen i 7.5.2.1.' },
   tunnel: { name: 'Tunnelkontroll', desc: 'Kan bilen kjøre gjennom tunnelen med denne lasten?' },
   merk: { name: 'Merk bilen', desc: 'Sett oransje skilt, store faresedler og merker på riktig sted på bilen.', run: () => startMerk() },
+  maaler: { name: 'Poengmåler', desc: 'Legg kolli på bilen og se måleren fylles opp mot 1000 poeng.', run: () => startMaaler() },
+  brann: { name: 'Branntrekanten', desc: 'Fjern én side av trekanten og se brannen slukne, og finn brannklassen.', run: () => startBrann() },
   lasteplan: { name: 'Last bilen', desc: 'Plasser kolliene på lasteplanet, la det som ikke kan være med stå igjen, og sikre lasten.', run: () => startLast() },
   rute: { name: 'Velg rute', desc: 'Finn den korteste ruta bilen får kjøre, med tunnelene på vegen.', run: () => startRute() },
   ulykke: { name: 'Ulykke på vegen', desc: 'Følg de skriftlige instruksjonene steg for steg når det lekker fra lasten.', run: () => startUlykke() }
@@ -1485,6 +1515,185 @@ function runRute(run) {
       kv('lab', { k: 'rute.' + (t.inTank ? 'tank' : t.under ? 'under' : 'kolli'), a: ok ? 'riktig' : 'feil', m: t.s.tc });
     });
   });
+}
+
+// ---------- Lab: Poengmåler (1.1.3.6) ----------
+const MULT = { 0: 0, 1: 50, 2: 3, 3: 1, 4: 0 };
+const UNIT = { L: 'L', S: 'kg', G: 'kg', C: 'L', A: 'kg' };
+// Kollitypene i måleren. LQ og tom emballasje er med for å vise at de ikke teller.
+const MAAL_ITEMS = [
+  ...[['1202', 0], ['1203', 0], ['1978', 0], ['1072', 0], ['1830', 0], ['2794', 0], ['3480', 0], ['1428', 0], ['2814', 0]].map(([un, k]) => {
+    const s = SUBST.find(x => x.un === un), [desc, amt] = s.packs[k];
+    return { key: un, label: `UN ${un} ${lc(s.name)}`, desc, amt, unit: UNIT[s.form], tk: s.tk, labs: s.lab };
+  }),
+  { key: 'lq', label: 'Maling i begrensede mengder (LQ)', desc: 'kartong à 12 kg', amt: 12, unit: 'kg', tk: null, lq: true, labs: [] },
+  { key: 'tom', label: 'Tomme, ikke rengjorte fat etter diesel', desc: 'tomt fat', amt: 1, unit: 'stk', tk: 4, labs: ['3'] }
+];
+const itemPts = (it, n) => it.lq ? 0 : n * it.amt * MULT[it.tk];
+function loadPts(counts) {
+  let sum = 0, cat0 = false, dg = false;
+  for (const it of MAAL_ITEMS) { const n = counts[it.key] || 0; if (!n) continue; if (!it.lq) dg = true; if (it.tk === 0) cat0 = true; sum += itemPts(it, n); }
+  return { sum, cat0, dg, over: cat0 || sum > 1000 };
+}
+// Halvsirkel 0–1500 poeng, rød strek ved 1000
+function gaugeSVG(L, hidden, swing) {
+  const ang = v => -90 + 180 * Math.min(v, 1500) / 1500, pt = (a, r) => [200 + r * Math.sin(a * Math.PI / 180), 200 - r * Math.cos(a * Math.PI / 180)];
+  const arc = (a0, a1, col) => { const [x0, y0] = pt(a0, 160), [x1, y1] = pt(a1, 160); return `<path d="M${x0.toFixed(1)} ${y0.toFixed(1)} A160 160 0 0 1 ${x1.toFixed(1)} ${y1.toFixed(1)}" fill="none" stroke="${col}" stroke-width="28"/>`; };
+  const a = hidden ? -90 : L.cat0 ? 90 : ang(L.sum), [lx0, ly0] = pt(ang(1000), 136), [lx1, ly1] = pt(ang(1000), 184);
+  const ticks = [0, 250, 500, 750, 1000, 1250, 1500].map(v => { const [x, y] = pt(ang(v), 118); return `<text x="${x.toFixed(1)}" y="${(y + 5).toFixed(1)}" text-anchor="middle" font-size="14" fill="var(--muted)" font-family="IBM Plex Sans,sans-serif">${v}</text>`; }).join('');
+  return `<svg viewBox="0 0 400 240" role="img" aria-label="${hidden ? 'Poengmåler, skjult til du sjekker' : L.cat0 ? 'Transportkategori 0: ingen unntak' : `Poengmåler: ${L.sum} poeng`}">
+    ${arc(-90, ang(1000), 'var(--ok)')}${arc(ang(1000), 90, 'var(--bad)')}
+    <line x1="${lx0.toFixed(1)}" y1="${ly0.toFixed(1)}" x2="${lx1.toFixed(1)}" y2="${ly1.toFixed(1)}" stroke="var(--ink)" stroke-width="5"/>${ticks}
+    <g class="needle${swing ? ' swing' : ''}" style="transform:rotate(${a}deg)"><path d="M196 200 L200 52 L204 200Z" fill="var(--ink)"/></g><circle cx="200" cy="200" r="12" fill="var(--ink)"/>
+    <text x="200" y="236" text-anchor="middle" font-family="Barlow Condensed,Arial Narrow,sans-serif" font-weight="700" font-size="30" fill="${L.over && !hidden ? 'var(--bad)' : 'currentColor'}">${hidden ? '? poeng' : L.cat0 ? 'KATEGORI 0' : L.sum + ' poeng'}</text></svg>`;
+}
+const REQ_ALWAYS = ['Transportdokument (8.1.2.1 a)', 'Ett pulverapparat på minst 2 kg (8.1.4.2)', 'Faresedler og merking på kolliene', 'Opplæring etter 1.3 for sjåføren', 'Samlastingsforbud og lastsikring'];
+const REQ_OVER = ['Oransje skilt foran og bak (5.3.2)', 'Skriftlige instruksjoner (5.4.3)', 'ADR-kompetansebevis (8.2.1)', 'Brannslukkere etter vekten på bilen (8.1.4.1)', 'Utstyr etter 8.1.5', 'Tunnelbegrensninger (8.6)'];
+function reqHTML(L) {
+  if (!L.dg) return '<p class="muted" style="margin:0">Ingen farlig gods som teller. LQ følger egne regler i kapittel 3.4.</p>';
+  return `<div class="reqs"><div><b>Gjelder alltid</b><ul>${REQ_ALWAYS.map(r => `<li class="on">${esc(r)}</li>`).join('')}</ul></div>
+    <div><b>${L.over ? 'Over grensen – gjelder nå' : 'Over 1000 poeng – gjelder ikke nå'}</b><ul>${REQ_OVER.map(r => `<li class="${L.over ? 'hot' : 'off'}">${esc(r)}</li>`).join('')}</ul></div></div>`;
+}
+const stepper = (it, n, dis) => `<div class="itm"><span class="nm">${it.labs.map(l => labelSVG(l)).join('')}${it.lq ? markSVG(lqMark()) : ''}<span><b>${esc(it.label)}</b><small>${esc(it.desc)} · ${it.lq ? 'teller ikke' : it.tk === 0 ? 'kategori 0' : it.tk === 4 ? 'kategori 4, teller ikke' : `kategori ${it.tk} × ${MULT[it.tk]}`}</small></span></span>
+  <span class="stp"><button class="btn" data-dec="${it.key}" ${dis || !n ? 'disabled' : ''} aria-label="Ta bort ett">−</button><b aria-live="polite">${n}</b><button class="btn" data-inc="${it.key}" ${dis ? 'disabled' : ''} aria-label="Legg til ett">+</button></span></div>`;
+
+function startMaaler() { runMaaler({ i: 0, right: 0 }); }
+function maalerTask() {
+  const adj = MAAL_ITEMS.filter(it => [1, 2, 3].includes(it.tk));
+  for (;;) {
+    const a = pick(adj), fixed = {};
+    for (const it of shuffle(MAAL_ITEMS.filter(x => x !== a && x.tk !== 0)).slice(0, pick([1, 2, 2]))) fixed[it.key] = 1 + Math.floor(Math.random() * (it.tk === 1 ? 2 : it.amt >= 100 ? 3 : 8));
+    const fp = loadPts(fixed).sum, per = a.amt * MULT[a.tk], max = Math.floor((1000 - fp) / per);
+    if (fp < 1000 && max >= 1 && max <= 25) return { a, fixed, max, fp, per, counts: { ...fixed, [a.key]: 0 } };
+  }
+}
+function runMaaler(run) {
+  if (run.explore) return runUtforsk(run);
+  if (run.i === MAAL_N) return labDone('maaler', run.right, MAAL_N, startMaaler);
+  if (!run.t) { run.t = maalerTask(); run.done = false; run.swung = false; }
+  const t = run.t, L = loadPts(t.counts);
+  const items = MAAL_ITEMS.filter(it => it.key in t.counts);
+  goPlay(`<div class="quiz">
+    <div class="qbar"><span>${esc(LABS.maaler.name)} · oppgave <b>${run.i + 1}</b> av <b>${MAAL_N}</b></span><span>Riktig <b>${run.right}</b></span><div class="row"><button class="btn" id="expl">Utforsk fritt</button><button class="btn" id="quit">Avslutt</button></div></div>
+    <p class="qtext">Hvor mange ${esc(PLURAL[t.a.desc.split(' à ')[0]] || t.a.desc.split(' à ')[0])} med ${esc(t.a.label)} kan du ta med sammen med resten, uten å gå over 1000 poeng?</p>
+    <div class="itms">${items.map(it => it === t.a ? stepper(it, t.counts[it.key], run.done) : `<div class="itm fix"><span class="nm">${it.labs.map(l => labelSVG(l)).join('')}${it.lq ? markSVG(lqMark()) : ''}<span><b>${esc(it.label)}</b><small>${t.counts[it.key]} × ${esc(it.desc)} – står fast</small></span></span></div>`).join('')}</div>
+    <div class="gauge">${gaugeSVG(L, !run.done, run.done && !run.swung)}</div>
+    <div class="row"><button class="btn primary" id="check" ${run.done ? 'hidden' : ''}>Sjekk</button></div><div id="fb">${run.done ? run.fb : ''}</div></div>`, !!run.keep);
+  run.keep = true; if (run.done) run.swung = true;
+  $('#quit').onclick = goHome;
+  $('#expl').onclick = () => { run.explore = { counts: {} }; run.keep = false; runMaaler(run); };
+  if (run.done) { $('#next').onclick = () => { run.i++; run.t = null; run.keep = false; runMaaler(run); }; return; }
+  $('#play').querySelector('.itms').addEventListener('click', e => {
+    const b = e.target.closest('[data-inc],[data-dec]'); if (!b) return;
+    t.counts[t.a.key] = Math.max(0, t.counts[t.a.key] + (b.dataset.inc ? 1 : -1)); runMaaler(run);
+  });
+  $('#check').onclick = () => {
+    const n = t.counts[t.a.key], ok = n === t.max;
+    if (ok) run.right++;
+    kv('lab', { k: 'maaler', a: ok ? 'riktig' : 'feil', m: t.a.key });
+    const fixedTxt = MAAL_ITEMS.filter(it => it.key in t.fixed).map(it => `${t.fixed[it.key]} × ${it.amt} ${it.unit} ${it.lq ? '(LQ teller ikke)' : it.tk === 4 ? '(kategori 4 teller ikke)' : `× ${MULT[it.tk]}`} = ${itemPts(it, t.fixed[it.key])}`).join(' · ');
+    run.fb = `<div class="fb ${ok ? 'ok' : 'no'}"><b>${ok ? 'Riktig' : `Feil, riktig svar: ${t.max}`}</b><span class="calc"><span>Resten av lasten: ${fixedTxt} → ${t.fp} poeng</span><span>Hvert kolli: ${t.a.amt} ${t.a.unit} × ${MULT[t.a.tk]} = ${t.per} poeng</span><span>(1000 − ${t.fp}) / ${t.per} = ${((1000 - t.fp) / t.per).toFixed(2).replace('.', ',')} → <b>${t.max}</b>. Med ${t.max + 1} blir det ${t.fp + (t.max + 1) * t.per} poeng.</span></span><span class="src">Kilde: ADR 1.1.3.6.3 og 1.1.3.6.4</span></div>
+      <div class="row" style="margin-top:10px"><button class="btn primary" id="next">${run.i < MAAL_N - 1 ? 'Neste' : 'Se resultat'}</button></div>`;
+    run.done = true; runMaaler(run); $('#next').focus();
+  };
+}
+const MAAL_N = 6;
+const PLURAL = { fat: 'fat', kanne: 'kanner', flaske: 'flasker', batteri: 'batterier', kasse: 'kasser', boks: 'bokser' };
+// Fri utforsking: måleren følger med mens eleven legger til og tar bort
+function runUtforsk(run) {
+  const c = run.explore.counts, L = loadPts(c);
+  goPlay(`<div class="quiz">
+    <div class="qbar"><span>${esc(LABS.maaler.name)} · <b>utforsk</b></span><div class="row"><button class="btn" id="back">Til oppgavene</button><button class="btn" id="quit">Avslutt</button></div></div>
+    <p class="qtext">Legg kolli på bilen og se hva som skjer når du passerer 1000 poeng.</p>
+    <div class="gauge">${gaugeSVG(L, false)}</div>
+    ${L.cat0 ? '<div class="fb no"><b>Transportkategori 0: ingen unntak. Hele ADR gjelder uansett mengde.</b></div>' : ''}
+    <div id="req">${reqHTML(L)}</div>
+    <div class="itms">${MAAL_ITEMS.map(it => stepper(it, c[it.key] || 0)).join('')}</div>
+    <div class="row"><button class="btn" id="empty">Tøm bilen</button></div></div>`, !!run.explore.keep);
+  run.explore.keep = true;
+  $('#quit').onclick = goHome;
+  $('#back').onclick = () => { run.explore = null; run.keep = false; runMaaler(run); };
+  $('#empty').onclick = () => { run.explore.counts = {}; runUtforsk(run); };
+  $('#play').querySelector('.itms').addEventListener('click', e => {
+    const b = e.target.closest('[data-inc],[data-dec]'); if (!b) return;
+    const k = b.dataset.inc || b.dataset.dec; c[k] = Math.max(0, (c[k] || 0) + (b.dataset.inc ? 1 : -1));
+    // Bytt bare måler, krav og telleren, så nåla glir fra forrige verdi
+    const L2 = loadPts(c), cur = $('.needle');
+    const g = document.createElement('div'); g.innerHTML = gaugeSVG(L2, false);
+    const nn = g.querySelector('.needle'); cur.style.transform = nn.style.transform;
+    $('.gauge svg').replaceChild(g.querySelector('text:last-of-type'), $('.gauge svg text:last-of-type'));
+    $('.gauge svg').setAttribute('aria-label', g.querySelector('svg').getAttribute('aria-label'));
+    $('#req').innerHTML = reqHTML(L2);
+    b.closest('.itm').outerHTML = stepper(MAAL_ITEMS.find(it => it.key === k), c[k]);
+    const cat0 = $('#play .fb'); if (!!cat0 !== L2.cat0) runUtforsk(run);
+  });
+}
+
+// ---------- Lab: Branntrekanten ----------
+const SIDES = { brensel: 'Brensel', oksygen: 'Oksygen', varme: 'Varme' };
+const BRANN_SIDE = [
+  ['Du legger et brannteppe over en brennende kartong.', 'oksygen', 'Teppet stenger lufta ute. Uten oksygen slukner brannen.'],
+  ['Du kjøler et varmt dekk med vann fra en kanne.', 'varme', 'Vann kjøler ned brannen. Er det farlig gods i nærheten, sjekk de skriftlige instruksjonene før du bruker vann.'],
+  ['Du stenger ventilen på gassflasken som brenner.', 'brensel', 'Uten gass er det ikke noe mer å brenne.'],
+  ['Du flytter pappesker og paller bort fra brannen.', 'brensel', 'Brannen får ikke mer å brenne.'],
+  ['Du lukker dører og luker inn til et rom som brenner.', 'oksygen', 'Brannen bruker opp oksygenet og blir svakere.'],
+  ['Du røyker ikke mens det lastes farlig gods (8.3.5).', 'varme', 'Røyk og gnister er tennkilder – varmen som starter brannen. Forebygging er å fjerne én side før det brenner.'],
+  ['Du bruker en lommelykt uten metalloverflater som kan gi gnister (8.3.4).', 'varme', 'Gnister er tennkilder. Uten tennkilde kan ikke damp eller gass ta fyr.'],
+  ['Du stopper motoren under lasting og lossing (8.3.6).', 'varme', 'En varm motor og eksosanlegg kan antenne brannfarlig damp.'],
+  ['Du kveler en liten brann i et dekk med CO₂-apparat.', 'oksygen', 'CO₂ fortrenger oksygenet rundt brannen.']
+];
+const BRANN_KLASSE = [
+  ['Det brenner i trepaller og papp.', 'A', 'Klasse A er faste stoffer som tre, papir og tekstiler.'],
+  ['Det brenner i diesel som har lekket under bilen.', 'B', 'Klasse B er brennbare væsker som bensin, diesel og maling.'],
+  ['Det brenner i maling som har rent ut.', 'B', 'Maling er en brennbar væske – klasse B.'],
+  ['Det brenner i gass som lekker fra en propanflaske.', 'C', 'Klasse C er gasser. Stans helst gasstilførselen.'],
+  ['Det brenner i natrium (UN 1428).', 'D', 'Klasse D er metaller. Vanlig ABC-pulver er ikke egnet, og vann er farlig: X423 betyr at stoffet reagerer farlig med vann.'],
+  ['Det brenner i et dekk.', 'A', 'Gummi er et fast stoff – klasse A. Pulverapparatet på bilen dekker A, B og C.']
+];
+const KLASSER = { A: 'A – faste stoffer', B: 'B – væsker', C: 'C – gasser', D: 'D – metaller' };
+const BRANN_N = 8;
+function triangleSVG(removed, lit) {
+  const P = { top: [200, 30], l: [40, 300], r: [360, 300] };
+  const side = (k, a, b, tx, ty, rot) => `<g class="side${removed === k ? ' gone' : ''}" data-side="${k}" tabindex="0" role="button" aria-label="${SIDES[k]}">
+    <line x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}" stroke="transparent" stroke-width="44"/>
+    <line class="edge" x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}" stroke-width="16" stroke-linecap="round"/>
+    <text x="${tx}" y="${ty}" text-anchor="middle" transform="rotate(${rot} ${tx} ${ty})" font-family="Barlow Condensed,Arial Narrow,sans-serif" font-weight="700" font-size="26" fill="currentColor">${SIDES[k].toUpperCase()}</text></g>`;
+  const fire = `<g class="fire${lit ? '' : ' out'}"><g class="flick"><path d="M200 250 C150 250 140 200 170 170 C172 190 182 196 186 196 C178 160 196 130 214 112 C212 146 236 156 236 190 C242 182 246 176 246 168 C262 194 258 250 200 250Z" fill="#FF7A1A"/><path d="M200 250 C176 250 170 222 186 206 C188 218 196 222 198 222 C196 204 204 190 214 180 C214 200 226 206 226 226 C226 242 216 250 200 250Z" fill="#FFD23F"/></g></g>
+    ${lit ? '' : `<g>${[0, .8, 1.6].map(d => `<circle class="puff" style="animation-delay:${d}s" cx="200" cy="200" r="12" fill="#9AA"/>`).join('')}</g>`}`;
+  return `<svg viewBox="0 0 400 330" role="group" aria-label="Branntrekanten">${fire}
+    ${side('varme', P.l, P.top, 98, 150, -59)}${side('oksygen', P.top, P.r, 302, 150, 59)}${side('brensel', P.l, P.r, 200, 326, 0)}</svg>`;
+}
+function startBrann() {
+  const mk = kind => ([txt, ans, ex]) => ({ kind, txt, ans, ex });
+  const tasks = shuffle([...shuffle(BRANN_SIDE).slice(0, 5).map(mk('side')), ...shuffle(BRANN_KLASSE).slice(0, 3).map(mk('kl'))]);
+  runBrann({ i: 0, right: 0, tasks });
+}
+function runBrann(run) {
+  if (run.i === BRANN_N) return labDone('brann', run.right, BRANN_N, startBrann);
+  const { txt, ans, ex, kind } = run.tasks[run.i];
+  const q = kind === 'side' ? { o: [ans, ...Object.keys(SIDES).filter(k => k !== ans)].map(k => SIDES[k]) } : { o: [ans, ...Object.keys(KLASSER).filter(k => k !== ans)].map(k => 'Brannklasse ' + KLASSER[k]) };
+  if (kind === 'kl') q._order = q.o.map((x, i) => ({ x, i })).sort((a, b) => a.x.localeCompare(b.x));
+  const p = goPlay(`<div class="quiz">
+    <div class="qbar"><span>${esc(LABS.brann.name)} · oppgave <b>${run.i + 1}</b> av <b>${BRANN_N}</b></span><span>Riktig <b>${run.right}</b></span><button class="btn" id="quit">Avslutt</button></div>
+    <div class="tri" id="tri">${triangleSVG(null, true)}</div>
+    <div class="load"><span><b>${esc(txt)}</b></span></div>
+    <p class="qtext">${kind === 'side' ? 'Hvilken side av branntrekanten fjerner du? Trykk på siden eller velg under.' : 'Hvilken brannklasse er det?'}</p>
+    ${optsHTML(q)}<div id="fb"></div></div>`, run.i > 0);
+  $('#quit').onclick = goHome;
+  const choose = i => {
+    if (p.querySelector('.opt[disabled]')) return;
+    const ok = answer(p, q, i, `<span>${esc(ex)}</span>${kind === 'kl' ? '<span class="src">Kilde: EN 2 (brannklasser) og ADR 8.1.4.1</span>' : ''}`, run.i < BRANN_N - 1 ? 'Neste' : 'Se resultat', () => { run.i++; runBrann(run); });
+    if (ok) run.right++;
+    kv('lab', { k: 'brann.' + kind, a: ok ? 'riktig' : 'feil', m: ans });
+    // Animasjonen viser alltid det riktige: siden forsvinner og brannen slukner
+    $('#tri').innerHTML = triangleSVG(kind === 'side' ? ans : null, kind === 'kl');
+  };
+  p.querySelector('.opts').addEventListener('click', e => { const b = e.target.closest('.opt'); if (b && !b.disabled) choose(+b.dataset.i); });
+  if (kind === 'side') {
+    const pickSide = g => { if (!g) return; const k = g.dataset.side; choose(q.o.indexOf(SIDES[k])); };
+    $('#tri').addEventListener('click', e => pickSide(e.target.closest('[data-side]')));
+    $('#tri').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pickSide(e.target.closest('[data-side]')); } });
+  }
 }
 
 renderHome();
