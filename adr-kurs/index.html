@@ -177,6 +177,13 @@ button{font:inherit;color:inherit}
 .pal button[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 2px var(--accent);background:var(--accent-soft)}
 .pal button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .pal button[disabled]{opacity:.5;cursor:default}
+/* Last bilen */
+.ramp{display:grid;gap:6px;background:var(--bg);border:1px dashed var(--line);border-radius:4px;padding:10px;min-height:60px;cursor:pointer}
+.pks{display:flex;flex-wrap:wrap;gap:8px}
+.pk{all:unset;cursor:pointer;display:grid;justify-items:center;gap:4px;width:110px;padding:6px;border:1px solid var(--line);border-radius:4px;background:var(--sheet);font-size:12px;line-height:1.25;text-align:center}
+.pk svg{width:64px;height:64px}
+.pk[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 2px var(--accent);background:var(--accent-soft)}
+.pk:focus-visible,.ramp:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 /* Ulykke på vegen */
 .acc svg{width:100%;height:auto;display:block;border-radius:4px}
 .steps{display:flex;flex-wrap:wrap;gap:4px}
@@ -256,9 +263,9 @@ const STATIONS = [
   { id: 'merking', day: 2, title: 'Merking og oransje skilt', emner: ['f'], desc: 'Oransje skilt, farenummer, store faresedler og LQ-merket.', labs: ['merk', 'skilt'], match: 'farenr' },
   { id: 'unntak', day: 2, title: 'Unntak og 1000 poeng', emner: ['a'], desc: 'Mengdeunntaket i 1.1.3.6, begrensede og unntatte mengder, og de andre unntakene.', labs: ['poeng'] },
   { id: 'forer', day: 2, title: 'Dokumenter og utstyr', emner: ['g', 'h'], desc: 'Hva som skal være i førerhuset, skriftlige instruksjoner, brannslukkere og utstyr.', labs: ['utstyr'] },
-  { id: 'lasting', day: 3, title: 'Lasting, samlasting og stuing', emner: ['i', 'j', 'm'], desc: 'Hva som kan lastes sammen, kontroll før lasting, matvarer og lastsikring.', labs: ['samlast'] },
+  { id: 'lasting', day: 3, title: 'Lasting, samlasting og stuing', emner: ['i', 'j', 'm'], desc: 'Hva som kan lastes sammen, kontroll før lasting, matvarer og lastsikring.', labs: ['lasteplan', 'samlast'] },
   { id: 'ansvar', day: 3, title: 'Ansvar og sikring', emner: ['k', 'o'], desc: 'Pliktene til avsender, transportør, laster og sjåfør, og sikring mot misbruk.', match: 'aktor' },
-  { id: 'ulykke', day: 3, title: 'Ulykke, brann og tunnel', emner: ['e', 'n'], desc: 'De skriftlige instruksjonene, brann og førstehjelp, og tunnelkategoriene.', labs: ['ulykke', 'tunnel'] }
+  { id: 'ulykke', day: 3, title: 'Ulykke, brann og tunnel', emner: ['e', 'n'], desc: 'De skriftlige instruksjonene, brann og førstehjelp, og tunnelkategoriene.', labs: ['ulykke', 'rute', 'tunnel'] }
 ];
 const ST = Object.fromEntries(STATIONS.map((s, i) => [s.id, { ...s, n: i + 1 }]));
 const DAYS = { 1: 'Dag 1', 2: 'Dag 2', 3: 'Dag 3' };
@@ -271,6 +278,8 @@ const LABS = {
   samlast: { name: 'Kan de lastes sammen?', desc: 'Avgjør om kolliene kan samlastes etter tabellen i 7.5.2.1.' },
   tunnel: { name: 'Tunnelkontroll', desc: 'Kan bilen kjøre gjennom tunnelen med denne lasten?' },
   merk: { name: 'Merk bilen', desc: 'Sett oransje skilt, store faresedler og merker på riktig sted på bilen.', run: () => startMerk() },
+  lasteplan: { name: 'Last bilen', desc: 'Plasser kolliene på lasteplanet, la det som ikke kan være med stå igjen, og sikre lasten.', run: () => startLast() },
+  rute: { name: 'Velg rute', desc: 'Finn den korteste ruta bilen får kjøre, med tunnelene på vegen.', run: () => startRute() },
   ulykke: { name: 'Ulykke på vegen', desc: 'Følg de skriftlige instruksjonene steg for steg når det lekker fra lasten.', run: () => startUlykke() }
 };
 const PRACTICAL = [
@@ -1284,6 +1293,197 @@ function runUlykke(run) {
     // Vis det riktige tiltaket i scenen. På posisjonssteget går sjåføren dit eleven valgte.
     $('#acc').innerHTML = ulykkeScene(sc, run.i + 1, st.pos);
     if (st.pos) { const d = $('#driver'), [x, y] = ({ up: [sc.wind > 0 ? 70 : 830, 172], down: [sc.wind > 0 ? 830 : 70, 172], low: [420, 300] })[sc.choice]; requestAnimationFrame(() => requestAnimationFrame(() => { d.style.transform = `translate(${x}px,${y}px)`; })); }
+  });
+}
+
+// ---------- Lab: Last bilen (7.5.2.1, 7.5.4, 7.5.7.1, 1.4.3.1.1 b) ----------
+// Lasteplanet sett ovenfra: 2 rader × 5 plasser, førerhuset til høyre. Kolonne 4 er nærmest førerhuset.
+const LAST_N = 5, COLS = 5;
+const TOXIC = ['6.1', '6.2'];
+const SECURE = [['strap', 'Stropper over lasten'], ['fill', 'Fyll tomrom med luftputer eller lastebjelke'], ['hard', 'Stram stroppene så hardt det går'], ['none', 'Ingen sikring – tunge kolli står støtt']];
+function lastTask() {
+  let id = 0;
+  const dg = s => ({ id: id++, kind: 'dg', labs: s.lab, un: s.un, name: lc(s.name) });
+  const exp = Math.random() < .3, s14 = !exp && Math.random() < .25, leak = Math.random() < .35, food = Math.random() < .75;
+  const pool = SUBST.filter(s => s.packs.length && !(exp && s.cls === '5.1'));
+  const pk = [];
+  if (food) pk.push({ id: id++, kind: 'food', labs: [], name: 'matvarer' });
+  // Minst ett kolli med 6.1 eller 6.2 når det er matvarer med, ellers blir regelen om matvarer aldri prøvd
+  if (food) pk.push(Math.random() < .5 ? { id: id++, kind: 'dg', labs: ['6.1'], un: '', name: 'plantevernmiddel, giftig' } : dg(pick(pool.filter(s => s.lab.some(l => TOXIC.includes(l))))));
+  if (exp) pk.push({ id: id++, kind: 'exp', labs: ['1'], un: '', name: 'sprengstoff, klasse 1.1D' });
+  if (s14) pk.push({ id: id++, kind: 's14', labs: ['1.4S'], un: '', name: 'nødbluss, klasse 1.4S' });
+  while (pk.length < 5) { const s = pick(pool); if (!pk.some(p => p.un === s.un)) pk.push(dg(s)); }
+  if (Math.random() < .5) pk.push({ id: id++, kind: 'gods', labs: [], name: 'vanlig gods' });
+  if (leak) { const l = pick(pk.filter(p => p.kind === 'dg')); l.leak = true; }
+  return { pk: shuffle(pk), at: {}, sec: {}, exp, leak, food };
+}
+// Kolliet skal stå igjen på rampa: lekker, eller klasse 1.1D sammen med andre farlige kolli
+const mustStay = (t, p) => p.leak || (p.kind === 'exp' && t.pk.some(q => q !== p && q.labs.length && q.kind !== 's14'));
+function lastCheck(t) {
+  const cells = {}; for (const [id, c] of Object.entries(t.at)) cells[c] = t.pk[t.pk.findIndex(p => p.id === +id)];
+  const msgs = [], badIds = new Set();
+  // 1 Hva skal være med
+  for (const p of t.pk) {
+    const on = t.at[p.id] != null, stay = mustStay(t, p);
+    if (on && stay) { badIds.add(p.id); msgs.push([false, p.leak ? `Kolliet med ${p.un ? 'UN ' + p.un : esc(p.name)} lekker og skal ikke lastes før skaden er utbedret (1.4.3.1.1 b).` : 'Klasse 1.1D kan ikke lastes sammen med de andre farlige kolliene (7.5.2.1). Det må gå med en annen bil.']); }
+    if (!on && !stay) { badIds.add(p.id); msgs.push([false, `${p.kind === 'food' ? 'Matvarene' : p.kind === 'gods' ? 'Det vanlige godset' : p.un ? 'UN ' + p.un : esc(p.name)} kan være med og står igjen på rampa.`]); }
+  }
+  if (t.exp && !t.pk.some(p => p.kind === 'exp' && t.at[p.id] != null)) msgs.push([true, 'Riktig at klasse 1.1D står igjen: den kan ikke samlastes med de andre klassene.']);
+  if (t.leak && !t.pk.some(p => p.leak && t.at[p.id] != null)) msgs.push([true, 'Riktig at kolliet som lekker, står igjen.']);
+  if (t.pk.some(p => p.kind === 's14' && t.at[p.id] != null)) msgs.push([true, '1.4S kan lastes sammen med de andre klassene.']);
+  // 2 Matvarer atskilt fra 6.1 og 6.2 (7.5.4)
+  const adj = c => { const r = Math.floor(c / COLS), k = c % COLS; return [[r, k - 1], [r, k + 1], [1 - r, k]].filter(([a, b]) => b >= 0 && b < COLS).map(([a, b]) => a * COLS + b); };
+  let foodOk = true;
+  for (const [c, p] of Object.entries(cells)) if (p.kind === 'food') for (const n of adj(+c)) { const q = cells[n]; if (q && q.labs.some(l => TOXIC.includes(l))) { foodOk = false; badIds.add(p.id); badIds.add(q.id); } }
+  if (t.food && t.pk.some(p => p.kind === 'food' && t.at[p.id] != null)) msgs.push([foodOk, foodOk ? 'Matvarene står ikke inntil kolli med 6.1 eller 6.2.' : 'Matvarene står rett inntil kolli med 6.1 eller 6.2. Flytt dem fra hverandre, eller la et annet kolli stå imellom (7.5.4).']);
+  // 3 Tomrom: en tom plass med last bak seg i samme rad (fronten er mot førerhuset)
+  let holes = 0;
+  for (let r = 0; r < 2; r++) for (let k = 0; k < COLS; k++) if (!cells[r * COLS + k] && [...Array(k).keys()].some(b => cells[r * COLS + b])) holes++;
+  const need = { strap: true, fill: holes > 0, hard: false, none: false };
+  const secOk = Object.keys(need).every(k => !!t.sec[k] === need[k]);
+  msgs.push([secOk, secOk ? `Lasten er sikret riktig${holes ? ', med tomrommene fylt' : ''}.` : `Sikring: stropper over lasten${holes ? `, og fyll de ${holes} tomrommene – eller skyv lasten fram mot førerhuset` : ''}. Ikke stram så hardt at kolliene skades, og aldri uten sikring (7.5.7.1).`]);
+  return { ok: msgs.every(m => m[0]) && badIds.size === 0, msgs, badIds, need };
+}
+// Ett kolli tegnet i en rute på 96 × 96
+function pkgSVG(p, x, y, sel, bad) {
+  const fill = p.kind === 'food' ? '#2E7D4F' : p.kind === 'gods' ? '#9C7A4E' : '#C49A6C';
+  const labs = p.labs.map((l, i, a) => placeSVG(labelSVG(l), x + 48 - a.length * 21 + i * 42, y + 10, 42, 42)).join('');
+  const txt = p.kind === 'food' ? 'MAT' : p.kind === 'gods' ? 'GODS' : p.un ? 'UN ' + p.un : p.labs[0] === '1' ? '1.1D' : p.labs[0] === '1.4S' ? '1.4S' : 'GIFT';
+  return `<rect x="${x + 2}" y="${y + 2}" width="92" height="92" rx="4" fill="${fill}" stroke="${bad ? 'var(--bad)' : sel ? 'var(--accent)' : '#5A4630'}" stroke-width="${bad || sel ? 6 : 2}"/>
+    ${p.kind === 'food' ? '<path d="M30 30 h36 v30 h-36z" fill="none"/>' : ''}${labs}
+    ${p.leak ? `<path d="M${x + 80} ${y + 56} q8 12 0 18 q-8 -6 0 -18z" fill="#3D9BE9"/><ellipse cx="${x + 76}" cy="${y + 88}" rx="16" ry="4" fill="#3D9BE9" opacity=".7"/>` : ''}
+    <text x="${x + 48}" y="${y + 80}" text-anchor="middle" font-family="Barlow Condensed,Arial Narrow,sans-serif" font-weight="700" font-size="17" fill="#fff">${esc(txt)}</text>`;
+}
+function bedSVG(t, sel, res) {
+  const cells = {}; for (const [id, c] of Object.entries(t.at)) cells[c] = t.pk.find(p => p.id === +id);
+  let g = '';
+  for (let c = 0; c < 2 * COLS; c++) {
+    const x = 26 + (c % COLS) * 104, y = 24 + Math.floor(c / COLS) * 104, p = cells[c];
+    g += `<g class="slot" data-cell="${c}" tabindex="0" role="button" aria-label="Plass ${c + 1}${p ? ': ' + esc(p.kind === 'food' ? 'matvarer' : p.kind === 'gods' ? 'vanlig gods' : (p.un ? 'UN ' + p.un + ' ' : '') + p.name) : ', tom'}"><rect class="hit" x="${x}" y="${y}" width="96" height="96" rx="4"/>${p ? pkgSVG(p, x, y, sel === p.id, res && res.badIds.has(p.id)) : ''}</g>`;
+  }
+  return `<svg viewBox="0 0 640 256" role="group" aria-label="Lasteplanet sett ovenfra, førerhuset til høyre">
+    <rect x="14" y="12" width="534" height="232" rx="6" fill="#4A4F53"/><rect x="552" y="40" width="74" height="176" rx="14" fill="#2B3A4A"/><rect x="590" y="52" width="26" height="152" rx="6" fill="#9FC3DA"/>
+    <text x="560" y="250" font-size="13" fill="var(--muted)" font-family="IBM Plex Sans,sans-serif">førerhus</text>${g}</svg>`;
+}
+function startLast() { runLast({ i: 0, right: 0 }); }
+function runLast(run) {
+  if (run.i === LAST_N) return labDone('lasteplan', run.right, LAST_N, startLast);
+  if (!run.t) { run.t = lastTask(); run.sel = null; run.res = null; }
+  const t = run.t;
+  const ramp = t.pk.filter(p => t.at[p.id] == null);
+  const card = p => `<button class="pk" data-pk="${p.id}" aria-pressed="${run.sel === p.id}" ${run.res ? 'disabled' : ''}><svg viewBox="0 0 96 96">${pkgSVG(p, 0, 0, false, run.res && run.res.badIds.has(p.id))}</svg><span>${esc(p.kind === 'food' ? 'Matvarer' : p.kind === 'gods' ? 'Vanlig gods' : (p.un ? 'UN ' + p.un + ' ' : '') + p.name)}${p.leak ? ' – <b>lekker</b>' : ''}</span></button>`;
+  goPlay(`<div class="quiz">
+    <div class="qbar"><span>${esc(LABS.lasteplan.name)} · bil <b>${run.i + 1}</b> av <b>${LAST_N}</b></span><span>Riktig <b>${run.right}</b></span><button class="btn" id="quit">Avslutt</button></div>
+    <p class="qtext">Trykk på et kolli og så på en plass på lasteplanet. Det som ikke kan være med, lar du stå på rampa. Velg sikring til slutt.</p>
+    <div class="view" id="bed">${bedSVG(t, run.sel, run.res)}</div>
+    <div class="ramp" id="ramp" tabindex="0" role="button" aria-label="Rampa – trykk for å sette valgt kolli tilbake"><span class="muted">Rampa${ramp.length ? '' : ' er tom'}</span><div class="pks">${ramp.map(card).join('')}</div></div>
+    <div class="eqs" id="sec">${SECURE.map(([k, n]) => `<button class="eq${run.res ? (run.res.need[k] ? (t.sec[k] ? ' right' : ' wrong') : t.sec[k] ? ' wrong' : '') : ''}" data-sec="${k}" aria-pressed="${!!t.sec[k]}" ${run.res ? 'disabled' : ''}>${esc(n)}</button>`).join('')}</div>
+    <div class="row"><button class="btn primary" id="check" ${run.res ? 'hidden' : ''}>Sjekk</button></div><div id="fb">${run.res ? lastFb(run) : ''}</div></div>`, !!run.keep);
+  run.keep = true;
+  $('#quit').onclick = goHome;
+  if (run.res) { $('#next').onclick = () => { run.i++; run.t = null; run.keep = false; runLast(run); }; return; }
+  const move = cell => { if (run.sel == null) return; for (const [id, c] of Object.entries(t.at)) if (c === cell) delete t.at[id]; if (cell == null) delete t.at[run.sel]; else t.at[run.sel] = cell; run.sel = null; runLast(run); };
+  $('#bed').addEventListener('click', e => {
+    const g = e.target.closest('[data-cell]'); if (!g) return;
+    const c = +g.dataset.cell, here = Object.entries(t.at).find(([, v]) => v === c);
+    if (run.sel == null && here) { run.sel = +here[0]; return runLast(run); }
+    if (run.sel != null && here && +here[0] === run.sel) { run.sel = null; return runLast(run); }
+    // Ledig plass, eller bytt: kolliet som stod der går tilbake til rampa
+    move(c);
+  });
+  $('#bed').addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.closest('[data-cell]')) { e.preventDefault(); e.target.closest('[data-cell]').dispatchEvent(new MouseEvent('click', { bubbles: true })); } });
+  $('#ramp').addEventListener('click', e => {
+    const b = e.target.closest('[data-pk]');
+    if (b) { run.sel = run.sel === +b.dataset.pk ? null : +b.dataset.pk; return runLast(run); }
+    if (run.sel != null && t.at[run.sel] != null) move(null);
+  });
+  $('#sec').addEventListener('click', e => { const b = e.target.closest('[data-sec]'); if (!b) return; t.sec[b.dataset.sec] = !t.sec[b.dataset.sec]; b.setAttribute('aria-pressed', !!t.sec[b.dataset.sec]); });
+  $('#check').onclick = () => {
+    run.res = lastCheck(t); run.sel = null;
+    if (run.res.ok) run.right++;
+    kv('lab', { k: 'lasteplan', a: run.res.ok ? 'riktig' : 'feil', m: [t.exp && 'eks', t.leak && 'lekk', t.food && 'mat'].filter(Boolean).join('+') });
+    runLast(run); $('#next').focus();
+  };
+}
+const lastFb = run => `<div class="fb ${run.res.ok ? 'ok' : 'no'}"><b>${run.res.ok ? 'Riktig lastet' : 'Ikke helt. Røde kolli står feil.'}</b>${run.res.msgs.map(([ok, m]) => `<span>${ok ? '✓' : '✗'} ${m}</span>`).join('')}<span class="src">Kilde: ADR 7.5.2.1, 7.5.4, 7.5.7.1 og 1.4.3.1.1 b)</span></div>
+  <div class="row" style="margin-top:10px"><button class="btn primary" id="next">${run.i < LAST_N - 1 ? 'Neste bil' : 'Se resultat'}</button></div>`;
+
+// ---------- Lab: Velg rute (8.6) ----------
+// Tre ruter fra A til B som kubiske Bézier-kurver. Tunnelene ligger på faste steder langs kurvene.
+const RUTE_N = 6;
+const ROUTES = [[[60, 175], [240, 10], [660, 10], [840, 175]], [[60, 175], [300, 200], [600, 150], [840, 175]], [[60, 175], [240, 340], [660, 340], [840, 175]]];
+const bez = ([p0, p1, p2, p3], t) => [0, 1].map(i => (1 - t) ** 3 * p0[i] + 3 * (1 - t) ** 2 * t * p1[i] + 3 * (1 - t) * t * t * p2[i] + t ** 3 * p3[i]);
+function ruteTask() {
+  for (;;) {
+    const inTank = Math.random() < .4, under = !inTank && Math.random() < .2;
+    const s = pick(SUBST.filter(x => x.tc !== '-' && (inTank ? x.tank : x.packs.length && !x.noPts && x.tk >= 1)));
+    const forb = tunnelForbidden([s.tc], inTank);
+    const kms = shuffle([38, 44, 52, 61, 67, 73, 85]).slice(0, 3);
+    const routes = ROUTES.map((c, r) => {
+      const nt = r === 1 ? pick([1, 1, 2]) : pick([0, 1, 1, 2]);
+      const tunnels = (nt === 2 ? [.33, .66] : nt === 1 ? [pick([.4, .55])] : []).map(at => ({ at, cat: pick(['A', 'B', 'C', 'D', 'E', 'D', 'E']) }));
+      const stop = under ? null : tunnels.find(tu => forb.includes(tu.cat)) || null;
+      return { r, km: kms[r], tunnels, ok: !stop, stop };
+    });
+    const okRoutes = routes.filter(x => x.ok);
+    if (!okRoutes.length || (!under && okRoutes.length === 3)) continue;
+    const best = okRoutes.reduce((a, b) => b.km < a.km ? b : a);
+    return { s, inTank, under, forb, routes, best };
+  }
+}
+function ruteSVG(t, drive) {
+  const names = ['Fjellvegen', 'Hovedvegen', 'Kystvegen'];
+  const path = c => `M${c[0]} C${c[1]} ${c[2]} ${c[3]}`;
+  const tun = t.routes.map(rt => rt.tunnels.map(tu => { const [x, y] = bez(ROUTES[rt.r], tu.at), [x2, y2] = bez(ROUTES[rt.r], tu.at + .05); const a = Math.atan2(y2 - y, x2 - x) * 180 / Math.PI;
+    return `<g transform="translate(${x} ${y})"><rect x="-22" y="-9" width="44" height="18" rx="9" fill="#222" transform="rotate(${a.toFixed(1)})"/>${tu.cat === 'A' ? '' : `<g transform="translate(0 -34)"><circle r="17" fill="#fff" stroke="#C8102E" stroke-width="5"/><rect x="-8" y="-6" width="16" height="12" fill="#F28C00" stroke="#000" stroke-width="1.5"/></g><rect x="-13" y="-17" width="26" height="20" rx="3" fill="#fff" stroke="#000" stroke-width="2"/><text y="-1" text-anchor="middle" font-family="Barlow Condensed,Arial Narrow,sans-serif" font-weight="700" font-size="18" fill="#000">${tu.cat}</text>`}</g>`; }).join('')).join('');
+  // Navnet står tidlig på ruta, før første tunnel, så det ikke kolliderer med tunnelskiltene
+  const lbl = t.routes.map(rt => { const [x, y] = bez(ROUTES[rt.r], .2), [dx, dy, anc] = [[-14, 0, 'end'], [0, 30, 'middle'], [-14, 10, 'end']][rt.r]; return `<text x="${x + dx}" y="${y + dy}" text-anchor="${anc}" font-family="IBM Plex Sans,sans-serif" font-size="15" font-weight="600" fill="currentColor">${rt.r + 1}. ${names[rt.r]} · ${rt.km} km</text>`; }).join('');
+  return `<svg viewBox="0 0 900 360" role="img" aria-label="Kart med tre ruter fra A til B">
+    <rect width="900" height="360" rx="6" fill="var(--bg)"/>
+    ${ROUTES.map(c => `<path d="${path(c)}" fill="none" stroke="#7B858C" stroke-width="12" stroke-linecap="round"/><path d="${path(c)}" fill="none" stroke="#E8E8E8" stroke-width="2" stroke-dasharray="10 10"/>`).join('')}
+    ${tun}${lbl}
+    ${[['A', 60], ['B', 840]].map(([n, x]) => `<circle cx="${x}" cy="175" r="20" fill="var(--ink)"/><text x="${x}" y="182" text-anchor="middle" font-family="Barlow Condensed,Arial Narrow,sans-serif" font-weight="700" font-size="22" fill="var(--sheet)">${n}</text>`).join('')}
+    <g id="lorry" transform="translate(60 175)"><rect x="-16" y="-10" width="32" height="20" rx="3" fill="#2B3A4A" stroke="#fff" stroke-width="2"/><rect x="-6" y="-5" width="12" height="10" fill="#F28C00"/></g><g id="stopX"></g></svg>`;
+}
+// Kjører bilen langs ruta, og stopper foran tunnelen den ikke får kjøre gjennom
+function driveRoute(t, rt, done) {
+  const g = $('#lorry'), end = rt.stop ? rt.stop.at - .06 : 1, c = ROUTES[rt.r];
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches, dur = reduce ? 0 : 2600 * end, t0 = performance.now();
+  const step = now => {
+    if (!g.isConnected) return;
+    const k = dur ? Math.min(1, (now - t0) / dur) : 1, u = end * k, [x, y] = bez(c, u), [x2, y2] = bez(c, Math.min(1, u + .01));
+    g.setAttribute('transform', `translate(${x.toFixed(1)} ${y.toFixed(1)}) rotate(${(Math.atan2(y2 - y, x2 - x) * 180 / Math.PI).toFixed(1)})`);
+    if (k < 1) return requestAnimationFrame(step);
+    if (rt.stop) { const [sx, sy] = bez(c, rt.stop.at); $('#stopX').innerHTML = `<g transform="translate(${sx} ${sy})"><circle r="26" fill="var(--bad)" opacity=".9"/><path d="M-11 -11 L11 11 M11 -11 L-11 11" stroke="#fff" stroke-width="6" stroke-linecap="round"/></g>`; }
+    done();
+  };
+  requestAnimationFrame(step);
+}
+function startRute() { runRute({ i: 0, right: 0 }); }
+function runRute(run) {
+  if (run.i === RUTE_N) return labDone('rute', run.right, RUTE_N, startRute);
+  const t = run.t = ruteTask();
+  const desc = rt => `Rute ${rt.r + 1}, ${rt.km} km – ${rt.tunnels.length ? rt.tunnels.map(tu => tu.cat === 'A' ? 'tunnel uten skilt' : 'tunnel kategori ' + tu.cat).join(' og ') : 'ingen tunneler'}`;
+  const q = { o: [t.best, ...t.routes.filter(x => x !== t.best)].map(desc) };
+  q._order = shuffle(q.o.map((x, i) => ({ x, i })));
+  const load = `${t.inTank ? 'Tankbil' : 'Kolli'} med <b>UN ${t.s.un} ${esc(lc(t.s.name))}</b>, tunnelkode <b>${tcTxt(t.s)}</b>${t.inTank ? '' : t.under ? ', <b>innenfor 1000 poeng</b> (ingen oransje skilt)' : ', over 1000 poeng'}.`;
+  const p = goPlay(`<div class="quiz">
+    <div class="qbar"><span>${esc(LABS.rute.name)} · tur <b>${run.i + 1}</b> av <b>${RUTE_N}</b></span><span>Riktig <b>${run.right}</b></span><button class="btn" id="quit">Avslutt</button></div>
+    <div class="load"><span>${load}</span></div>
+    <div class="acc">${ruteSVG(t)}</div>
+    <p class="qtext">Du skal fra A til B. Hvilken rute er den korteste du får kjøre?</p>${optsHTML(q)}<div id="fb"></div></div>`, run.i > 0);
+  $('#quit').onclick = goHome;
+  p.querySelector('.opts').addEventListener('click', e => {
+    const b = e.target.closest('.opt'); if (!b || b.disabled) return;
+    const i = +b.dataset.i, rt = [t.best, ...t.routes.filter(x => x !== t.best)][i];
+    p.querySelectorAll('.opt').forEach(x => x.disabled = true);
+    const why = t.under ? 'Lasten er innenfor 1000 poeng, så tunnelbegrensningene gjelder ikke (8.6.3.3). Velg den korteste ruta.'
+      : `Med kode ${tcTxt(t.s)} ${t.inTank ? 'i tank' : 'i kolli'} er ${t.forb.length ? 'kategori ' + t.forb.join(', ') + ' forbudt' : 'alle tunneler tillatt'}. Tunneler uten skilt er kategori A.`;
+    driveRoute(t, rt, () => {
+      const ok = answer(p, q, i, `<span>${rt.stop ? `Bilen må stoppe foran tunnelen i kategori ${rt.stop.cat}. ` : ''}${why} Korteste lovlige rute er rute ${t.best.r + 1} (${t.best.km} km).</span><span class="src">Kilde: ADR 8.6.3 og 8.6.4</span>`, run.i < RUTE_N - 1 ? 'Neste tur' : 'Se resultat', () => { run.i++; runRute(run); });
+      if (ok) run.right++;
+      kv('lab', { k: 'rute.' + (t.inTank ? 'tank' : t.under ? 'under' : 'kolli'), a: ok ? 'riktig' : 'feil', m: t.s.tc });
+    });
   });
 }
 
