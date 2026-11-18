@@ -1,0 +1,1001 @@
+<!doctype html>
+<html lang="nb">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>ADR grunnkurs</title>
+<meta name="description" content="Kunnskapssti for ADR grunnkurs: fagstoff, øving, laber og prøve etter emnene i ADR 8.2.2.3.2.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: kunnskapssti med stasjoner per kursdag, deretter én oppgave eller lab om gangen */
+:root{
+  --bg:#E8EBE9; --sheet:#F6F7F5; --ink:#17201D; --muted:#56625D; --line:#C7CFCB;
+  --accent:#E07800; --accent-soft:rgba(224,120,0,.14); --badge-ink:#1a0e00;
+  --ok:#1D7A4C; --ok-soft:rgba(29,122,76,.12); --bad:#C0352B; --bad-soft:rgba(192,53,43,.10);
+  --f-display:'Barlow Condensed','Arial Narrow',sans-serif;
+  --f-body:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F1312; --sheet:#161B1A; --ink:#E3E8E5; --muted:#95A19C; --line:#2A3230;
+    --accent:#FF9A2E; --accent-soft:rgba(255,154,46,.14);
+    --ok:#4CC38A; --ok-soft:rgba(76,195,138,.13); --bad:#FF6B5E; --bad-soft:rgba(255,107,94,.12);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F1312; --sheet:#161B1A; --ink:#E3E8E5; --muted:#95A19C; --line:#2A3230;
+  --accent:#FF9A2E; --accent-soft:rgba(255,154,46,.14);
+  --ok:#4CC38A; --ok-soft:rgba(76,195,138,.13); --bad:#FF6B5E; --bad-soft:rgba(255,107,94,.12);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{background:var(--bg)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:calc(20px + env(safe-area-inset-top,0px)) calc(40px + env(safe-area-inset-bottom,0px))}
+.wrap{max-width:1100px;margin:0 auto}
+header{display:grid;gap:4px;margin-bottom:18px}
+h1{font-family:var(--f-display);font-weight:700;font-size:clamp(30px,4vw,40px);letter-spacing:.01em;margin:0;text-transform:uppercase;line-height:1}
+h1 span{color:var(--accent)}
+header p{margin:0;color:var(--muted);max-width:75ch}
+a.back{color:var(--muted);font-size:13px;text-decoration:none}
+a.back:hover{color:var(--ink)}
+h2{font-family:var(--f-display);font-weight:600;font-size:15px;letter-spacing:.08em;text-transform:uppercase;margin:0 0 10px;color:var(--muted);display:flex;align-items:center;gap:12px}
+h2::after{content:"";flex:1;height:1px;background:var(--line)}
+h3{font-family:var(--f-display);font-weight:700;font-size:24px;line-height:1.05;text-transform:uppercase;margin:0;letter-spacing:.01em}
+section{margin-top:24px}
+button{font:inherit;color:inherit}
+.btn{cursor:pointer;font-weight:600;font-size:14px;padding:8px 14px;border-radius:4px;border:1px solid var(--line);background:var(--sheet)}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--ink);color:var(--sheet);border-color:var(--ink)}
+.btn.primary:hover{background:var(--accent);border-color:var(--accent);color:var(--badge-ink)}
+.btn:focus-visible,.opt:focus-visible,.m:focus-visible,.eq:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn:disabled{opacity:.5;cursor:default}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.muted{color:var(--muted)}
+.note{font-size:14px;color:var(--muted);max-width:75ch}
+
+/* Kunnskapsstien */
+.overview{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:10px}
+.tile{background:var(--sheet);border:1px solid var(--line);border-radius:4px;padding:12px 14px}
+.tile .v{font-family:var(--f-display);font-weight:700;font-size:34px;line-height:1}
+.tile .l{font-size:13px;color:var(--muted)}
+.day{margin-top:18px}
+.day h3{font-size:20px;color:var(--muted);margin-bottom:8px}
+.path{list-style:none;margin:0;padding:0;display:grid;gap:10px;position:relative}
+.path::before{content:"";position:absolute;left:21px;top:22px;bottom:22px;width:2px;background:var(--line)}
+.stn{display:grid;grid-template-columns:44px minmax(0,1fr);gap:12px;align-items:start}
+.dot{position:relative;z-index:1;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-display);font-weight:700;font-size:22px;background:var(--sheet);border:2px solid var(--line)}
+.stn.started .dot{border-color:var(--accent);color:var(--accent)}
+.stn.done .dot{background:var(--ok);border-color:var(--ok);color:#fff}
+.stn.next .dot{box-shadow:0 0 0 4px var(--accent-soft)}
+.card{background:var(--sheet);border:1px solid var(--line);border-radius:4px;padding:14px 16px;display:grid;gap:8px}
+.stn.next .card{border-color:var(--accent)}
+.card .hd{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 12px;align-items:baseline}
+.card p{margin:0;font-size:14.5px}
+.emner{display:flex;flex-wrap:wrap;gap:6px}
+.em{font-size:12px;padding:2px 8px;border:1px solid var(--line);border-radius:999px;color:var(--muted)}
+.bar{height:8px;border-radius:4px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--ok);border-radius:4px}
+.prog{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;font-size:13px;color:var(--muted)}
+.chk{display:grid;gap:6px}
+.chk label{display:flex;gap:10px;align-items:flex-start;font-size:14.5px;cursor:pointer}
+.chk input{width:18px;height:18px;margin-top:2px;accent-color:var(--ok)}
+
+/* Oppgave */
+.quiz{background:var(--sheet);border:1px solid var(--line);border-radius:4px;padding:20px;display:grid;gap:14px}
+.qbar{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 16px;align-items:center;font-size:14px;color:var(--muted)}
+.qbar b{color:var(--ink);font-family:var(--f-display);font-size:20px}
+.track{height:6px;border-radius:3px;background:var(--line);overflow:hidden}
+.track i{display:block;height:100%;background:var(--accent)}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tag{font-size:12px;padding:2px 8px;border:1px solid var(--line);border-radius:999px;color:var(--muted)}
+.qtext{font-size:clamp(18px,2.2vw,22px);font-weight:600;line-height:1.35;margin:0;max-width:62ch}
+.opts{display:grid;gap:8px}
+.opt{all:unset;cursor:pointer;display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:center;padding:12px 14px;border:1px solid var(--line);border-radius:4px;background:var(--bg);font-size:15.5px}
+.opt .k{font-family:var(--f-display);font-weight:700;font-size:18px;line-height:1.2;width:20px}
+.opt:hover:not([disabled]){border-color:var(--muted)}
+.opt[disabled]{cursor:default}
+.opt.sel{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);background:var(--accent-soft)}
+.opt.right{border-color:var(--ok);background:var(--ok-soft)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.opt.dim{opacity:.55}
+.opts.pics{grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr))}
+.opts.pics svg{width:150px;height:auto;display:block}
+.fb{padding:12px 14px;border-radius:4px;font-size:14.5px;display:grid;gap:4px}
+.fb.ok{background:var(--ok-soft);border:1px solid var(--ok)}
+.fb.no{background:var(--bad-soft);border:1px solid var(--bad)}
+.src{font-size:13px;font-weight:600;color:var(--muted)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:10px}
+.tiles .tile{background:var(--bg)}
+.review{display:grid;gap:10px;margin:0;padding:0;list-style:none}
+.review li{border:1px solid var(--line);border-left:4px solid var(--bad);border-radius:4px;padding:10px 14px;background:var(--bg);display:grid;gap:4px;font-size:14.5px}
+.mrow{display:grid;grid-template-columns:minmax(0,240px) minmax(0,1fr) auto;gap:12px;align-items:center;font-size:14px}
+.mrow b{font-family:var(--f-display);font-size:18px;min-width:5ch;text-align:right}
+@media (max-width:560px){.mrow{grid-template-columns:minmax(0,1fr) auto}.mrow .bar{grid-column:1 / -1;grid-row:2}}
+
+/* Fagstoff */
+.facts{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,320px),1fr));gap:12px}
+.fact{background:var(--sheet);border:1px solid var(--line);border-radius:4px;padding:14px 16px;display:grid;gap:8px;align-content:start}
+.fact h4{margin:0;font-family:var(--f-display);font-size:20px;text-transform:uppercase;line-height:1.1}
+.fact ul{margin:0;padding-left:18px;display:grid;gap:4px;font-size:14.5px}
+.fact .em{justify-self:start}
+
+/* Koble sammen */
+.match{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:10px}
+.col{display:grid;gap:8px;align-content:start}
+.m{all:unset;cursor:pointer;padding:12px 14px;border:1px solid var(--line);border-radius:4px;background:var(--bg);font-size:15px;min-height:24px}
+.m.code{font-family:var(--f-display);font-weight:700;font-size:20px;line-height:1.1}
+.m.sel{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);background:var(--accent-soft)}
+.m.done{border-color:var(--ok);background:var(--ok-soft);cursor:default;opacity:.75}
+.m.err{border-color:var(--bad);background:var(--bad-soft)}
+
+/* Laber */
+.tabA{overflow-x:auto;border:1px solid var(--line);border-radius:4px;background:var(--bg)}
+.tabA table{border-collapse:collapse;font-size:13.5px;min-width:640px;width:100%}
+.tabA th,.tabA td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.tabA th{font-size:12px;color:var(--muted);font-weight:600}
+.tabA th b{display:block;font-family:var(--f-display);font-size:15px;color:var(--ink)}
+.tabA td.n{font-family:var(--f-display);font-weight:700;font-size:16px;white-space:nowrap}
+.load{display:grid;gap:6px;background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:12px 14px;font-size:14.5px}
+.load .li{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center}
+.load svg{width:44px;height:44px;flex:none}
+.pair{display:flex;flex-wrap:wrap;gap:24px;justify-content:center;align-items:center;padding:8px 0}
+.pair figure{margin:0;display:grid;justify-items:center;gap:6px;font-size:13.5px;text-align:center;max-width:180px}
+.pair svg{width:120px;height:120px}
+.big svg{width:min(260px,80vw);height:auto;display:block;margin:0 auto}
+.scene{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:center}
+.scene > svg{width:min(220px,70vw);height:auto}
+.eqs{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:8px}
+.eq{all:unset;cursor:pointer;display:flex;gap:10px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:4px;background:var(--bg);font-size:14.5px}
+.eq::before{content:"";flex:none;width:16px;height:16px;border:2px solid var(--muted);border-radius:3px}
+.eq[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.eq[aria-pressed="true"]::before{background:var(--accent);border-color:var(--accent)}
+.eq.right{border-color:var(--ok);background:var(--ok-soft)}
+.eq.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.calc{font-size:14px;display:grid;gap:2px}
+.navrow #hand{margin-left:auto}
+@media (max-width:560px){
+  .quiz{padding:14px;gap:12px}
+  .qtext{font-size:18px}
+  .opt{padding:12px;font-size:15px}
+  .match{grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:6px}
+  .m{padding:10px;font-size:14px}
+  .m.code{font-size:16px}
+  .navrow #hand{margin-left:0}
+  .qbar{font-size:13px}
+  .pair svg{width:96px;height:96px}
+}
+@media print{body{background:#fff}.noprint,a.back{display:none!important}.review li{break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a class="back" href="../index.html">← Transport og logistikk</a>
+    <h1>ADR <span>grunnkurs</span></h1>
+    <p>Kunnskapsstien følger emnene grunnkurset skal dekke etter ADR 8.2.2.3.2. Gå stasjonene i rekkefølge gjennom kurset: les fagstoffet, øv til du kan det, prøv laben, og ta prøven til slutt.</p>
+  </header>
+
+  <main id="home">
+    <section style="margin-top:0">
+      <h2>Fremdrift på denne maskinen</h2>
+      <div class="overview" id="overview"></div>
+      <div class="row" style="margin-top:10px"><button class="btn primary" id="cont">Fortsett der du slapp</button><button class="btn" id="resetM">Nullstill</button></div>
+    </section>
+    <section>
+      <h2>Kunnskapsstien</h2>
+      <div id="path"></div>
+    </section>
+    <section>
+      <h2>Til læreren</h2>
+      <p class="note">Innholdet bygger på ADR/RID 2025 og forskrift om landtransport av farlig gods slik DSB gir dem ut. Stasjonene dekker emnene a–o i 8.2.2.3.2, og hvert spørsmål viser hvilket emne det hører til og hvor i regelverket svaret står. Spørsmålene er skrevet med egne ord og er ikke hentet fra oppgavesamlingene.</p>
+      <p class="note">Prøven har 25 spørsmål og 45 minutter, som er minstekravet til den avsluttende prøven i 8.2.2.7.1.6. Den er en øvingsprøve, ikke eksamen hos Statens vegvesen. Grunnkurset skal ha minst 18 undervisningstimer på 45 minutter og høyst 8 timer per dag (8.2.2.4), og kursdagene på stien følger det.</p>
+      <p class="note">Anonyme svar (hvilke spørsmål som besvares feil) sendes til læreren for å forbedre oppgavene. Ingen navn eller personopplysninger lagres.</p>
+    </section>
+  </main>
+
+  <main id="play" hidden></main>
+</div>
+
+<script src="../kvalitet/kvalitet.js"></script>
+<script>
+// ---------- Kurset ----------
+// Emnene grunnkurset minst skal omfatte, ADR 8.2.2.3.2
+const EMNER = {
+  a: 'Alminnelige bestemmelser', b: 'De viktigste farene', c: 'Miljø og kontroll med avfall', d: 'Forebygging og sikkerhetstiltak',
+  e: 'Opptreden ved ulykke', f: 'Merking, faresedler og oransje skilt', g: 'Førerens plikter', h: 'Kjøretøyets tekniske utstyr',
+  i: 'Samlastingsforbud', j: 'Lasting og lossing', k: 'Sivilrettslig ansvar', l: 'Multimodal transport',
+  m: 'Håndtering og stuing av kolli', n: 'Tunneler', o: 'Sikring (security)'
+};
+const STATIONS = [
+  { id: 'bok', day: 1, title: 'Regelverket og ADR-boka', emner: ['a', 'l'], desc: 'Hvem lager reglene, hvordan boka er bygd opp, og hvordan du slår opp i Tabell A.', lab: 'tabA', match: 'kolonner' },
+  { id: 'farer', day: 1, title: 'Fareklassene og farene', emner: ['b', 'c'], desc: 'De ni fareklassene, faresedlene, emballasjegruppene og miljøfarlig gods og avfall.', lab: 'sedler', match: 'klasser' },
+  { id: 'forebygg', day: 1, title: 'Forebygging og sikkerhet', emner: ['d'], desc: 'Tennkilder, røykeforbud, verneutstyr og trygg drift av kjøretøyet.' },
+  { id: 'merking', day: 2, title: 'Merking og oransje skilt', emner: ['f'], desc: 'Oransje skilt, farenummer, store faresedler og LQ-merket.', lab: 'skilt', match: 'farenr' },
+  { id: 'unntak', day: 2, title: 'Unntak og 1000 poeng', emner: ['a'], desc: 'Mengdeunntaket i 1.1.3.6, begrensede og unntatte mengder, og de andre unntakene.', lab: 'poeng' },
+  { id: 'forer', day: 2, title: 'Dokumenter og utstyr', emner: ['g', 'h'], desc: 'Hva som skal være i førerhuset, skriftlige instruksjoner, brannslukkere og utstyr.', lab: 'utstyr' },
+  { id: 'lasting', day: 3, title: 'Lasting, samlasting og stuing', emner: ['i', 'j', 'm'], desc: 'Hva som kan lastes sammen, kontroll før lasting, matvarer og lastsikring.', lab: 'samlast' },
+  { id: 'ansvar', day: 3, title: 'Ansvar og sikring', emner: ['k', 'o'], desc: 'Pliktene til avsender, transportør, laster og sjåfør, og sikring mot misbruk.', match: 'aktor' },
+  { id: 'ulykke', day: 3, title: 'Ulykke, brann og tunnel', emner: ['e', 'n'], desc: 'De skriftlige instruksjonene, brann og førstehjelp, og tunnelkategoriene.', lab: 'tunnel' }
+];
+const ST = Object.fromEntries(STATIONS.map((s, i) => [s.id, { ...s, n: i + 1 }]));
+const DAYS = { 1: 'Dag 1', 2: 'Dag 2', 3: 'Dag 3' };
+const LABS = {
+  tabA: { name: 'Slå opp i Tabell A', desc: 'Finn klasse, transportkategori, tunnelkode og farenummer i et utdrag av tabellen.' },
+  sedler: { name: 'Kjenn igjen faresedlene', desc: 'Hvilken klasse viser faresedlen?' },
+  skilt: { name: 'Les det oransje skiltet', desc: 'Farenummer og UN-nummer: hva betyr skiltet, og hvilket skilt skal bilen ha?' },
+  poeng: { name: 'Regn 1000 poeng', desc: 'Regn ut poengene for lasten og avgjør om den er innenfor 1.1.3.6.' },
+  utstyr: { name: 'Pakk utstyret', desc: 'Kryss av utstyret transportenheten skal ha for lasten.' },
+  samlast: { name: 'Kan de lastes sammen?', desc: 'Avgjør om kolliene kan samlastes etter tabellen i 7.5.2.1.' },
+  tunnel: { name: 'Tunnelkontroll', desc: 'Kan bilen kjøre gjennom tunnelen med denne lasten?' }
+};
+const PRACTICAL = [
+  ['fa', 'Førstehjelp', 'Frie luftveier, sideleie, HLR og skylling av øyne og hud.'],
+  ['brann', 'Brannslukking', 'Slukk en øvingsbrann med pulverapparat.'],
+  ['uhell', 'Opptreden ved uhell', 'Gå gjennom tiltakene i de skriftlige instruksjonene på bilen.']
+];
+
+// ---------- Utdrag av Tabell A (ADR/RID 2025, kontrollert mot DSBs utgave) ----------
+// form: L væske (liter), S fast stoff (kg), G flytende eller oppløst gass (netto kg), C komprimert gass (vannkapasitet i liter), A gjenstand (kg)
+const SUBST = [
+  { un: '1202', name: 'DIESELOLJE', cls: '3', pg: 'III', lab: ['3'], lq: '5 L', tk: 3, tc: 'D/E', hz: '30', form: 'L', packs: [['fat à 200 L', 200], ['IBC à 1000 L', 1000], ['kanne à 20 L', 20]], tank: true },
+  { un: '1203', name: 'BENSIN', cls: '3', pg: 'II', lab: ['3'], lq: '1 L', tk: 2, tc: 'D/E', hz: '33', form: 'L', packs: [['kanne à 20 L', 20], ['fat à 200 L', 200]], tank: true },
+  { un: '1223', name: 'PARAFIN', cls: '3', pg: 'III', lab: ['3'], lq: '5 L', tk: 3, tc: 'D/E', hz: '30', form: 'L', packs: [['kanne à 20 L', 20], ['fat à 200 L', 200]], tank: true },
+  { un: '1090', name: 'ACETON', cls: '3', pg: 'II', lab: ['3'], lq: '1 L', tk: 2, tc: 'D/E', hz: '33', form: 'L', packs: [['kanne à 25 L', 25], ['fat à 200 L', 200]] },
+  { un: '1230', name: 'METANOL', cls: '3', pg: 'II', lab: ['3', '6.1'], lq: '1 L', tk: 2, tc: 'D/E', hz: '336', form: 'L', packs: [['kanne à 25 L', 25], ['fat à 200 L', 200]], tank: true },
+  { un: '1263', name: 'MALING', cls: '3', pg: 'II', lab: ['3'], lq: '5 L', tk: 2, tc: 'D/E', hz: '33', form: 'L', packs: [['spann à 10 L', 10], ['spann à 20 L', 20]] },
+  { un: '1978', name: 'PROPAN', cls: '2', pg: '', lab: ['2.1'], lq: '0', tk: 2, tc: 'B/D', hz: '23', form: 'G', packs: [['flaske à 11 kg', 11], ['flaske à 33 kg', 33]], tank: true },
+  { un: '1011', name: 'BUTAN', cls: '2', pg: '', lab: ['2.1'], lq: '0', tk: 2, tc: 'B/D', hz: '23', form: 'G', packs: [['flaske à 5 kg', 5]] },
+  { un: '1001', name: 'ACETYLEN, OPPLØST', cls: '2', pg: '', lab: ['2.1'], lq: '0', tk: 2, tc: 'B/D', hz: '239', form: 'G', packs: [['flaske à 8 kg', 8]] },
+  { un: '1072', name: 'OKSYGEN, KOMPRIMERT', cls: '2', pg: '', lab: ['2.2', '5.1'], lq: '0', tk: 3, tc: 'E', hz: '25', form: 'C', packs: [['flaske à 50 L', 50], ['flaske à 20 L', 20]] },
+  { un: '1066', name: 'NITROGEN, KOMPRIMERT', cls: '2', pg: '', lab: ['2.2'], lq: '120 ml', tk: 3, tc: 'E', hz: '20', form: 'C', packs: [['flaske à 50 L', 50]] },
+  { un: '1013', name: 'KARBONDIOKSID', cls: '2', pg: '', lab: ['2.2'], lq: '120 ml', tk: 3, tc: 'C/E', hz: '20', form: 'G', packs: [['flaske à 20 kg', 20]] },
+  { un: '1005', name: 'AMMONIAKK, VANNFRI', cls: '2', pg: '', lab: ['2.3', '8'], lq: '0', tk: 1, tc: 'C/D', hz: '268', form: 'G', packs: [], noPts: true },
+  { un: '1830', name: 'SVOVELSYRE', cls: '8', pg: 'II', lab: ['8'], lq: '1 L', tk: 2, tc: 'E', hz: '80', form: 'L', packs: [['kanne à 25 L', 25], ['IBC à 1000 L', 1000]], tank: true },
+  { un: '1824', name: 'NATRIUMHYDROKSIDLØSNING', cls: '8', pg: 'II', lab: ['8'], lq: '1 L', tk: 2, tc: 'E', hz: '80', form: 'L', packs: [['kanne à 25 L', 25]] },
+  { un: '1791', name: 'HYPOKLORITTLØSNING', cls: '8', pg: 'III', lab: ['8'], lq: '5 L', tk: 3, tc: 'E', hz: '80', form: 'L', packs: [['kanne à 25 L', 25]] },
+  { un: '2794', name: 'AKKUMULATORER, VÅTE, FYLT MED SYRE', cls: '8', pg: '', lab: ['8'], lq: '1 L', tk: 3, tc: 'E', hz: '80', form: 'A', packs: [['batteri à 25 kg', 25], ['pall à 500 kg', 500]] },
+  { un: '3480', name: 'LITIUM ION BATTERIER', cls: '9', pg: '', lab: ['9A'], lq: '0', tk: 2, tc: 'E', hz: '90', form: 'A', packs: [['kasse à 12 kg', 12], ['pall à 300 kg', 300]] },
+  { un: '3082', name: 'MILJØFARLIG STOFF, FLYTENDE, N.O.S.', cls: '9', pg: 'III', lab: ['9'], lq: '5 L', tk: 3, tc: '-', hz: '90', form: 'L', packs: [['fat à 200 L', 200], ['IBC à 1000 L', 1000]], tank: true },
+  { un: '3077', name: 'MILJØFARLIG STOFF, I FAST FORM, N.O.S.', cls: '9', pg: 'III', lab: ['9'], lq: '5 kg', tk: 3, tc: '-', hz: '90', form: 'S', packs: [['sekk à 25 kg', 25]] },
+  { un: '2067', name: 'AMMONIUMNITRATGJØDSEL', cls: '5.1', pg: 'III', lab: ['5.1'], lq: '5 kg', tk: 3, tc: 'E', hz: '50', form: 'S', packs: [['sekk à 25 kg', 25], ['storsekk à 500 kg', 500]] },
+  { un: '1748', name: 'KALSIUMHYPOKLORITT, TØRR', cls: '5.1', pg: 'II', lab: ['5.1'], lq: '1 kg', tk: 2, tc: 'E', hz: '50', form: 'S', packs: [['spann à 10 kg', 10]] },
+  { un: '1402', name: 'KALSIUMKARBID', cls: '4.3', pg: 'II', lab: ['4.3'], lq: '500 g', tk: 2, tc: 'D/E', hz: '423', form: 'S', packs: [['fat à 50 kg', 50]] },
+  { un: '1428', name: 'NATRIUM', cls: '4.3', pg: 'I', lab: ['4.3'], lq: '0', tk: 1, tc: 'B/E', hz: 'X423', form: 'S', packs: [['boks à 5 kg', 5]] },
+  { un: '2814', name: 'INFEKSJONSFREMMENDE STOFF, RAMMER MENNESKER', cls: '6.2', pg: '', lab: ['6.2'], lq: '0', tk: 0, tc: 'E', hz: '606', form: 'S', packs: [['kolli à 2 kg', 2]] },
+  { un: '3291', name: 'KLINISK AVFALL, USPESIFISERT, N.O.S.', cls: '6.2', pg: 'II', lab: ['6.2'], lq: '0', tk: 2, tc: '-', hz: '606', form: 'S', packs: [['beholder à 30 kg', 30]] },
+  { un: '3257', name: 'OPPVARMET FLYTENDE STOFF, N.O.S. (asfalt)', cls: '9', pg: 'III', lab: ['9'], lq: '0', tk: 3, tc: 'D', hz: '99', form: 'L', packs: [], tank: true, noPts: true },
+  { un: '1965', name: 'HYDROKARBON GASSBLANDING, FLYTENDE (LPG)', cls: '2', pg: '', lab: ['2.1'], lq: '0', tk: 2, tc: 'B/D', hz: '23', form: 'G', packs: [['flaske à 11 kg', 11]], tank: true }
+];
+const HZ = {
+  '20': 'kvelende gass eller gass uten tilleggsfare', '22': 'nedkjølt flytende gass, kvelende', '23': 'brannfarlig gass',
+  '239': 'brannfarlig gass som spontant kan føre til voldsom reaksjon', '25': 'oksiderende (brannfremmende) gass', '268': 'giftig gass, etsende',
+  '30': 'brannfarlig væske (flammepunkt 23–60 °C)', '33': 'meget brannfarlig væske (flammepunkt under 23 °C)', '336': 'meget brannfarlig væske, giftig',
+  '423': 'fast stoff som utvikler brannfarlige gasser med vann', 'X423': 'fast stoff som reagerer farlig med vann og utvikler brannfarlige gasser',
+  '50': 'oksiderende (brannfremmende) stoff', '606': 'infeksjonsfremmende stoff', '80': 'etsende stoff',
+  '90': 'miljøfarlig stoff; forskjellige farlige stoffer', '99': 'forskjellige farlige stoffer transportert ved høy temperatur'
+};
+const CLASSNAME = {
+  '1': 'Klasse 1 – eksplosive stoffer og gjenstander', '1.4S': 'Klasse 1.4S – eksplosiver med liten fare', '2.1': '2.1 – brannfarlig gass', '2.2': '2.2 – ikke-brannfarlig, ikke-giftig gass',
+  '2.3': '2.3 – giftig gass', '3': 'Klasse 3 – brannfarlige væsker', '4.1': '4.1 – brannfarlige faste stoffer', '4.2': '4.2 – selvantennende stoffer',
+  '4.3': '4.3 – utvikler brannfarlig gass med vann', '5.1': '5.1 – oksiderende stoffer', '5.2': '5.2 – organiske peroksider', '6.1': '6.1 – giftige stoffer',
+  '6.2': '6.2 – infeksjonsfremmende stoffer', '7': 'Klasse 7 – radioaktivt materiale', '8': 'Klasse 8 – etsende stoffer', '9': 'Klasse 9 – forskjellige farlige stoffer', '9A': 'Klasse 9 – litiumbatterier'
+};
+
+// ---------- Spørsmålsbank ----------
+// [stasjon, emne, kilde, spørsmål, svar (riktig først), forklaring]. Rekkefølgen stokkes ved visning.
+const QS = [
+  // 1 Regelverket og ADR-boka
+  ['bok', 'a', 'Forordet i ADR/RID', 'Hvilken forskrift gjør ADR til norsk regelverk?', ['Forskrift om landtransport av farlig gods', 'Forskrift om utførelse av arbeid', 'Forskrift om håndtering av farlig stoff', 'Vegtrafikkloven'], 'ADR og RID er gjort til norsk rett i forskrift 1. april 2009 nr. 384 om landtransport av farlig gods.'],
+  ['bok', 'a', 'Forordet i ADR/RID', 'Hvilken myndighet forvalter regelverket for landtransport av farlig gods i Norge?', ['DSB – Direktoratet for samfunnssikkerhet og beredskap', 'Arbeidstilsynet', 'Miljødirektoratet', 'Kystverket'], 'DSB gir også ut ADR/RID på norsk. Statens vegvesen og politiet kontrollerer på vegen.'],
+  ['bok', 'l', 'Forordet i ADR/RID', 'Hvilket regelverk gjelder for farlig gods på jernbane?', ['RID', 'ADR', 'IMDG-koden', 'ICAO-TI'], 'ADR gjelder veg, RID jernbane, IMDG sjø og ICAO-TI luft.'],
+  ['bok', 'l', 'Forordet i ADR/RID', 'Hvilket regelverk gjelder for farlig gods til sjøs?', ['IMDG-koden', 'RID', 'ADN', 'ICAO-TI'], 'ADN gjelder indre vannveier som elver og kanaler.'],
+  ['bok', 'l', 'Forordet i ADR/RID', 'Hvorfor ligner reglene for veg, bane, sjø og luft på hverandre?', ['De bygger på FNs regelverksmal for farlig gods', 'De er skrevet av DSB', 'De er norske særregler', 'Det gjør de ikke – hver transportform har helt egne regler'], 'Harmoniseringen gjør det enklere å sende gods med flere transportformer.'],
+  ['bok', 'a', 'Forordet i ADR/RID', 'Hvor ofte kommer det en ny utgave av ADR?', ['Annethvert år, med virkning fra 1. januar i oddetallsår', 'Hvert år 1. januar', 'Hvert femte år', 'Bare når Stortinget vedtar endringer'], 'Derfor heter utgavene ADR 2023, ADR 2025, ADR 2027 og så videre.'],
+  ['bok', 'a', 'ADR 3.2.1', 'Hvordan er Tabell A i kapittel 3.2 ordnet?', ['Etter UN-nummer', 'Alfabetisk etter navn', 'Etter fareklasse', 'Etter farenummer'], 'Tabell B er den alfabetiske listen.'],
+  ['bok', 'a', 'ADR 3.2.2', 'Du vet bare navnet på stoffet. Hvor finner du UN-nummeret?', ['I Tabell B, den alfabetiske listen', 'I kolonne (20) i Tabell A', 'I kapittel 8.6', 'På de skriftlige instruksjonene'], ''],
+  ['bok', 'a', 'ADR 3.2.1', 'Hvilken kolonne i Tabell A viser transportkategori og tunnelkode?', ['Kolonne (15)', 'Kolonne (20)', 'Kolonne (5)', 'Kolonne (7a)'], 'Transportkategorien står øverst i kolonne (15), og tunnelkoden står i parentes under.'],
+  ['bok', 'a', 'ADR 3.2.1', 'Hva står i kolonne (20) i Tabell A?', ['Farenummeret til det oransje skiltet', 'UN-nummeret', 'Emballasjegruppen', 'Begrensede mengder'], ''],
+  ['bok', 'a', 'ADR 3.2.1', 'Hva viser kolonne (5) i Tabell A?', ['Hvilke faresedler kolliene skal ha', 'Transportkategorien', 'Tankkoden', 'Begrensede mengder'], ''],
+  ['bok', 'a', 'ADR 2.1.1.3', 'Hva forteller emballasjegruppe I, II og III?', ['Hvor farlig stoffet er: I stor, II middels og III liten fare', 'Hvor stor emballasjen er', 'Hvilket kjøretøy som skal brukes', 'Hvor mange kolli som kan lastes'], ''],
+  ['bok', 'a', 'ADR 1.2.1', 'Hva er et kolli?', ['Emballasjen med innhold, klar til forsendelse', 'En tom emballasje', 'Et lasterom på bilen', 'En tank over 1000 liter'], ''],
+  ['bok', 'a', 'ADR 3.1.2', 'Hva er UN-nummeret?', ['Et firesifret nummer som identifiserer stoffet eller gjenstanden', 'Nummeret på fareklassen', 'Nummeret på kompetansebeviset', 'Godkjenningsnummeret til tanken'], ''],
+  ['bok', 'a', 'Forskriften § 11a', 'Du har fullført ADR-kurset. Hvor lenge har du på deg til å bestå eksamen før du må ta kurset på nytt?', ['1 år', '6 måneder', '2 år', '5 år'], 'Står i forskrift om landtransport av farlig gods § 11a.'],
+  ['bok', 'a', 'ADR 8.2.2.8.2', 'Hvor lenge gjelder ADR-kompetansebeviset?', ['5 år', '2 år', '10 år', 'Livet ut'], 'Det fornyes med oppfriskningskurs og eksamen. Tas de i løpet av de siste 12 månedene, gjelder det nye beviset 5 år fra utløpsdatoen.'],
+  ['bok', 'a', 'Forskriften § 33', 'Hvem administrerer ADR-eksamen i Norge?', ['Statens vegvesen', 'DSB', 'Kursarrangøren', 'Politiet'], 'Statens vegvesen er eksamensadministrator etter avtale med DSB.'],
+  ['bok', 'a', 'ADR 8.2.2.7.1.6', 'Hvor mange spørsmål skal den avsluttende prøven etter grunnkurset minst ha?', ['25', '15', '40', '57'], 'Prøven skal vare minst 45 minutter. Etter oppfriskningskurs er kravet minst 15 spørsmål og 30 minutter.'],
+  ['bok', 'l', 'ADR 1.1.4.2', 'Kolliene skal videre med skip og er merket etter IMDG-koden. Kan de kjøres på vegen til havna?', ['Ja, når transporten er del av en kjede med sjøtransport', 'Nei, de må merkes om etter ADR', 'Bare med politieskorte', 'Bare under 1000 poeng'], 'Gods merket etter IMDG-koden eller ICAO-TI godtas på vegen når transporten inngår i en kjede med sjø- eller lufttransport.'],
+
+  // 2 Fareklassene og farene
+  ['farer', 'b', 'ADR 2.2.3', 'Hvilken fareklasse er brannfarlige væsker?', ['Klasse 3', 'Klasse 2', 'Klasse 4.1', 'Klasse 5.1'], ''],
+  ['farer', 'b', 'ADR 2.2.2', 'Hva er klasse 2?', ['Gasser', 'Etsende stoffer', 'Oksiderende stoffer', 'Eksplosive stoffer'], 'Klasse 2 deles i 2.1 brannfarlig, 2.2 ikke-brannfarlig og ikke-giftig, og 2.3 giftig gass.'],
+  ['farer', 'b', 'ADR 2.2.43', 'Hva kjennetegner stoffer i klasse 4.3?', ['De utvikler brannfarlig gass i kontakt med vann', 'De er selvantennende i luft', 'De er radioaktive', 'De er giftige ved innånding'], ''],
+  ['farer', 'b', 'ADR 2.2.51 og 2.2.52', 'Hva er forskjellen på klasse 5.1 og 5.2?', ['5.1 er oksiderende stoffer, 5.2 er organiske peroksider', '5.1 er giftige, 5.2 er infeksjonsfremmende', '5.1 er faste stoffer, 5.2 er væsker', 'Det er ingen forskjell'], ''],
+  ['farer', 'b', 'ADR 2.2.62', 'Hva er klasse 6.2?', ['Infeksjonsfremmende stoffer', 'Giftige stoffer', 'Etsende stoffer', 'Miljøfarlige stoffer'], ''],
+  ['farer', 'b', 'ADR 2.2.9', 'Litiumbatterier tilhører klasse …', ['9', '4.3', '8', '2'], 'Litiumbatterier har en egen fareseddel, 9A.'],
+  ['farer', 'b', 'Skriftlige instruksjoner (5.4.3.4)', 'Hva er den største faren ved brannfarlige gasser (2.1)?', ['Brann og eksplosjon', 'Etseskader', 'Infeksjon', 'Stråling'], 'Gassen kan også være under trykk.'],
+  ['farer', 'b', 'Skriftlige instruksjoner (5.4.3.4)', 'Hvorfor er en kvelende gass som nitrogen (2.2) farlig?', ['Den fortrenger oksygenet i lufta, og du merker det ikke', 'Den brenner lett', 'Den etser huden', 'Den er radioaktiv'], 'Gasser kan også være under trykk og gi frostskader.'],
+  ['farer', 'b', 'ADR 2.2.8', 'Hva gjør etsende stoffer (klasse 8)?', ['Skader hud, øyne og materialer som metall', 'Utvikler gass i kontakt med vann', 'Antenner seg selv i luft', 'Sender ut ioniserende stråling'], ''],
+  ['farer', 'b', 'ADR 5.2.2.2', 'Hvilken farge har faresedlene for klasse 1?', ['Oransje', 'Rød', 'Gul', 'Blå'], ''],
+  ['farer', 'b', 'ADR 5.2.2.2', 'Hvilken fareseddel har blå bakgrunn?', ['4.3 – farlig ved kontakt med vann', '2.2 – ikke-brannfarlig gass', '6.1 – giftig', '8 – etsende'], ''],
+  ['farer', 'b', 'ADR 5.2.2.2', 'Hvilken fareseddel er grønn?', ['2.2 – ikke-brannfarlig, ikke-giftig gass', '2.1 – brannfarlig gass', '2.3 – giftig gass', '5.1 – oksiderende'], ''],
+  ['farer', 'b', 'ADR 5.2.2.2', 'Faresedlen er hvit øverst og rød nederst. Hvilken klasse er det?', ['4.2 – selvantennende stoffer', '4.1 – brannfarlige faste stoffer', '3 – brannfarlige væsker', '5.2 – organiske peroksider'], ''],
+  ['farer', 'b', 'ADR 5.2.2.2', 'Faresedlen har røde og hvite loddrette striper. Hvilken klasse er det?', ['4.1 – brannfarlige faste stoffer', '4.2 – selvantennende stoffer', '3 – brannfarlige væsker', '2.1 – brannfarlig gass'], ''],
+  ['farer', 'b', 'Tabell A, kolonne (5)', 'UN 1230 metanol har faresedlene 3 og 6.1. Hva betyr det?', ['Metanol er brannfarlig og i tillegg giftig', 'Metanol er enten brannfarlig eller giftig', 'Metanol er en gass', 'Metanol kan velge klasse selv'], 'Den første faresedlen er hovedfaren, de neste er tilleggsfarer.'],
+  ['farer', 'c', 'ADR 5.2.1.8', 'Hvilket merke skal kolli med miljøfarlige stoffer ha i tillegg til faresedlene?', ['Merket for miljøfarlige stoffer, med død fisk og tre', 'Et oransje skilt', 'LQ-merket', 'Ingen ekstra merking'], 'Det gjelder ikke innerbeholdere på 5 liter eller 5 kg og mindre.'],
+  ['farer', 'c', 'ADR 2.2.9.1.10', 'Hvilket UN-nummer brukes for en miljøfarlig væske som ikke hører til en annen klasse?', ['UN 3082', 'UN 1203', 'UN 1830', 'UN 1978'], 'UN 3077 brukes for miljøfarlige faste stoffer.'],
+  ['farer', 'c', 'Forskriften § 12', 'Hva sier den norske særregelen om farlig avfall?', ['Inntil 500 kg netto farlig avfall kan fraktes med færre krav når sjåføren har minst 6 timers opplæring', 'Farlig avfall er aldri farlig gods', 'Farlig avfall krever alltid tankbil', 'Farlig avfall er unntatt alle krav i ADR'], 'Særregelen gjelder ikke klasse 1, 6.2 og 7.'],
+  ['farer', 'c', 'Forskriften § 12', 'Hva kan brukes som transportdokument for farlig avfall etter forskriften § 12?', ['Deklarasjonsskjemaet etter avfallsforskriften', 'En kvittering fra mottaket', 'Ingenting, avfall trenger ikke dokument', 'Vognkortet'], 'Deklarasjonen følger avfallet, så det blir sporbart fra den som leverer til godkjent mottak.'],
+
+  // 3 Forebygging og sikkerhet
+  ['forebygg', 'd', 'ADR 8.3.5', 'Hvor er røyking forbudt?', ['I og nær kjøretøyet mens det lastes og losses – også e-sigaretter', 'Bare inne i førerhuset', 'Bare ved tankbiler', 'Ingen steder, så lenge vinduet er åpent'], ''],
+  ['forebygg', 'd', 'ADR 8.3.4', 'Hvilken lommelykt skal du bruke?', ['En uten metalloverflater som kan lage gnister', 'En hvilken som helst lommelykt', 'En parafinlykt', 'Mobiltelefonen holder'], ''],
+  ['forebygg', 'd', 'ADR 8.3.6', 'Hva er regelen for motoren under lasting og lossing?', ['Den skal være stoppet, med mindre den driver pumper eller annet utstyr til lastingen', 'Den skal gå, så bilen kan flyttes raskt', 'Den skal alltid gå på tomgang', 'Det er ingen regel'], ''],
+  ['forebygg', 'd', 'ADR 8.3.7', 'Hva gjelder når du parkerer bilen med farlig gods?', ['Parkeringsbremsen skal være på, og tilhenger uten brems sikres med stoppekloss', 'Det holder å sette bilen i gir', 'Stoppekloss brukes bare om vinteren', 'Parkeringsbremsen trengs ikke på flat mark'], ''],
+  ['forebygg', 'd', 'ADR 8.3.3', 'Får sjåføren åpne et kolli med farlig gods for å sjekke innholdet?', ['Nei, fører og hjelpemann får ikke åpne kolli med farlig gods', 'Ja, med hansker', 'Ja, hvis mottakeren ber om det', 'Ja, når kolliet står på transportdokumentet'], ''],
+  ['forebygg', 'd', 'ADR 7.5.10', 'Hvorfor kobles tankbilen til jord før den fylles med brannfarlig væske?', ['For å lede bort statisk elektrisitet som kan gi gnister', 'For å hindre at bilen triller', 'For å måle hvor mye som er fylt', 'For å kjøle ned tanken'], ''],
+  ['forebygg', 'd', 'Skriftlige instruksjoner (5.4.3.4)', 'Hvor skal du stå når det lekker gass, røyk eller damp?', ['På den siden vinden blåser fra', 'Nærmest mulig, så du ser hva som lekker', 'På lesiden av lekkasjen', 'Inne i førerhuset'], ''],
+  ['forebygg', 'd', 'ADR 8.1.5.2', 'Hvilket personlig utstyr skal hvert medlem av mannskapet ha?', ['Varselvest, lommelykt, vernehansker og øyebeskyttelse', 'Hjelm og vernesko', 'Gassmaske og brannteppe', 'Refleksbånd og førstehjelpsskrin'], ''],
+  ['forebygg', 'd', 'ADR 8.1.5.3', 'Når skal mannskapet ha fluktmaske?', ['Når transportenheten er merket med fareseddel 2.3 eller 6.1', 'Alltid ved farlig gods', 'Bare ved klasse 3', 'Bare i tunnel'], ''],
+  ['forebygg', 'd', 'ADR 8.1.5.3', 'Spade, tetning for sluk og oppsamlingsbeholder kreves for faste stoffer og væsker med fareseddel …', ['3, 4.1, 4.3, 8 eller 9', '2.1, 2.2 eller 2.3', '1 eller 7', 'bare 6.1'], ''],
+  ['forebygg', 'd', 'ADR 8.1.5.2', 'Ved hvilke faresedler trenger du ikke øyeskyllemiddel?', ['1, 1.4, 1.5, 1.6, 2.1, 2.2 og 2.3', '3 og 8', '6.1 og 6.2', 'Øyeskyllemiddel kreves alltid'], ''],
+  ['forebygg', 'd', 'ADR 8.3.2', 'Hvem skal kunne bruke brannslukkingsapparatene?', ['Kjøretøyets mannskap', 'Bare brannvesenet', 'Bare den som laster', 'Bare sikkerhetsrådgiveren'], ''],
+  ['forebygg', 'd', 'ADR 8.3.1', 'Kan du ta med en venn som passasjer på en bil med farlig gods (over 1000 poeng)?', ['Nei, bare kjøretøyets mannskap', 'Ja, én passasjer', 'Ja, hvis vennen har ADR-bevis', 'Ja, hvis vennen sitter i førerhuset'], ''],
+  ['forebygg', 'd', 'ADR 8.3.8', 'Hva gjelder for ABS-kabelen til en tilhenger over 3,5 tonn?', ['Den skal alltid være tilkoblet under transport', 'Den kan kobles fra på glatt føre', 'Den trengs bare i tunnel', 'Den er ikke påkrevd'], ''],
+
+  // 4 Merking og oransje skilt
+  ['merking', 'f', 'ADR 5.3.2.1.1', 'Hvor skal de oransje skiltene sitte?', ['Ett foran og ett bak på transportenheten', 'Bare bak', 'På begge sider', 'På taket av førerhuset'], ''],
+  ['merking', 'f', 'ADR 5.3.2.2.1', 'Hvor store er de oransje skiltene normalt?', ['40 cm brede og 30 cm høye', '30 × 30 cm', '25 × 25 cm', '60 × 40 cm'], 'Skiltene er reflekterende og har en svart ramme på 15 mm.'],
+  ['merking', 'f', 'ADR 5.3.2.1', 'Hvilket nummer står øverst på et oransje skilt med tall?', ['Farenummeret', 'UN-nummeret', 'Fareklassen', 'Emballasjegruppen'], 'UN-nummeret står nederst.'],
+  ['merking', 'f', 'ADR 5.3.2.3.2', 'Hva betyr farenummer 33?', ['Meget brannfarlig væske (flammepunkt under 23 °C)', 'Brannfarlig væske (flammepunkt 23–60 °C)', 'Brannfarlig gass', 'Giftig væske'], 'Bensin har 33. Diesel har 30.'],
+  ['merking', 'f', 'ADR 5.3.2.3.1', 'Hva betyr X foran farenummeret, for eksempel X423?', ['Stoffet reagerer farlig med vann', 'Stoffet er eksplosivt', 'Stoffet er ekstra giftig', 'Stoffet transporteres i tank'], 'Ikke bruk vann på stoffet.'],
+  ['merking', 'f', 'ADR 5.3.2.3.1', 'Hva betyr det når et siffer er doblet, for eksempel 33 eller 88?', ['At faren er forsterket', 'At det er to forskjellige stoffer', 'At skiltet er feil', 'At stoffet er i emballasjegruppe II'], ''],
+  ['merking', 'f', 'ADR 5.3.2.3.1', 'Hva betyr 0 som andre siffer, for eksempel 30 eller 80?', ['Ett siffer er nok til å beskrive faren', 'At stoffet er ufarlig', 'At tanken er tom', 'At stoffet er miljøfarlig'], ''],
+  ['merking', 'f', 'ADR 5.3.2.1.1', 'Stykkgods over grensen i 1.1.3.6: hvordan skal de oransje skiltene se ut?', ['Blanke, uten tall', 'Med farenummer og UN-nummer for det farligste stoffet', 'Med fareklassen', 'Stykkgods trenger ikke oransje skilt'], 'Skilt med tall brukes på tank og bulk.'],
+  ['merking', 'f', 'ADR 5.3.1.5', 'Når skal en bil med stykkgods ha store faresedler på sidene og bak?', ['Ved klasse 1 (unntatt 1.4S) og klasse 7', 'Alltid ved farlig gods', 'Ved klasse 3 over 1000 liter', 'Aldri'], ''],
+  ['merking', 'f', 'ADR 5.3.2.1.2', 'Hvor skal oransje skilt med tall sitte på en tankbil?', ['På begge sider av hver tank eller hvert tankrom, i tillegg til foran og bak', 'Bare foran og bak', 'Bare bak', 'På førerhusdøra'], 'Tankbiler med bare diesel, bensin, parafin eller flydrivstoff kan nøye seg med skilt med tall foran og bak (5.3.2.1.3).'],
+  ['merking', 'f', 'ADR 3.4.7', 'Hvordan ser merket for begrensede mengder (LQ) ut?', ['Et kvadrat på høykant, svart øverst og nederst og hvitt i midten', 'En oransje firkant', 'En rød rombe med flamme', 'Bokstavene LQ i en sirkel'], ''],
+  ['merking', 'f', 'ADR 3.4.13 og 3.4.14', 'Når skal transportenheten merkes med LQ-merket foran og bak?', ['Når den er over 12 tonn og kolliene med begrensede mengder veier over 8 tonn brutto', 'Alltid', 'Når lasten er over 1000 poeng', 'Aldri'], ''],
+  ['merking', 'f', 'ADR 5.3.6', 'En tankbil har UN 3082. Hvilket merke skal den ha i tillegg til faresedlene?', ['Merket for miljøfarlige stoffer', 'LQ-merket', 'Merket for oppvarmede stoffer', 'Ingen'], ''],
+  ['merking', 'f', 'ADR 5.3.2.1.1', 'En tilhenger med farlig gods kobles fra trekkvogna. Hva gjelder for de oransje skiltene?', ['Tilhengeren skal fortsatt ha oransje skilt bak', 'Skiltene kan tas av', 'Tilhengeren skal ha skilt foran', 'Trekkvogna beholder begge skiltene'], ''],
+  ['merking', 'f', 'ADR 5.3.2.1.8', 'Alt det farlige godset er losset og bilen er rengjort. Hva gjør du med de oransje skiltene?', ['Fjerner eller dekker dem til', 'Lar dem sitte til neste tur', 'Snur dem opp ned', 'Ingenting, de skal alltid sitte på'], ''],
+
+  // 5 Unntak og 1000 poeng
+  ['unntak', 'a', 'ADR 1.1.3.6.3', 'Hva er grensen for samlet beregnet verdi i 1.1.3.6?', ['1000', '333', '500', '20'], ''],
+  ['unntak', 'a', 'ADR 1.1.3.6.4', 'Hva ganges mengden i transportkategori 2 med?', ['3', '50', '1', '0'], ''],
+  ['unntak', 'a', 'ADR 1.1.3.6.4', 'Hva ganges mengden i transportkategori 1 med?', ['50', '20', '3', '10'], 'For noen få stoffer, blant annet UN 1005 og 1017, er grensen 50 kg og faktoren 20.'],
+  ['unntak', 'a', 'ADR 1.1.3.6.4', 'Hva ganges mengden i transportkategori 3 med?', ['1', '3', '50', '0'], ''],
+  ['unntak', 'a', 'ADR 1.1.3.6.3', 'Hva er grensen for transportkategori 4?', ['Ubegrenset', '1000', '333', '0'], 'Tom, ikke rengjort emballasje er transportkategori 4, så sant den ikke har inneholdt gods i kategori 0.'],
+  ['unntak', 'a', 'ADR 1.1.3.6.3', 'Hva betyr transportkategori 0?', ['Ingen unntak – alle reglene gjelder uansett mengde', 'Ubegrenset mengde', 'Stoffet er ikke farlig gods', 'Største mengde er 20 kg'], ''],
+  ['unntak', 'a', 'ADR 1.1.3.6.2', 'Hva slipper du når lasten er 1000 poeng eller mindre?', ['Oransje skilt og skriftlige instruksjoner', 'Transportdokument', 'Brannslukkingsapparat', 'Faresedler på kolliene'], ''],
+  ['unntak', 'a', 'ADR 1.1.3.6.2 og 8.1.4.2', 'Hvilke krav gjelder fortsatt når lasten er 1000 poeng eller mindre?', ['Transportdokument og ett pulverapparat på minst 2 kg', 'Oransje skilt foran og bak', 'ADR-kompetansebevis for sjåføren', 'Skriftlige instruksjoner'], 'Røykeforbud, forbud mot å åpne kolli, samlastingsforbud og tilsyn gjelder også.'],
+  ['unntak', 'a', 'ADR 1.1.3.6.2 og 8.2.3', 'Trenger sjåføren ADR-kompetansebevis når lasten er 1000 poeng eller mindre?', ['Nei, men sjåføren skal ha opplæring etter kapittel 1.3', 'Ja, alltid', 'Ja, men bare grunnkurs', 'Nei, og ingen opplæring er nødvendig'], ''],
+  ['unntak', 'a', 'ADR 1.1.3.6.3', 'Hvordan måles mengden av en væske i 1.1.3.6?', ['Samlet innhold i liter', 'Bruttovekt med emballasje', 'Antall kolli', 'Volumet av lasterommet'], ''],
+  ['unntak', 'a', 'ADR 1.1.3.6.3', 'Hvordan måles komprimert gass, for eksempel oksygen på flaske?', ['Vannkapasiteten til flaskene i liter', 'Vekten av gassen i kg', 'Antall flasker', 'Trykket i bar'], ''],
+  ['unntak', 'a', 'ADR 1.1.3.6.3', 'Hvordan måles flytende gass som propan?', ['Netto masse i kg', 'Vannkapasiteten', 'Bruttovekt med flaske', 'Antall flasker'], ''],
+  ['unntak', 'a', 'ADR 1.1.3.6.2', 'Gjelder unntaket i 1.1.3.6 for tankbiler?', ['Nei, det gjelder bare gods i kolli', 'Ja, under 1000 liter', 'Ja, for alle klasser', 'Bare for diesel'], ''],
+  ['unntak', 'a', 'ADR 3.4.1', 'Teller farlig gods i begrensede mengder (LQ) med når du regner 1000 poeng?', ['Nei', 'Ja, ganger 3', 'Ja, dobbelt', 'Ja, som transportkategori 1'], 'Gods i begrensede mengder følger bare reglene i kapittel 3.4 og noen få andre bestemmelser.'],
+  ['unntak', 'a', 'ADR 3.4.1', 'Hva er begrensede mengder (LQ)?', ['Farlig gods i små innerbeholdere, med færre krav under transporten', 'Gods som bare kan kjøres i små mengder per dag', 'Gods som er forbudt i tunneler', 'Avfall'], 'Største mengde per innerbeholder står i kolonne (7a). «0» betyr at LQ ikke er tillatt.'],
+  ['unntak', 'a', 'ADR 3.4.2', 'Hva er største bruttovekt for et kolli med begrensede mengder?', ['30 kg', '20 kg', '50 kg', '100 kg'], 'Brett med krympe- eller strekkfilm kan veie høyst 20 kg.'],
+  ['unntak', 'a', 'ADR 1.1.3.1 a)', 'En privatperson fyller bensin på egne kanner til eget bruk. Hvor mye kan fraktes uten ADR?', ['Høyst 60 liter per kanne og 240 liter per transportenhet', 'Høyst 20 liter totalt', 'Ubegrenset', '1000 liter'], ''],
+  ['unntak', 'a', 'ADR 1.1.3.1 c)', 'En rørlegger frakter gassflasker til egen jobb. Hvilket unntak kan gjelde?', ['Unntaket for foretak: høyst 450 liter per emballasje og innenfor 1.1.3.6', 'Ingen unntak', 'Unntaket for privatpersoner', 'Unntaket for redningstjenesten'], 'Unntaket gjelder ikke for leveranser og distribusjon, og ikke for klasse 7.'],
+  ['unntak', 'a', 'ADR 1.1.3.3', 'Gjelder ADR for drivstoffet i bilens egen tank?', ['Nei, drivstoff til egen framdrift er unntatt', 'Ja, over 200 liter', 'Ja, alltid', 'Bare for tankbiler'], ''],
+  ['unntak', 'a', 'ADR 3.5', 'Hva er unntatte mengder (EQ)?', ['Svært små mengder med enda færre krav enn begrensede mengder', 'Avfall som er unntatt', 'Gods i tank', 'Gods som er forbudt på vegen'], 'E-koden står i kolonne (7b) i Tabell A.'],
+
+  // 6 Dokumenter og utstyr
+  ['forer', 'g', 'ADR 8.1.2.1', 'Hvilke dokumenter skal være i førerhuset ved transport over 1000 poeng?', ['Transportdokument, skriftlige instruksjoner og ID med bilde', 'Bare fraktbrevet', 'Sikkerhetsdatablad for alle stoffene', 'Vognkort og forsikringsbevis'], 'Kompetansebeviset og eventuell godkjenningsattest kommer i tillegg (8.1.2.2).'],
+  ['forer', 'g', 'ADR 5.4.1.1.1', 'Hva skal stå i transportdokumentet for hvert farlig stoff?', ['UN-nummer, navn, fareseddel, emballasjegruppe og tunnelkode, pluss kolli, mengde, avsender og mottaker', 'Bare UN-nummeret', 'Bare navnet på stoffet', 'Sjåførens navn og fødselsdato'], 'For eksempel: «UN 1203 BENSIN, 3, II, (D/E)».'],
+  ['forer', 'g', 'ADR 5.4.1.1.1 k)', 'Hvorfor står tunnelkoden i transportdokumentet?', ['Så sjåføren vet hvilke tunneler lasten ikke kan kjøres gjennom', 'Fordi tollen krever det', 'For å beregne bompenger', 'Den skal ikke stå der'], ''],
+  ['forer', 'g', 'ADR 5.4.3.2', 'Hvem skal gi sjåføren de skriftlige instruksjonene?', ['Transportøren, før transporten starter', 'Mottakeren', 'Politiet', 'Sjåføren skriver dem selv'], ''],
+  ['forer', 'g', 'ADR 5.4.3.2', 'På hvilket språk skal de skriftlige instruksjonene være?', ['Et språk mannskapet kan lese og forstå', 'Alltid engelsk', 'Alltid norsk', 'Språket i landet godset ble sendt fra'], ''],
+  ['forer', 'g', 'ADR 5.4.3.3', 'Hva skal sjåføren gjøre før transporten starter?', ['Gjøre seg kjent med godset og de skriftlige instruksjonene', 'Åpne kolliene og sjekke innholdet', 'Melde turen til brannvesenet', 'Ingenting'], ''],
+  ['forer', 'g', 'ADR 8.4.1', 'Hvor kan en bil med store mengder farlig gods parkeres uten tilsyn?', ['På en sikret lagerplass eller et sikret fabrikkområde', 'Hvor som helst med låste dører', 'Utenfor et kjøpesenter', 'På en rasteplass i et boligområde'], ''],
+  ['forer', 'h', 'ADR 8.1.4.1', 'Hvor mye slukkemiddel skal en transportenhet over 7,5 tonn ha?', ['Minst 2 apparater og til sammen minst 12 kg pulver', 'Ett apparat på 2 kg', 'Minst 2 apparater og til sammen minst 4 kg', 'Minst 3 apparater på 6 kg'], 'Ett av apparatene skal ha minst 6 kg.'],
+  ['forer', 'h', 'ADR 8.1.4.1', 'Hvilket krav gjelder for ett av brannslukkingsapparatene?', ['Det skal kunne slukke brann i motor eller førerhus og ha minst 2 kg', 'Det skal være et skumapparat', 'Det skal stå i lasterommet', 'Det skal ha minst 12 kg'], ''],
+  ['forer', 'h', 'ADR 8.1.4.1', 'Hvor mye slukkemiddel skal en transportenhet på inntil 3,5 tonn ha?', ['Minst 2 apparater og til sammen minst 4 kg pulver', 'Ett apparat på 2 kg', 'Minst 2 apparater og 12 kg', 'Ingen krav'], ''],
+  ['forer', 'h', 'ADR 8.1.4.4', 'Hva skal brannslukkingsapparatene ha?', ['En plombe og merking med dato for neste inspeksjon', 'Sjåførens navn', 'Et oransje skilt', 'Ingenting spesielt'], ''],
+  ['forer', 'h', 'ADR 8.1.5.2', 'Hvilket utstyr skal alltid finnes i transportenheten?', ['Stoppekloss, to frittstående varselsignaler og (oftest) øyeskyllemiddel', 'Snøkjetting og slepetau', 'Gassmaske og vernedrakt', 'Ekstra drivstoffkanne'], ''],
+  ['forer', 'h', 'ADR 8.1.5.2', 'Hvor mange frittstående varselsignaler skal være med?', ['2', '1', '3', '4'], ''],
+  ['forer', 'h', 'Skriftlige instruksjoner (5.4.3.4)', 'Hva bruker du hovedstrømbryteren til ved en ulykke?', ['Å bryte strømmen fra batteriet så du unngår gnister', 'Å starte motoren raskere', 'Å slå på varsellysene', 'Å låse dørene'], ''],
+  ['forer', 'h', 'ADR 9.1.3 og 8.1.2.2', 'Hvilket dokument viser at en tankbil (FL eller AT) er godkjent for farlig gods?', ['Godkjenningsattesten', 'Vognkortet', 'Kompetansebeviset', 'Transportdokumentet'], ''],
+
+  // 7 Lasting, samlasting og stuing
+  ['lasting', 'i', 'ADR 7.5.2.1', 'Kan kolli med fareseddel 3 og kolli med fareseddel 8 lastes på samme bil?', ['Ja', 'Nei', 'Bare med skillevegg', 'Bare under 1000 poeng'], ''],
+  ['lasting', 'i', 'ADR 7.5.2.1', 'Kan kolli med fareseddel 1 (ikke 1.4S) lastes sammen med kolli med fareseddel 3?', ['Nei', 'Ja', 'Ja, med skillevegg', 'Ja, under 1000 poeng'], ''],
+  ['lasting', 'i', 'ADR 7.5.2.1', 'Hvilke eksplosiver kan samlastes med de andre klassene?', ['1.4S', '1.1D', '1.3G', 'Ingen'], ''],
+  ['lasting', 'i', 'ADR 7.5.2.1', 'Kan kolli med 5.1 (oksiderende) og kolli med 3 (brannfarlig væske) lastes på samme bil?', ['Ja, tabellen tillater det', 'Nei, aldri', 'Bare i tank', 'Bare under 333 poeng'], 'Last og sikre likevel med omtanke, så kolliene ikke skades.'],
+  ['lasting', 'i', 'ADR 7.5.2.1', 'Hva avgjør samlastingsforbudene?', ['Faresedlene på kolliene', 'UN-nummeret', 'Vekten av kolliene', 'Emballasjegruppen'], ''],
+  ['lasting', 'i', 'ADR 7.5.2.1 ANM 1', 'Hva gjelder for gods som ikke kan samlastes?', ['Det skal ha separate transportdokumenter', 'Det kan stå på samme dokument', 'Det trenger ikke dokument', 'Det skal pakkes om'], ''],
+  ['lasting', 'j', 'ADR 7.5.1.2', 'Dokumentkontrollen før lasting viser at noe ikke er i orden. Hva gjør du?', ['Laster ikke før feilen er rettet', 'Laster og melder fra senere', 'Laster bare halvparten', 'Ringer mottakeren og laster'], ''],
+  ['lasting', 'j', 'ADR 1.4.3.1.1 b)', 'Et kolli lekker. Hva gjelder?', ['Det skal ikke lastes før skaden er utbedret', 'Det kan lastes ytterst', 'Sjåføren avgjør', 'Det kan sendes med beskjed til mottakeren'], ''],
+  ['lasting', 'j', 'ADR 7.5.8.1', 'Det har lekket farlig gods i lasterommet. Når skal det rengjøres?', ['Så snart som mulig, og i hvert fall før bilen lastes på nytt', 'Ved neste service', 'Når det er tid', 'Det trengs ikke'], ''],
+  ['lasting', 'j', 'ADR 7.5.1.5', 'Kolliene har orienteringspiler. Hvordan skal de stå?', ['Slik pilene viser', 'Hvordan som helst', 'På siden', 'Opp ned'], 'Flytende farlig gods lastes under tørt farlig gods når det er praktisk mulig.'],
+  ['lasting', 'm', 'ADR 7.5.7.1', 'Hvordan skal kolli med farlig gods sikres?', ['Med stropper, lastebjelker eller annet, så de ikke flytter seg, vrir seg eller blir skadet', 'De skal ikke sikres, så de kan flytte seg', 'Bare med plast', 'Bare tunge kolli trenger sikring'], ''],
+  ['lasting', 'm', 'ADR 7.5.7.1', 'Hva må du passe på når du strammer stropper over kolli med farlig gods?', ['Ikke stramme så hardt at kolliene blir skadet', 'Stramme så hardt som mulig', 'Bare bruke kjetting', 'Ingenting'], ''],
+  ['lasting', 'm', 'ADR 7.5.7.1', 'Hva gjør du med tomrom mellom kolliene?', ['Fyller dem med passende materiale eller støtter, så kolliene ikke flytter seg', 'Lar dem være', 'Fyller dem med løs last', 'Setter flere farlige kolli der'], ''],
+  ['lasting', 'm', 'ADR 7.5.7.1', 'Hvilken standard for lastsikring viser ADR til?', ['EN 12195-1', 'EN 590', 'ISO 9001', 'EN 3-7'], ''],
+  ['lasting', 'j', 'ADR 7.5.4', 'Kolli med fareseddel 6.1 skal på samme bil som matvarer. Hva gjelder?', ['De skal holdes atskilt, for eksempel med hele skillevegger', 'De kan stå oppå matvarene', 'Det er alltid forbudt', 'Det er ingen regler for dette'], 'Gjelder også 6.2 og enkelte stoffer i klasse 9.'],
+
+  // 8 Ansvar og sikring
+  ['ansvar', 'k', 'ADR 1.4.2.1.1', 'Hvem skal sørge for at det farlige godset er riktig klassifisert?', ['Avsenderen', 'Sjåføren', 'Mottakeren', 'Politiet'], ''],
+  ['ansvar', 'k', 'ADR 1.4.2.2.1', 'Hva skal transportøren blant annet gjøre?', ['Sjekke at dokumentene er med og at kjøretøy og last ikke har åpenbare feil', 'Klassifisere godset', 'Pakke godset', 'Lage sikkerhetsdatabladet'], ''],
+  ['ansvar', 'k', 'ADR 1.4.2.2.1 e)', 'Hvem skal kontrollere at kjøretøyet ikke er overlastet?', ['Transportøren', 'Mottakeren', 'Avsenderen', 'Produsenten'], ''],
+  ['ansvar', 'k', 'ADR 1.4.3.1.1 e)', 'Hvem skal følge samlastingsforbudene når kolliene lastes?', ['Den som laster', 'Mottakeren', 'Produsenten', 'Ingen'], ''],
+  ['ansvar', 'k', 'ADR 1.4.1.2', 'Hva skal alle gjøre når det er umiddelbar fare for offentlig sikkerhet?', ['Straks varsle nødetatene og gi dem opplysningene de trenger', 'Vente på beskjed fra sjefen', 'Rydde opp selv først', 'Skrive avviksrapport dagen etter'], ''],
+  ['ansvar', 'k', 'ADR 1.4.2.2.3', 'Transportøren finner brudd på ADR før avreise. Hva gjelder?', ['Transporten skal ikke starte før saken er brakt i orden', 'Kjøre og melde fra til mottakeren', 'Det er avsenderens problem', 'Kjøre, men saktere'], ''],
+  ['ansvar', 'k', 'ADR 1.8.3.1', 'Hva gjør en sikkerhetsrådgiver for transport av farlig gods?', ['Hjelper virksomheten å forebygge risiko og følge reglene', 'Kjører bilen', 'Utsteder kompetansebevis', 'Kontrollerer biler på vegen'], ''],
+  ['ansvar', 'k', 'Forskriften § 35', 'Hvem kan trekke tilbake et ADR-kompetansebevis?', ['DSB', 'Arbeidsgiveren', 'Kursholderen', 'Mottakeren av godset'], 'Det kan skje ved brudd på lov eller forskrift, eller når særlige grunner tilsier det.'],
+  ['ansvar', 'k', 'ADR 1.4.1.1', 'Hva er hovedplikten til alle som er med på transport av farlig gods?', ['Treffe tiltak mot farer som kan forutses, og følge ADR på sitt område', 'Bare følge ordre', 'Ha forsikring', 'Kjøre raskt, så godset er kortest mulig på vegen'], ''],
+  ['ansvar', 'o', 'ADR 1.10.1.4', 'Hva skal mannskapet ha med seg av hensyn til sikringen?', ['Identifikasjonspapirer med bilde', 'Våpen', 'Reservenøkler', 'Kopi av kjøreruta'], ''],
+  ['ansvar', 'o', 'ADR 1.10.2.2', 'Hva betyr sikring (security) i ADR?', ['Tiltak mot tyveri og misbruk av farlig gods', 'Lastsikring med stropper', 'Brannsikkerhet', 'Forsikring av lasten'], ''],
+  ['ansvar', 'o', 'ADR 1.10.1.2', 'Hvem kan farlig gods leveres til for transport?', ['Bare transportører som er tilfredsstillende identifisert', 'Alle som har lastebil', 'Bare utenlandske transportører', 'Bare privatpersoner'], ''],
+  ['ansvar', 'o', 'ADR 1.10.3.1.1', 'Hva er farlig gods med høy risiko?', ['Gods som kan misbrukes i terror og gi alvorlige følger', 'Alt gods i klasse 3', 'Gods som lekker', 'Gods i begrensede mengder'], ''],
+  ['ansvar', 'o', 'ADR 1.10.3.2.1', 'Hva må transportøren ha for farlig gods med høy risiko?', ['En sikringsplan', 'Ingenting ekstra', 'Politieskorte', 'Tillatelse til å kjøre bare om natten'], ''],
+  ['ansvar', 'o', 'ADR 1.10.2.2', 'Du ser en ukjent person som undersøker bilen med farlig gods på en rasteplass. Hva gjør du?', ['Melder fra etter sikringsrutinene, til politiet ved mistanke', 'Ignorerer det', 'Viser fram lasten', 'Kjører videre uten å si noe'], ''],
+
+  // 9 Ulykke, brann og tunnel
+  ['ulykke', 'e', 'Skriftlige instruksjoner (5.4.3.4)', 'Hva gjør du først ved en ulykke med farlig gods, hvis det er trygt?', ['Setter på bremsene, stopper motoren og slår av hovedstrømbryteren', 'Åpner lasterommet', 'Slukker brann i lasten', 'Kjører videre til nærmeste verksted'], ''],
+  ['ulykke', 'e', 'Skriftlige instruksjoner (5.4.3.4)', 'Skal du prøve å slukke brann i lasterommet?', ['Nei, mannskapet skal ikke slukke brann i lasterommet', 'Ja, alltid', 'Ja, med vann', 'Ja, hvis lasten er klasse 3'], ''],
+  ['ulykke', 'e', 'Skriftlige instruksjoner (5.4.3.4)', 'Hvilke branner kan du prøve å slukke?', ['Mindre branner i dekk, bremser og motorrom, hvis det er trygt', 'Alle branner', 'Bare brann i lasten', 'Ingen'], ''],
+  ['ulykke', 'e', 'Skriftlige instruksjoner (5.4.3.4)', 'Hva gjør du med transportdokumentene ved en ulykke?', ['Har dem lett tilgjengelig for nødetatene', 'Gjemmer dem', 'Leverer dem på politistasjonen', 'Kaster dem'], ''],
+  ['ulykke', 'e', 'Skriftlige instruksjoner (5.4.3.4)', 'Hva gjør du før du setter ut varselsignalene?', ['Tar på varselvesten', 'Åpner lasterommet', 'Starter motoren', 'Ringer arbeidsgiveren'], ''],
+  ['ulykke', 'e', 'Skriftlige instruksjoner (5.4.3.4)', 'Hvilket nødnummer ringer du ved brann eller lekkasje av farlig gods?', ['110', '112', '113', '1881'], 'Brannvesenet håndterer akutt forurensning. 112 er politi og 113 er ambulanse.'],
+  ['ulykke', 'e', 'Skriftlige instruksjoner (5.4.3.4)', 'Hva gjør du med klær som er tilsølt av farlig gods?', ['Tar dem av og avhender dem på en trygg måte', 'Beholder dem på til du kommer hjem', 'Vasker dem i nærmeste bekk', 'Henger dem på bilen'], ''],
+  ['ulykke', 'e', 'Skriftlige instruksjoner (5.4.3.4)', 'Hvorfor skal du hindre at lekkasjen når sluk og vann?', ['For å beskytte miljøet og hindre at stoffet sprer seg', 'For å spare stoffet', 'Fordi det er tungt', 'Det skal du ikke'], ''],
+  ['ulykke', 'e', 'Skriftlige instruksjoner (5.4.3.4)', 'Et kolli med fareseddel 4.3 har lekket. Hva er viktig?', ['Holde stoffet tørt og ikke bruke vann', 'Spyle med mye vann', 'Dekke med en våt presenning', 'Ingenting, det er ufarlig'], ''],
+  ['ulykke', 'e', 'Skriftlige instruksjoner (5.4.3.4)', 'Hva er rådet ved en ulykke med eksplosiver (1, 1.5 og 1.6)?', ['Ta dekning og hold deg unna vinduer', 'Spyle med vann', 'Flytte kolliene', 'Gå nærmere og se'], ''],
+  ['ulykke', 'e', 'ADR 8.2.2.3.8', 'Hvilke praktiske øvelser skal ADR-grunnkurset minst ha?', ['Førstehjelp, brannslukking og opptreden ved uhell', 'Rygging med henger', 'Kjøring på glatt føre', 'Truckkjøring'], ''],
+  ['ulykke', 'e', 'EN 2 og ADR 8.1.4.1', 'Brannklasse B er brann i …', ['væsker', 'faste stoffer som tre og papir', 'gasser', 'metaller'], 'Klasse A er faste stoffer, B væsker og C gasser. Pulverapparatet på bilen skal dekke A, B og C.'],
+  ['ulykke', 'e', 'Brannteori', 'Hva trenger en brann?', ['Brennbart stoff, oksygen og varme', 'Bare oksygen', 'Vann og varme', 'Strøm og luft'], 'Fjerner du én av de tre, slukner brannen.'],
+  ['ulykke', 'n', 'ADR 8.6.2', 'Hvilken tunnelkategori er strengest?', ['E', 'A', 'B', 'C'], 'I kategori E er bare gods med tunnelkode (-) tillatt når bilen har oransje skilt.'],
+  ['ulykke', 'n', 'ADR 8.6.2', 'Tunnelen har ikke skilt for farlig gods. Hvilken kategori er den?', ['A – ingen begrensninger', 'E', 'Den er stengt for farlig gods', 'B'], ''],
+  ['ulykke', 'n', 'ADR 8.6.3.2', 'Lasten har stoffer med forskjellige tunnelkoder. Hvilken gjelder?', ['Den mest restriktive koden, for hele lasten', 'Koden til stoffet det er mest av', 'Den minst restriktive', 'Koden som står først på transportdokumentet'], ''],
+  ['ulykke', 'n', 'ADR 8.6.3.3', 'Gjelder tunnelbegrensningene når lasten er innenfor 1000 poeng?', ['Nei, gods etter unntakene i 1.1.3 har ingen tunnelbegrensninger', 'Ja, alltid', 'Bare i kategori B', 'Bare om natten'], ''],
+  ['ulykke', 'n', 'ADR 8.6.4', 'Bensin (D/E) i kolli over 1000 poeng. Hvilke tunneler er forbudt?', ['Kategori E', 'Kategori D og E', 'Alle tunneler', 'Ingen'], ''],
+  ['ulykke', 'n', 'ADR 8.6.4', 'Bensin (D/E) i tankbil. Hvilke tunneler er forbudt?', ['Kategori D og E', 'Kategori E', 'Kategori B, C, D og E', 'Ingen'], 'For koder med skråstrek gjelder bokstaven før streken for tank.'],
+  ['ulykke', 'n', 'ADR 8.6.4', 'Hva betyr tunnelkoden (-)?', ['Passasje tillatt i alle tunneler', 'Passasje forbudt i alle tunneler', 'Koden mangler', 'Bare tillatt om natten'], ''],
+  ['ulykke', 'n', 'Statens vegvesen: brann i tunnel', 'Det brenner i tunnelen foran deg. Hva gjør du?', ['Stopper, slår av motoren, lar nøkkelen stå og går til nærmeste nødutgang', 'Rygger ut av tunnelen', 'Venter i bilen med vinduene lukket', 'Kjører forbi brannen'], 'Varsle fra nødtelefonen, så vet nødetatene hvor du er.']
+].map(([st, em, src, q, o, ex]) => ({ st, em, src, q, o, ex, id: hash(q) }));
+function hash(s) { let h = 0; for (const c of s) h = (h * 31 + c.charCodeAt(0)) | 0; return 'q' + (h >>> 0).toString(36); }
+
+// ---------- Fagstoff ----------
+const FACTS = [
+  { st: 'bok', em: 'a', title: 'Regelverket', pts: ['ADR gjelder veg, RID jernbane, IMDG sjø, ICAO-TI luft og ADN indre vannveier', 'Alle bygger på FNs regelverksmal, så reglene ligner hverandre', 'ADR og RID er norsk rett gjennom forskrift om landtransport av farlig gods (2009 nr. 384)', 'DSB forvalter regelverket og gir ut ADR/RID på norsk', 'Ny utgave gjelder fra 1. januar hvert oddetallsår'] },
+  { st: 'bok', em: 'a', title: 'Slik er boka bygd opp', pts: ['Del 1 Alminnelige bestemmelser: unntak, definisjoner, ansvar, sikring', 'Del 2 Klassifisering', 'Del 3 Tabell A og B, begrensede og unntatte mengder', 'Del 4 Emballering og tanker', 'Del 5 Merking, faresedler, oransje skilt og dokumenter', 'Del 6 Konstruksjon og prøving av emballasje og tanker', 'Del 7 Transport, lasting, lossing og samlasting', 'Del 8 Mannskap, utstyr, drift, opplæring og tunneler', 'Del 9 Bygging og godkjenning av kjøretøyer'] },
+  { st: 'bok', em: 'a', title: 'Tabell A – kolonnene du bruker mest', pts: ['(1) UN-nummer · (2) navn og beskrivelse', '(3a) klasse · (4) emballasjegruppe', '(5) faresedler', '(7a) begrensede mengder · (7b) unntatte mengder', '(15) transportkategori, med tunnelkode i parentes under', '(20) farenummer til det oransje skiltet', 'Tabell B er alfabetisk og gir deg UN-nummeret når du bare vet navnet'] },
+  { st: 'bok', em: 'a', title: 'Kurs, eksamen og bevis', pts: ['Grunnkurset har minst 18 undervisningstimer à 45 minutter, høyst 8 per dag (8.2.2.4)', 'I tillegg kommer praktiske øvelser i førstehjelp, brannslukking og opptreden ved uhell (8.2.2.3.8)', 'Eksamen har minst 25 spørsmål og varer minst 45 minutter (8.2.2.7.1.6)', 'Statens vegvesen er eksamensadministrator (forskriften § 33)', 'Ikke bestått innen 1 år etter kurset: kurset må tas på nytt (§ 11a)', 'Beviset gjelder i 5 år og fornyes med oppfriskningskurs og eksamen (8.2.2.8.2)'] },
+  { st: 'bok', em: 'l', title: 'Multimodal transport', pts: ['Mye farlig gods går med flere transportformer: bil, tog, båt og fly', 'Kolli merket etter IMDG-koden eller ICAO-TI godtas på vegen når transporten er del av en kjede med sjø- eller lufttransport (1.1.4.2)', 'Containere med farlig gods skal ha store faresedler på alle fire sider', 'Reglene er harmonisert, så faresedlene og UN-numrene er de samme overalt'] },
+  { st: 'farer', em: 'b', title: 'Fareklassene', pts: ['1 Eksplosive stoffer og gjenstander', '2 Gasser: 2.1 brannfarlig, 2.2 ikke-brannfarlig og ikke-giftig, 2.3 giftig', '3 Brannfarlige væsker', '4.1 Brannfarlige faste stoffer · 4.2 Selvantennende · 4.3 Utvikler brannfarlig gass med vann', '5.1 Oksiderende · 5.2 Organiske peroksider', '6.1 Giftige · 6.2 Infeksjonsfremmende', '7 Radioaktivt · 8 Etsende · 9 Forskjellige, for eksempel litiumbatterier og miljøfarlige stoffer'] },
+  { st: 'farer', em: 'b', title: 'Faresedlene – fargene', pts: ['Oransje: eksplosiver (1)', 'Rød: brannfarlig gass (2.1) og væske (3)', 'Grønn: ikke-brannfarlig, ikke-giftig gass (2.2)', 'Hvit med hodeskalle: giftig (2.3 og 6.1)', 'Rød-hvite striper: 4.1 · hvit over rød: 4.2 · blå: 4.3', 'Gul: oksiderende (5.1) · rød over gul: organisk peroksid (5.2)', 'Gul over hvit: radioaktiv (7) · hvit over svart: etsende (8) · svarte striper: 9'] },
+  { st: 'farer', em: 'b', title: 'Emballasjegrupper og tilleggsfare', pts: ['I – stor fare · II – middels fare · III – liten fare', 'Står i kolonne (4) og i transportdokumentet', 'Gasser, gjenstander og noen klasser har ikke emballasjegruppe', 'Flere faresedler: den første er hovedfaren, de neste er tilleggsfarer. Metanol har 3 og 6.1'] },
+  { st: 'farer', em: 'c', title: 'Miljø og farlig avfall', pts: ['Miljøfarlige stoffer merkes med symbolet med død fisk og tre (5.2.1.8)', 'UN 3082 (væske) og UN 3077 (fast) brukes for miljøfarlige stoffer som ikke hører til andre klasser', 'Farlig avfall kan være farlig gods, og da gjelder ADR fullt ut', 'Norsk særregel (forskriften § 12): inntil 500 kg netto farlig avfall med færre krav, når sjåføren har minst 6 timers opplæring', 'Særregelen gjelder ikke klasse 1, 6.2 og 7', 'Deklarasjonsskjemaet etter avfallsforskriften kan brukes som transportdokument'] },
+  { st: 'forebygg', em: 'd', title: 'Hold unna tennkilder', pts: ['Røykeforbud i og nær kjøretøyet under lasting og lossing, også e-sigaretter (8.3.5)', 'Lommelykt uten metalloverflater som kan gi gnister (8.3.4)', 'Motoren stoppet under lasting og lossing, med mindre den driver pumper (8.3.6)', 'Tankbiler kobles til jord mot statisk elektrisitet (7.5.10)'] },
+  { st: 'forebygg', em: 'd', title: 'Utstyr på alle transportenheter (8.1.5.2)', pts: ['Minst én stoppekloss per kjøretøy', 'To frittstående varselsignaler', 'Øyeskyllemiddel – ikke nødvendig for faresedlene 1, 1.4, 1.5, 1.6, 2.1, 2.2 og 2.3', 'Til hver i mannskapet: varselvest, lommelykt, vernehansker og øyebeskyttelse'] },
+  { st: 'forebygg', em: 'd', title: 'Utstyr for bestemte faresedler (8.1.5.3)', pts: ['Fluktmaske til alle i mannskapet ved fareseddel 2.3 eller 6.1', 'Spade, tetning for sluk og oppsamlingsbeholder for faste stoffer og væsker med fareseddel 3, 4.1, 4.3, 8 eller 9'] },
+  { st: 'forebygg', em: 'd', title: 'Trygg drift', pts: ['Parkeringsbremsen på når bilen står. Tilhenger uten brems sikres med stoppekloss (8.3.7)', 'Ikke åpne kolli med farlig gods (8.3.3)', 'Ingen passasjerer, bare mannskapet (8.3.1)', 'ABS-kabelen til tilhenger over 3,5 tonn alltid tilkoblet (8.3.8)', 'Mannskapet skal kunne bruke brannslukkerne (8.3.2)'] },
+  { st: 'merking', em: 'f', title: 'Oransje skilt', pts: ['40 × 30 cm, reflekterende og med svart ramme', 'Ett foran og ett bak på transportenheten', 'Stykkgods: blanke skilt', 'Tank og bulk: farenummer øverst og UN-nummer nederst', 'Skilt som ikke gjelder lasten, skal fjernes eller dekkes til (5.3.2.1.8)'] },
+  { st: 'merking', em: 'f', title: 'Slik leser du farenummeret', pts: ['2 gass under trykk · 3 brannfarlig væske eller gass · 4 brannfarlig fast stoff', '5 oksiderende · 6 giftig eller smittefare · 7 radioaktiv · 8 etsende · 9 voldsom reaksjon', 'Doblet siffer betyr forsterket fare (33, 88)', '0 som andre siffer: ett siffer er nok (30, 80)', 'X foran: reagerer farlig med vann (X423)'] },
+  { st: 'merking', em: 'f', title: 'Skilt du ser ofte', pts: ['30 / 1202 diesel', '33 / 1203 bensin', '23 / 1965 LPG og 23 / 1978 propan', '80 / 1830 svovelsyre', '90 / 3082 miljøfarlig væske', '99 / 3257 oppvarmet stoff, for eksempel asfalt'] },
+  { st: 'merking', em: 'f', title: 'Store faresedler på kjøretøyet', pts: ['Stykkgods: bare ved klasse 1 (unntatt 1.4S) og klasse 7, på begge sider og bak (5.3.1.5)', 'Tankbiler: på begge sider og bak', 'Containere: på alle fire sider', 'Miljømerket kommer i tillegg når store faresedler kreves og lasten er miljøfarlig (5.3.6)'] },
+  { st: 'merking', em: 'f', title: 'Begrensede mengder – LQ-merket', pts: ['Svart og hvitt kvadrat på høykant (3.4.7)', 'Kolli høyst 30 kg brutto, brett med krympefilm høyst 20 kg', 'Transportenhet over 12 tonn med over 8 tonn LQ brutto: LQ-merket foran og bak (3.4.13–3.4.14)'] },
+  { st: 'unntak', em: 'a', title: '1000 poeng – slik regner du (1.1.3.6)', pts: ['Finn transportkategorien i kolonne (15)', 'Kategori 1 × 50 · kategori 2 × 3 · kategori 3 × 1', 'Kategori 4 teller ikke. Kategori 0 har aldri unntak', 'Summen må være 1000 eller mindre', 'Væsker: liter innhold · faste stoffer og flytende gasser: netto kg · komprimerte gasser: vannkapasitet i liter · gjenstander: kg uten emballasje', 'Gjelder bare gods i kolli, ikke tank'] },
+  { st: 'unntak', em: 'a', title: 'Innenfor 1000 poeng slipper du', pts: ['Oransje skilt (kapittel 5.3)', 'Skriftlige instruksjoner (5.4.3)', 'ADR-kompetansebevis – men sjåføren skal ha opplæring etter 1.3', 'Tunnelbegrensninger og det meste av utstyret i 8.1.5'] },
+  { st: 'unntak', em: 'a', title: 'Innenfor 1000 poeng gjelder fortsatt', pts: ['Transportdokument (8.1.2.1 a)', 'Ett pulverapparat på minst 2 kg (8.1.4.2)', 'Faresedler og merking på kolliene', 'Samlastingsforbud og lastsikring', 'Røykeforbud, forbud mot å åpne kolli og reglene om tilsyn (8.3 og 8.4)'] },
+  { st: 'unntak', em: 'a', title: 'Andre unntak', pts: ['Privatpersoner: gods for detaljsalg til eget bruk. Brannfarlig væske i egne kanner: høyst 60 L per kanne og 240 L per transportenhet (1.1.3.1 a)', 'Foretak som frakter til egen jobb: høyst 450 L per emballasje og innenfor 1.1.3.6 (1.1.3.1 c)', 'Drivstoff i kjøretøyets egen tank (1.1.3.3)', 'Redningstjeneste og nødsituasjoner (1.1.3.1 d og e)'] },
+  { st: 'unntak', em: 'a', title: 'Begrensede og unntatte mengder', pts: ['LQ: største mengde per innerbeholder står i kolonne (7a). «0» betyr ikke tillatt', 'LQ teller ikke med i 1000 poeng', 'EQ: enda mindre mengder, E-kode i kolonne (7b) og eget merke'] },
+  { st: 'forer', em: 'g', title: 'I førerhuset (8.1.2)', pts: ['Transportdokument for alt det farlige godset', 'Skriftlige instruksjoner, lett å finne', 'ID med bilde for hele mannskapet', 'ADR-kompetansebevis', 'Godkjenningsattest når kjøretøyet krever det (tankbiler, FL, AT)'] },
+  { st: 'forer', em: 'g', title: 'Transportdokumentet (5.4.1)', pts: ['UN-nummer, navn, fareseddel, emballasjegruppe og tunnelkode i denne rekkefølgen: «UN 1203 BENSIN, 3, II, (D/E)»', 'Antall og type kolli, og samlet mengde', 'Avsender og mottaker', 'Gods som ikke kan samlastes, skal ha separate dokumenter'] },
+  { st: 'forer', em: 'g', title: 'Skriftlige instruksjoner (5.4.3)', pts: ['Fire sider etter en fast mal', 'Transportøren gir dem til mannskapet før avreise', 'På et språk mannskapet kan lese og forstå', 'Les dem før du kjører, og ha dem lett tilgjengelig'] },
+  { st: 'forer', em: 'h', title: 'Brannslukkingsapparater (8.1.4)', pts: ['Inntil 3,5 t: minst 2 apparater, til sammen 4 kg', '3,5–7,5 t: minst 2 apparater, til sammen 8 kg, ett på minst 6 kg', 'Over 7,5 t: minst 2 apparater, til sammen 12 kg, ett på minst 6 kg', 'Ett apparat skal kunne slukke brann i motor eller førerhus og ha minst 2 kg', 'Plombe og dato for neste inspeksjon', 'Innenfor 1000 poeng: ett apparat på minst 2 kg'] },
+  { st: 'forer', em: 'g', title: 'Parkering og tilsyn (8.4)', pts: ['Store mengder skal være under tilsyn, eller stå på sikret lager- eller fabrikkområde', 'Ellers: bevoktet plass der vakta kjenner lasten, en plass der bilen neppe blir skadet, eller et avsides sted borte fra hovedveg og boliger'] },
+  { st: 'lasting', em: 'i', title: 'Samlasting (7.5.2.1)', pts: ['Faresedlene på kolliene avgjør', 'Klasse 1 kan som hovedregel ikke lastes sammen med andre klasser – unntatt 1.4S', 'Klassene 2–9 kan i stor grad lastes sammen', 'Unntak: 4.1 og 5.2 med tilleggsfare 1', 'Gods som ikke kan samlastes, skal ha separate transportdokumenter'] },
+  { st: 'lasting', em: 'j', title: 'Matvarer og fôr (7.5.4)', pts: ['Kolli med 6.1, 6.2 og enkelte stoffer i klasse 9 skal ikke stables på eller stå inntil matvarer', 'De holdes atskilt med hele skillevegger, kolli uten slike faresedler, eller avstand'] },
+  { st: 'lasting', em: 'j', title: 'Lasting og lossing', pts: ['Ikke last hvis dokumentkontrollen eller den visuelle kontrollen viser feil (7.5.1.2)', 'Skadde eller lekkende kolli lastes ikke (1.4.3.1.1 b)', 'Følg orienteringspilene (7.5.1.5)', 'Væsker under tørt gods når det er praktisk mulig', 'Har noe lekket: rengjør lasterommet før neste lasting (7.5.8.1)'] },
+  { st: 'lasting', em: 'm', title: 'Lastsikring (7.5.7.1)', pts: ['Kolliene skal ikke flytte seg, vri seg eller bli skadet', 'Bruk stropper, lastebjelker, justerbare braketter eller fyll tomrom', 'Ikke stram så hardt at kolliene blir skadet', 'Kravet regnes som oppfylt når lasten er sikret etter EN 12195-1'] },
+  { st: 'ansvar', em: 'k', title: 'Hvem har ansvaret? (1.4)', pts: ['Alle: treffe tiltak mot farer som kan forutses, og varsle nødetatene ved umiddelbar fare', 'Avsender: klassifisere godset, gi opplysninger og dokumenter, bruke godkjent emballasje', 'Transportør: sjekke at godset er tillatt og dokumentene med, se over bil og last, ikke overlaste, gi mannskapet skriftlige instruksjoner', 'Laster: ikke laste skadde kolli, følge samlastingsforbud og reglene om matvarer', 'Brudd på reglene: transporten starter ikke før saken er i orden (1.4.2.2.3)'] },
+  { st: 'ansvar', em: 'k', title: 'Sikkerhetsrådgiver og reaksjoner', pts: ['Virksomheter som sender, transporterer, pakker, laster eller losser farlig gods, skal ha sikkerhetsrådgiver (1.8.3)', 'Rådgiveren hjelper virksomheten å følge reglene og forebygge risiko', 'DSB kan trekke tilbake ADR-kompetansebeviset ved brudd på lov eller forskrift (forskriften § 35)', 'Hver aktør kan få ansvar etter norsk lov for sin del av transporten'] },
+  { st: 'ansvar', em: 'o', title: 'Sikring – security (1.10)', pts: ['Sikring betyr å hindre tyveri og misbruk av farlig gods', 'Gods leveres bare til transportører som er tilfredsstillende identifisert', 'Mannskapet har ID med bilde', 'Gods med høy risiko krever en sikringsplan (1.10.3.2)', 'Uvanlige hendelser og mistenkelige personer meldes etter rutinene'] },
+  { st: 'ulykke', em: 'e', title: 'Skriftlige instruksjoner – tiltak', pts: ['Sett på bremsene, stopp motoren og slå av hovedstrømbryteren', 'Unngå tennkilder, ikke røyk og ikke slå på elektrisk utstyr', 'Varsle nødetatene med så mye informasjon som mulig', 'Ta på varselvest og sett ut varselsignalene', 'Ha transportdokumentene klare til nødetatene', 'Ikke gå i utlekket stoff, og hold deg der vinden blåser fra', 'Slukk små branner i dekk, bremser og motorrom – aldri brann i lasterommet', 'Hindre lekkasje til vann og avløp hvis det er trygt'] },
+  { st: 'ulykke', em: 'e', title: 'Brann', pts: ['Branntrekanten: brennbart stoff, oksygen og varme', 'Brannklasse A faste stoffer, B væsker, C gasser', 'Pulverapparatet på bilen skal dekke A, B og C', 'Ring 110 ved brann og lekkasje av farlig gods'] },
+  { st: 'ulykke', em: 'e', title: 'Førstehjelp', pts: ['Sikre deg selv og skadestedet først', '110 brann · 112 politi · 113 ambulanse', 'Etsende stoff på hud eller i øyne: skyll med mye vann lenge', 'Ta av tilsølte klær', 'HLR: 30 kompresjoner og 2 innblåsinger'] },
+  { st: 'ulykke', em: 'n', title: 'Tunnelkategorier (8.6)', pts: ['Kategori A har ikke skilt og ingen begrensninger. B–E har skilt med bokstav på underskiltet', 'E er strengest', 'Tunnelkoden står i kolonne (15) og i transportdokumentet', 'Den mest restriktive koden gjelder for hele lasten', 'Gjelder bare når bilen skal ha oransje skilt'] },
+  { st: 'ulykke', em: 'n', title: 'Koder med skråstrek', pts: ['Bokstaven før streken gjelder tank, bokstaven etter gjelder kolli', 'B/D: tank forbudt i B–E, kolli forbudt i D og E', 'C/E: tank forbudt i C–E, kolli forbudt i E', 'D/E: tank og bulk forbudt i D og E, kolli forbudt i E', '(-) betyr tillatt i alle tunneler'] },
+  { st: 'ulykke', em: 'n', title: 'Brann i tunnel', pts: ['Stopp, slå av motoren og la nøkkelen stå i', 'Ta med de skriftlige instruksjonene og gå til nærmeste nødutgang', 'Varsle fra nødtelefonen, så vet nødetatene hvor du er'] }
+];
+
+// Koble sammen
+const SETS = {
+  kolonner: { name: 'Kolonnene i Tabell A', pairs: [['(1)', 'UN-nummer'], ['(2)', 'Navn og beskrivelse'], ['(3a)', 'Klasse'], ['(4)', 'Emballasjegruppe'], ['(5)', 'Faresedler'], ['(7a)', 'Begrensede mengder'], ['(7b)', 'Unntatte mengder'], ['(15)', 'Transportkategori og tunnelkode'], ['(20)', 'Farenummer']] },
+  klasser: { name: 'Fareklassene', pairs: [['Klasse 1', 'Eksplosive stoffer og gjenstander'], ['Klasse 2', 'Gasser'], ['Klasse 3', 'Brannfarlige væsker'], ['Klasse 4.1', 'Brannfarlige faste stoffer'], ['Klasse 4.2', 'Selvantennende stoffer'], ['Klasse 4.3', 'Utvikler brannfarlig gass med vann'], ['Klasse 5.1', 'Oksiderende stoffer'], ['Klasse 5.2', 'Organiske peroksider'], ['Klasse 6.1', 'Giftige stoffer'], ['Klasse 6.2', 'Infeksjonsfremmende stoffer'], ['Klasse 7', 'Radioaktivt materiale'], ['Klasse 8', 'Etsende stoffer'], ['Klasse 9', 'Forskjellige farlige stoffer og gjenstander']] },
+  farenr: { name: 'Farenummer', pairs: [['20', 'Kvelende gass'], ['23', 'Brannfarlig gass'], ['25', 'Oksiderende gass'], ['268', 'Giftig gass, etsende'], ['30', 'Brannfarlig væske'], ['33', 'Meget brannfarlig væske'], ['336', 'Meget brannfarlig væske, giftig'], ['X423', 'Fast stoff som reagerer farlig med vann'], ['50', 'Oksiderende stoff'], ['606', 'Infeksjonsfremmende stoff'], ['80', 'Etsende stoff'], ['90', 'Miljøfarlig stoff'], ['99', 'Farlig stoff ved høy temperatur']] },
+  aktor: { name: 'Hvem har ansvaret?', pairs: [['Avsender', 'Klassifiserer godset og gir transportøren dokumentene'], ['Transportør', 'Sjekker at dokumentene er med og at bilen ikke er overlastet'], ['Laster', 'Laster ikke skadde kolli og følger samlastingsforbudene'], ['Sjåfør', 'Leser de skriftlige instruksjonene før avreise'], ['Sikkerhetsrådgiver', 'Hjelper virksomheten å følge reglene'], ['DSB', 'Forvalter regelverket og kan trekke tilbake beviset'], ['Statens vegvesen', 'Holder ADR-eksamen']] }
+};
+
+// ---------- Hjelpere og lagring ----------
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const LETTERS = 'ABCDEF';
+const KEY = 'adr-grunnkurs-v1';
+let store = { streak: {}, labs: {}, prak: {}, last: null };
+try { store = Object.assign(store, JSON.parse(localStorage.getItem(KEY)) || {}); } catch (e) {}
+function save() { try { localStorage.setItem(KEY, JSON.stringify(store)); } catch (e) {} }
+function record(q, ok) { store.streak[q.id] = ok ? Math.min(2, (store.streak[q.id] || 0) + 1) : 0; save(); }
+const mastered = q => (store.streak[q.id] || 0) >= 2;
+const qsOf = st => QS.filter(q => q.st === st);
+function stProgress(st) { const qs = qsOf(st), m = qs.filter(mastered).length; return { m, n: qs.length, pct: Math.round(100 * m / qs.length) }; }
+const stDone = st => stProgress(st).pct >= 80;
+
+// Kvalitet: anonym logg av svar til kvalitetsdelen (se ../kvalitet/kvalitet.js). Ingen navn eller ID.
+function kv(h, d) { try { if (window.Kvalitet) Kvalitet.logg('adr', h, d); } catch (e) {} }
+const kvSvar = (q, i, kilde) => kv(i === 0 ? 'riktig' : 'feil', { k: q.id, t: q.q, a: i === 0 ? '' : i == null ? '(ubesvart)' : q.o[i], m: q.st + '.' + q.em + ' ' + kilde });
+
+// ---------- Tegninger ----------
+const FLAME = 'M0,-26 C9,-15 13,-6 9,4 C15,0 15,-8 13,-12 C22,-1 20,14 0,18 C-20,14 -22,-1 -11,-14 C-13,-6 -9,1 -7,4 C-12,-6 -7,-16 0,-26Z';
+// Fareseddel sentrert i 0,0, halv diagonal 100. Forenklede symboler, riktige farger.
+function label(c) {
+  const D = 'M0,-100 L100,0 L0,100 L-100,0Z', I = 'M0,-91 L91,0 L0,91 L-91,0Z';
+  const top = 'M0,-100 L100,0 L-100,0Z', bot = 'M-100,0 L100,0 L0,100Z';
+  const num = (t, fill = '#000') => `<text x="0" y="80" text-anchor="middle" font-family="Barlow Condensed,Arial Narrow,sans-serif" font-weight="700" font-size="28" fill="${fill}">${t}</text>`;
+  const frame = (s = '#000') => `<path d="${I}" fill="none" stroke="${s}" stroke-width="3"/>`;
+  const flame = (fill = '#000', y = -30) => `<path d="${FLAME}" transform="translate(0 ${y}) scale(1.5)" fill="${fill}"/>`;
+  const skull = `<path d="M-34 -2 L34 -30 M-34 -30 L34 -2" stroke="#000" stroke-width="9" stroke-linecap="round"/><circle cx="0" cy="-46" r="20" fill="#000"/><rect x="-11" y="-34" width="22" height="14" rx="3" fill="#000"/><circle cx="-8" cy="-48" r="6" fill="#fff"/><circle cx="8" cy="-48" r="6" fill="#fff"/>`;
+  const stripes = (h) => { let s = ''; for (let x = -42; x <= 42; x += 14) s += `<line x1="${x}" y1="${-(92 - Math.abs(x)) + 8}" x2="${x}" y2="${h}" stroke="#000" stroke-width="7"/>`; return s; };
+  const white = `<path d="${D}" fill="#fff" stroke="#000" stroke-width="2"/>`;
+  switch (c) {
+    case '1': return `<path d="${D}" fill="#F08A00"/>${frame()}<circle cx="0" cy="-34" r="14" fill="#000"/>${[0, 45, 90, 135, 180, 225, 270, 315].map(a => `<line x1="0" y1="-34" x2="${(30 * Math.cos(a * Math.PI / 180)).toFixed(1)}" y2="${(-34 + 30 * Math.sin(a * Math.PI / 180)).toFixed(1)}" stroke="#000" stroke-width="5"/>`).join('')}<text x="0" y="30" text-anchor="middle" font-family="Barlow Condensed,Arial Narrow,sans-serif" font-weight="700" font-size="26">1.1D</text>${num(1)}`;
+    case '1.4S': return `<path d="${D}" fill="#F08A00"/>${frame()}<text x="0" y="-10" text-anchor="middle" font-family="Barlow Condensed,Arial Narrow,sans-serif" font-weight="700" font-size="64">1.4</text><text x="0" y="40" text-anchor="middle" font-family="Barlow Condensed,Arial Narrow,sans-serif" font-weight="700" font-size="28">S</text>${num(1)}`;
+    case '2.1': return `<path d="${D}" fill="#D7262B"/>${frame()}${flame()}${num(2)}`;
+    case '2.2': return `<path d="${D}" fill="#1F8A4C"/>${frame('#fff')}<rect x="-11" y="-72" width="22" height="58" rx="10" fill="#fff"/><rect x="-5" y="-80" width="10" height="9" fill="#fff"/>${num(2, '#fff')}`;
+    case '2.3': return `${white}${frame()}${skull}${num(2)}`;
+    case '3': return `<path d="${D}" fill="#D7262B"/>${frame()}${flame()}${num(3)}`;
+    case '4.1': { let s = ''; for (let x = -84; x < 84; x += 24) s += `<rect x="${x}" y="-100" width="12" height="200" fill="#D7262B"/>`;
+      return `<defs><clipPath id="c41"><path d="${D}"/></clipPath></defs><path d="${D}" fill="#fff"/><g clip-path="url(#c41)">${s}</g><path d="${D}" fill="none" stroke="#000" stroke-width="2"/>${frame()}${flame()}${num(4)}`; }
+    case '4.2': return `<path d="${top}" fill="#fff"/><path d="${bot}" fill="#D7262B"/><path d="${D}" fill="none" stroke="#000" stroke-width="2"/>${frame()}${flame()}${num(4)}`;
+    case '4.3': return `<path d="${D}" fill="#1F5FAD"/>${frame()}${flame()}${num(4)}`;
+    case '5.1': return `<path d="${D}" fill="#F2C200"/>${frame()}<circle cx="0" cy="-14" r="14" fill="none" stroke="#000" stroke-width="6"/><path d="${FLAME}" transform="translate(0 -48) scale(1.05)" fill="#000"/>${num('5.1')}`;
+    case '5.2': return `<path d="${top}" fill="#D7262B"/><path d="${bot}" fill="#F2C200"/>${frame()}${flame()}${num('5.2')}`;
+    case '6.1': return `${white}${frame()}${skull}${num(6)}`;
+    case '6.2': return `${white}${frame()}${[[0, -54], [-16, -26], [16, -26]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="15" fill="none" stroke="#000" stroke-width="6"/>`).join('')}<circle cx="0" cy="-36" r="6" fill="#000"/>${num(6)}`;
+    case '7': return `<path d="${top}" fill="#F2C200"/><path d="${bot}" fill="#fff"/><path d="${D}" fill="none" stroke="#000" stroke-width="2"/>${frame()}<circle cx="0" cy="-36" r="7" fill="#000"/>${[90, 210, 330].map(a => `<path d="M0 -36 L${(30 * Math.cos((a - 30) * Math.PI / 180)).toFixed(1)} ${(-36 - 30 * Math.sin((a - 30) * Math.PI / 180)).toFixed(1)} A30 30 0 0 0 ${(30 * Math.cos((a + 30) * Math.PI / 180)).toFixed(1)} ${(-36 - 30 * Math.sin((a + 30) * Math.PI / 180)).toFixed(1)}Z" fill="#000"/>`).join('')}${num(7)}`;
+    case '8': return `${white}<path d="${bot}" fill="#000"/>${frame()}<rect x="-40" y="-62" width="12" height="34" transform="rotate(30 -34 -45)" fill="#000"/><rect x="24" y="-62" width="12" height="34" transform="rotate(-30 30 -45)" fill="#000"/><rect x="-46" y="-8" width="92" height="6" fill="#000"/>${num(8, '#fff')}`;
+    case '9': return `${white}${frame()}${stripes(-8)}<text x="0" y="78" text-anchor="middle" font-family="Barlow Condensed,Arial Narrow,sans-serif" font-weight="700" font-size="28" text-decoration="underline">9</text>`;
+    case '9A': return `${white}${frame()}${stripes(-8)}<rect x="-30" y="12" width="40" height="22" rx="3" fill="none" stroke="#000" stroke-width="4"/><rect x="10" y="18" width="6" height="10" fill="#000"/><path d="M28 6 l-8 14 h8 l-6 14" fill="none" stroke="#000" stroke-width="3"/><text x="0" y="78" text-anchor="middle" font-family="Barlow Condensed,Arial Narrow,sans-serif" font-weight="700" font-size="28" text-decoration="underline">9</text>`;
+  }
+  return '';
+}
+const labelSVG = (c, cls = '') => `<svg viewBox="-104 -104 208 208" role="img" aria-label="Fareseddel ${esc(c)}" class="${cls}">${label(c)}</svg>`;
+// Oransje skilt, tomt eller med farenummer og UN-nummer
+function plateSVG(hz, un) {
+  const txt = (t, y) => `<text x="200" y="${y}" text-anchor="middle" font-family="Barlow Condensed,Arial Narrow,sans-serif" font-weight="700" font-size="100" fill="#000">${esc(t)}</text>`;
+  return `<svg viewBox="0 0 400 300" role="img" aria-label="${hz ? `Oransje skilt ${esc(hz)} over ${esc(un)}` : 'Blankt oransje skilt'}"><rect x="7.5" y="7.5" width="385" height="285" fill="#F28C00" stroke="#000" stroke-width="15"/>${hz ? `<line x1="0" y1="150" x2="400" y2="150" stroke="#000" stroke-width="15"/>${txt(hz, 115)}${txt(un, 255)}` : ''}</svg>`;
+}
+// Tunnelskilt: farlig gods-forbud med underskilt for kategori
+function tunnelSVG(cat) {
+  return `<svg viewBox="0 0 200 270" role="img" aria-label="${cat === 'A' ? 'Tunnel uten skilt for farlig gods' : 'Tunnelskilt kategori ' + cat}">
+    ${cat === 'A' ? `<path d="M20 230 V120 A80 80 0 0 1 180 120 V230" fill="#3A403E" stroke="#888" stroke-width="6"/><text x="100" y="262" text-anchor="middle" font-family="Barlow Condensed,Arial Narrow,sans-serif" font-weight="700" font-size="26" fill="currentColor">Ingen skilt</text>`
+    : `<circle cx="100" cy="95" r="88" fill="#fff" stroke="#C8102E" stroke-width="18"/><rect x="58" y="65" width="84" height="60" fill="#F28C00" stroke="#000" stroke-width="5"/>
+    <rect x="45" y="200" width="110" height="64" rx="6" fill="#fff" stroke="#000" stroke-width="4"/><text x="100" y="249" text-anchor="middle" font-family="Barlow Condensed,Arial Narrow,sans-serif" font-weight="700" font-size="52" fill="#000">${cat}</text>`}</svg>`;
+}
+
+// ---------- Startsiden: kunnskapsstien ----------
+function nextStation() { return STATIONS.find(s => !stDone(s.id)) || null; }
+function renderHome() {
+  const all = QS.length, m = QS.filter(mastered).length, done = STATIONS.filter(s => stDone(s.id)).length;
+  const prak = PRACTICAL.filter(p => store.prak[p[0]]).length;
+  const best = store.labs.prove;
+  $('#overview').innerHTML = `<div class="tile"><div class="v">${done}/${STATIONS.length}</div><div class="l">stasjoner fullført (80 % mestret)</div></div>
+    <div class="tile"><div class="v">${m}/${all}</div><div class="l">spørsmål mestret</div></div>
+    <div class="tile"><div class="v">${prak}/${PRACTICAL.length}</div><div class="l">praktiske øvelser</div></div>
+    <div class="tile"><div class="v">${best == null ? '–' : best + ' %'}</div><div class="l">beste prøveresultat</div></div>`;
+  const nx = nextStation();
+  $('#cont').textContent = nx ? `Fortsett: ${ST[nx.id].n}. ${nx.title}` : 'Ta prøven';
+  let html = '';
+  for (const d of [1, 2, 3]) {
+    html += `<div class="day"><h3>${DAYS[d]}</h3><ol class="path">`;
+    for (const s of STATIONS.filter(x => x.day === d)) {
+      const p = stProgress(s.id), status = stDone(s.id) ? 'done' : p.m ? 'started' : '';
+      const lab = s.lab ? LABS[s.lab] : null, lb = s.lab ? store.labs[s.lab] : null;
+      html += `<li class="stn ${status} ${nx && nx.id === s.id ? 'next' : ''}"><span class="dot">${stDone(s.id) ? '✓' : ST[s.id].n}</span>
+        <article class="card"><div class="hd"><h3>${esc(s.title)}</h3><div class="emner">${s.emner.map(e => `<span class="em" title="${esc(EMNER[e])}">Emne ${e}: ${esc(EMNER[e])}</span>`).join('')}</div></div>
+        <p>${esc(s.desc)}</p>
+        <div class="prog"><div class="bar"><i style="width:${p.pct}%"></i></div><span>${p.m}/${p.n} mestret</span></div>
+        <div class="row"><button class="btn" data-go="facts" data-st="${s.id}">Fagstoff</button><button class="btn primary" data-go="ov" data-st="${s.id}">Øv</button>${lab ? `<button class="btn" data-go="lab" data-st="${s.id}" title="${esc(lab.desc)}">Lab: ${esc(lab.name)}${lb != null ? ` · ${lb} %` : ''}</button>` : ''}${s.match ? `<button class="btn" data-go="match" data-st="${s.id}">Koble: ${esc(SETS[s.match].name)}</button>` : ''}</div></article></li>`;
+    }
+    if (d === 3) {
+      html += `<li class="stn ${prak === PRACTICAL.length ? 'done' : prak ? 'started' : ''}"><span class="dot">${prak === PRACTICAL.length ? '✓' : 'P'}</span>
+        <article class="card"><div class="hd"><h3>Praktiske øvelser</h3><div class="emner"><span class="em">ADR 8.2.2.3.8</span></div></div>
+        <p>Øvelsene gjøres på kurset sammen med læreren. Kryss av når du har gjort dem.</p>
+        <div class="chk">${PRACTICAL.map(([k, n, d2]) => `<label><input type="checkbox" data-prak="${k}" ${store.prak[k] ? 'checked' : ''}><span><b>${n}.</b> ${d2}</span></label>`).join('')}</div></article></li>`;
+      html += `<li class="stn ${best != null ? 'done' : ''}"><span class="dot">${best != null ? '✓' : 'PR'}</span>
+        <article class="card"><div class="hd"><h3>Prøve</h3><div class="emner"><span class="em">Alle emner a–o</span></div></div>
+        <p>25 tilfeldige spørsmål fra alle stasjonene, uten fasit underveis. Du har 45 minutter, som på den avsluttende prøven.</p>
+        <div class="row"><button class="btn primary" data-go="prove">Start prøve</button><button class="btn" data-go="ovall">Øv på alt</button></div></article></li>`;
+    }
+    html += '</ol></div>';
+  }
+  $('#path').innerHTML = html;
+}
+$('#path').addEventListener('click', e => {
+  const b = e.target.closest('[data-go]'); if (!b) return;
+  const st = b.dataset.st;
+  if (st) { store.last = st; save(); }
+  ({ facts: () => showFacts(st), ov: () => startPractice(st), lab: () => startLab(ST[st].lab), match: () => startMatch(ST[st].match), prove: startExam, ovall: () => startPractice(null) })[b.dataset.go]();
+});
+$('#path').addEventListener('change', e => {
+  const c = e.target.closest('[data-prak]'); if (!c) return;
+  store.prak[c.dataset.prak] = c.checked; save(); renderHome();
+});
+$('#cont').addEventListener('click', () => { const nx = nextStation(); if (!nx) return startExam(); store.last = nx.id; save(); stProgress(nx.id).m ? startPractice(nx.id) : showFacts(nx.id); });
+$('#resetM').addEventListener('click', () => { if (confirm('Nullstille fremdriften på denne maskinen?')) { store = { streak: {}, labs: {}, prak: {}, last: null }; save(); renderHome(); } });
+
+function goHome() { $('#play').hidden = true; $('#home').hidden = false; renderHome(); scrollTo(0, 0); }
+function goPlay(html, keepScroll) { $('#home').hidden = true; const p = $('#play'); p.hidden = false; p.innerHTML = html; if (!keepScroll) scrollTo(0, 0); return p; }
+const tagsHTML = q => `<div class="tags"><span class="tag">${ST[q.st].n}. ${esc(ST[q.st].title)}</span><span class="tag">Emne ${q.em}: ${esc(EMNER[q.em])}</span></div>`;
+function optsHTML(q) {
+  if (!q._order) q._order = shuffle(q.o.map((x, i) => ({ x, i })));
+  return `<div class="opts${q.pics ? ' pics' : ''}">` + q._order.map((o, n) => `<button class="opt" data-i="${o.i}"><span class="k">${LETTERS[n]}</span><span>${q.html ? q.html[o.i] : esc(o.x)}</span></button>`).join('') + '</div>';
+}
+const srcHTML = q => `<span class="src">Kilde: ${esc(q.src)}</span>`;
+// Marker svaret og vis forklaring. Riktig svar har alltid indeks 0.
+function answer(p, q, i, fbHTML, nextLbl, onNext) {
+  p.querySelectorAll('.opt').forEach(x => { x.disabled = true; const j = +x.dataset.i; x.classList.add(j === 0 ? 'right' : j === i ? 'wrong' : 'dim'); });
+  const ok = i === 0;
+  $('#fb').innerHTML = `<div class="fb ${ok ? 'ok' : 'no'}"><b>${ok ? 'Riktig' : 'Feil, riktig svar: ' + (q.html ? q.html[0] : esc(q.o[0]))}</b>${fbHTML}</div>
+    <div class="row" style="margin-top:10px"><button class="btn primary" id="next">${nextLbl}</button></div>`;
+  $('#next').focus(); $('#next').onclick = onNext;
+  return ok;
+}
+
+// ---------- Fagstoff ----------
+function showFacts(st) {
+  const s = ST[st], list = FACTS.filter(f => f.st === st);
+  goPlay(`<div class="quiz">
+    <div class="qbar"><span>Fagstoff · <b>${s.n}. ${esc(s.title)}</b></span><div class="row"><button class="btn" onclick="window.print()">Skriv ut</button><button class="btn" id="quit">Tilbake</button></div></div>
+    <div class="facts">${list.map(f => `<article class="fact"><span class="em">Emne ${f.em}: ${esc(EMNER[f.em])}</span><h4>${esc(f.title)}</h4><ul>${f.pts.map(p => `<li>${esc(p)}</li>`).join('')}</ul></article>`).join('')}</div>
+    <div class="row noprint"><button class="btn primary" id="ovNow">Øv på denne stasjonen</button>${s.lab ? `<button class="btn" id="labNow">Lab: ${esc(LABS[s.lab].name)}</button>` : ''}</div></div>`);
+  $('#quit').onclick = goHome;
+  $('#ovNow').onclick = () => startPractice(st);
+  if (s.lab) $('#labNow').onclick = () => startLab(s.lab);
+}
+
+// ---------- Øving ----------
+// Feil svar settes inn igjen tre plasser frem i køen. st = null øver på alle stasjonene.
+function startPractice(st) {
+  const p = st ? qsOf(st) : QS;
+  const fresh = shuffle(p.filter(q => !mastered(q))), rest = shuffle(p.filter(mastered));
+  const run = { st, queue: [...fresh, ...rest].slice(0, st ? Math.max(12, fresh.length) : 20), right: 0, wrong: 0 };
+  run.total = run.queue.length;
+  run.queue.forEach(q => delete q._order);
+  nextPractice(run);
+}
+function nextPractice(run, keepScroll) {
+  if (!run.queue.length) return endPractice(run);
+  const q = run.queue[0], done = run.total - new Set(run.queue.map(x => x.id)).size;
+  const p = goPlay(`<div class="quiz">
+    <div class="qbar"><span>Øving · igjen <b>${run.queue.length}</b></span><span>Riktig <b>${run.right}</b> · Feil <b>${run.wrong}</b></span><button class="btn" id="quit">Avslutt</button></div>
+    <div class="track"><i style="width:${100 * done / run.total}%"></i></div>
+    ${tagsHTML(q)}<p class="qtext">${esc(q.q)}</p>${optsHTML(q)}<div id="fb"></div></div>`, keepScroll);
+  $('#quit').onclick = goHome;
+  p.querySelector('.opts').addEventListener('click', e => {
+    const b = e.target.closest('.opt'); if (!b || b.disabled) return;
+    const i = +b.dataset.i;
+    run.queue.shift();
+    const ok = answer(p, q, i, `${q.ex ? `<span>${esc(q.ex)}</span>` : ''}${srcHTML(q)}`, run.queue.length + (i === 0 ? 0 : 1) ? 'Neste' : 'Ferdig', () => nextPractice(run));
+    record(q, ok); kvSvar(q, i, 'øving');
+    delete q._order;
+    if (ok) run.right++; else { run.wrong++; run.queue.splice(Math.min(3, run.queue.length), 0, q); }
+  });
+}
+function endPractice(run) {
+  const pool = run.st ? qsOf(run.st) : QS, s = run.st && ST[run.st];
+  const nx = s && STATIONS[s.n];
+  goPlay(`<div class="quiz"><h3>Runden er ferdig</h3>
+    <div class="tiles"><div class="tile"><div class="v">${run.total}</div><div class="l">spørsmål</div></div>
+    <div class="tile"><div class="v">${run.wrong}</div><div class="l">feil underveis</div></div>
+    <div class="tile"><div class="v">${pool.filter(mastered).length}/${pool.length}</div><div class="l">mestret${s ? ' på stasjonen' : ''}</div></div></div>
+    ${s && stDone(run.st) ? `<div class="fb ok"><b>Stasjon ${s.n} er fullført.</b>${nx ? `<span>Neste stasjon: ${nx.n}. ${esc(nx.title)}</span>` : '<span>Du er klar for prøven.</span>'}</div>` : ''}
+    <div class="row"><button class="btn primary" id="again">Ny runde</button>${s && s.lab ? `<button class="btn" id="lab2">Lab: ${esc(LABS[s.lab].name)}</button>` : ''}<button class="btn" id="home2">Til stien</button></div></div>`);
+  $('#again').onclick = () => startPractice(run.st); $('#home2').onclick = goHome;
+  if (s && s.lab) $('#lab2').onclick = () => startLab(s.lab);
+}
+
+// ---------- Prøve: 25 spørsmål, 45 minutter (8.2.2.7.1.6) ----------
+const EXAM_N = 25, EXAM_MS = 45 * 60 * 1000;
+function startExam() {
+  const by = {}; shuffle(QS).forEach(q => (by[q.st] = by[q.st] || []).push(q));
+  const picked = []; let k = 0; const ls = shuffle(Object.keys(by));
+  while (picked.length < EXAM_N) { const a = by[ls[k++ % ls.length]]; if (a.length) picked.push(a.pop()); }
+  picked.forEach(q => delete q._order);
+  const run = { qs: shuffle(picked), ans: {}, i: 0, t0: Date.now() };
+  run.timer = setInterval(() => {
+    const left = EXAM_MS - (Date.now() - run.t0), el = $('#clock');
+    if (!el) return clearInterval(run.timer);
+    if (left <= 0) { clearInterval(run.timer); return finishExam(run, true); }
+    el.textContent = clock(left);
+  }, 1000);
+  showExam(run);
+}
+const clock = ms => { const s = Math.max(0, Math.ceil(ms / 1000)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
+function showExam(run, keepScroll) {
+  const q = run.qs[run.i], answered = Object.keys(run.ans).length;
+  const p = goPlay(`<div class="quiz">
+    <div class="qbar"><span>Spørsmål <b>${run.i + 1}</b> av <b>${run.qs.length}</b></span><span>Besvart <b>${answered}</b> · Tid igjen <b id="clock">${clock(EXAM_MS - (Date.now() - run.t0))}</b></span></div>
+    <div class="track"><i style="width:${100 * answered / run.qs.length}%"></i></div>
+    <p class="qtext">${esc(q.q)}</p>${optsHTML(q)}
+    <div class="row navrow"><button class="btn" id="prev" ${run.i ? '' : 'disabled'}>Forrige</button><button class="btn primary" id="nxt">${run.i < run.qs.length - 1 ? 'Neste' : 'Lever'}</button><button class="btn" id="hand">Lever nå</button></div></div>`, keepScroll);
+  const mark = () => p.querySelectorAll('.opt').forEach(x => x.classList.toggle('sel', run.ans[q.id] === +x.dataset.i));
+  mark();
+  p.querySelector('.opts').addEventListener('click', e => { const b = e.target.closest('.opt'); if (!b) return; run.ans[q.id] = +b.dataset.i; mark(); });
+  $('#prev').onclick = () => { run.i--; showExam(run); };
+  $('#nxt').onclick = () => { if (run.i < run.qs.length - 1) { run.i++; showExam(run); } else finishExam(run); };
+  $('#hand').onclick = () => finishExam(run);
+}
+function finishExam(run, timeUp) {
+  if (run.finished) return;
+  const left = run.qs.length - Object.keys(run.ans).length;
+  if (!timeUp && left && !confirm(`Du har ${left} ubesvarte spørsmål. Levere likevel?`)) return;
+  run.finished = true;
+  clearInterval(run.timer);
+  run.t1 = Date.now();
+  run.qs.forEach(q => { record(q, run.ans[q.id] === 0); kvSvar(q, run.ans[q.id], 'prøve'); });
+  const right = run.qs.filter(q => run.ans[q.id] === 0).length, pct = Math.round(100 * right / run.qs.length);
+  store.labs.prove = Math.max(store.labs.prove || 0, pct); save();
+  kv('prove', { k: 'grunnkurs', a: String(Math.round(pct / 10) * 10), m: String(run.qs.length) });
+  run.timeUp = timeUp;
+  showResult(run);
+}
+function showResult(run) {
+  const right = run.qs.filter(q => run.ans[q.id] === 0).length, pct = Math.round(100 * right / run.qs.length);
+  const wrong = run.qs.filter(q => run.ans[q.id] !== 0);
+  const bySt = {}; run.qs.forEach(q => { bySt[q.st] = bySt[q.st] || [0, 0]; bySt[q.st][1]++; if (run.ans[q.id] === 0) bySt[q.st][0]++; });
+  goPlay(`<div class="quiz">
+    <h3>Resultat</h3>${run.timeUp ? '<div class="fb no"><b>Tiden er ute. Prøven ble levert automatisk.</b></div>' : ''}
+    <div class="tiles"><div class="tile"><div class="v">${right}/${run.qs.length}</div><div class="l">riktige svar</div></div>
+      <div class="tile"><div class="v">${pct} %</div><div class="l">score</div></div>
+      <div class="tile"><div class="v">${clock(run.t1 - run.t0)}</div><div class="l">tid brukt</div></div></div>
+    <div class="mastery" style="display:grid;gap:8px">${STATIONS.filter(s => bySt[s.id]).map(s => { const [r, n] = bySt[s.id]; return `<div class="mrow"><span>${ST[s.id].n}. ${esc(s.title)}</span><div class="bar"><i style="width:${100 * r / n}%"></i></div><b>${r}/${n}</b></div>`; }).join('')}</div>
+    <h2 style="margin-top:6px">${wrong.length ? 'Gå gjennom det du svarte feil på' : 'Alt riktig!'}</h2>
+    <ul class="review">${wrong.map(q => `<li><b>${esc(q.q)}</b>
+      <span>Ditt svar: ${run.ans[q.id] === undefined ? '<i>ikke besvart</i>' : esc(q.o[run.ans[q.id]])}</span>
+      <span>Riktig: <b>${esc(q.o[0])}</b></span>${q.ex ? `<span class="muted">${esc(q.ex)}</span>` : ''}${srcHTML(q)}</li>`).join('')}</ul>
+    <div class="row noprint"><button class="btn primary" id="again">Ny prøve</button><button class="btn" onclick="window.print()">Skriv ut</button><button class="btn" id="home2">Til stien</button></div></div>`);
+  $('#again').onclick = startExam; $('#home2').onclick = goHome;
+}
+
+// ---------- Koble sammen ----------
+function startMatch(key) {
+  const set = SETS[key], rounds = [], all = shuffle(set.pairs);
+  for (let i = 0; i < all.length; i += 5) rounds.push(all.slice(i, i + 5));
+  if (rounds.length > 1 && rounds[rounds.length - 1].length < 3) rounds[rounds.length - 2].push(...rounds.pop());
+  showMatch({ key, set, rounds, r: 0, errors: 0, t0: Date.now() });
+}
+function showMatch(run) {
+  const pairs = run.rounds[run.r];
+  const left = shuffle(pairs.map((p, i) => ({ x: p[0], i }))), right = shuffle(pairs.map((p, i) => ({ x: p[1], i })));
+  const p = goPlay(`<div class="quiz">
+    <div class="qbar"><span>${esc(run.set.name)} · runde <b>${run.r + 1}</b> av <b>${run.rounds.length}</b></span><span>Feil <b id="err">${run.errors}</b></span><button class="btn" id="quit">Avslutt</button></div>
+    <p class="muted" style="margin:0">Trykk på én til venstre og den som hører sammen med den til høyre.</p>
+    <div class="match"><div class="col">${left.map(x => `<button class="m code" data-side="a" data-i="${x.i}">${esc(x.x)}</button>`).join('')}</div>
+    <div class="col">${right.map(x => `<button class="m" data-side="b" data-i="${x.i}">${esc(x.x)}</button>`).join('')}</div></div>
+    <div id="mfb"></div></div>`);
+  $('#quit').onclick = goHome;
+  let sel = { a: null, b: null }, done = 0;
+  p.querySelector('.match').addEventListener('click', e => {
+    const b = e.target.closest('.m'); if (!b || b.classList.contains('done')) return;
+    const side = b.dataset.side;
+    p.querySelectorAll(`.m[data-side="${side}"]`).forEach(x => x.classList.remove('sel', 'err'));
+    b.classList.add('sel'); sel[side] = b;
+    if (!sel.a || !sel.b) return;
+    const A = sel.a, B = sel.b; sel = { a: null, b: null };
+    if (A.dataset.i === B.dataset.i) { [A, B].forEach(x => { x.classList.remove('sel'); x.classList.add('done'); x.disabled = true; }); done++; }
+    else { run.errors++; $('#err').textContent = run.errors; [A, B].forEach(x => { x.classList.remove('sel'); x.classList.add('err'); }); setTimeout(() => [A, B].forEach(x => x.classList.remove('err')), 700); }
+    if (done === pairs.length) {
+      const last = run.r === run.rounds.length - 1;
+      if (last) kv('koble', { k: run.key, a: String(run.errors), m: String(run.set.pairs.length) });
+      $('#mfb').innerHTML = last
+        ? `<div class="fb ok"><b>Alle ${run.set.pairs.length} par på ${clock(Date.now() - run.t0)} med ${run.errors} feil.</b></div><div class="row" style="margin-top:10px"><button class="btn primary" id="again">Spill igjen</button><button class="btn" id="home2">Til stien</button></div>`
+        : `<div class="row"><button class="btn primary" id="nextr">Neste runde</button></div>`;
+      if (last) { $('#again').onclick = () => startMatch(run.key); $('#home2').onclick = goHome; }
+      else { $('#nextr').onclick = () => { run.r++; showMatch(run); }; $('#nextr').focus(); }
+    }
+  });
+}
+
+// ---------- Laber ----------
+// Hver lab lager én oppgave om gangen: { q, o (riktig først) eller html, ex, show (HTML over spørsmålet) }
+const LAB_N = 10;
+function startLab(key) { runLab({ key, i: 0, right: 0 }); }
+function runLab(run, keepScroll) {
+  const L = LABS[run.key];
+  if (run.i === LAB_N) {
+    const pct = Math.round(100 * run.right / LAB_N);
+    store.labs[run.key] = Math.max(store.labs[run.key] || 0, pct); save();
+    kv('lab', { k: run.key, a: String(pct), m: String(LAB_N) });
+    goPlay(`<div class="quiz"><h3>${esc(L.name)}: ${run.right} av ${LAB_N} riktige</h3><div class="row"><button class="btn primary" id="again">Nye oppgaver</button><button class="btn" id="home2">Til stien</button></div></div>`);
+    $('#again').onclick = () => startLab(run.key); $('#home2').onclick = goHome; return;
+  }
+  if (!run.task) { run.task = LABGEN[run.key](); run.task._order = null; }
+  const tk = run.task;
+  if (tk.multi) return runMulti(run, keepScroll);
+  const p = goPlay(`<div class="quiz">
+    <div class="qbar"><span>${esc(L.name)} · oppgave <b>${run.i + 1}</b> av <b>${LAB_N}</b></span><span>Riktig <b>${run.right}</b></span><button class="btn" id="quit">Avslutt</button></div>
+    ${tk.show || ''}<p class="qtext">${tk.qHTML || esc(tk.q)}</p>${optsHTML(tk)}<div id="fb"></div></div>`, keepScroll);
+  $('#quit').onclick = goHome;
+  p.querySelector('.opts').addEventListener('click', e => {
+    const b = e.target.closest('.opt'); if (!b || b.disabled) return;
+    const i = +b.dataset.i;
+    const ok = answer(p, tk, i, `<span>${tk.ex}</span>${tk.src ? `<span class="src">Kilde: ${esc(tk.src)}</span>` : ''}`, run.i < LAB_N - 1 ? 'Neste' : 'Se resultat', () => { run.i++; run.task = null; runLab(run); });
+    if (ok) run.right++;
+    kv('lab', { k: run.key + '.' + (tk.kind || ''), a: ok ? 'riktig' : 'feil', m: tk.tag || '' });
+    run.task.done = true;
+  });
+}
+// Fire ulike svar: riktig først, så kandidater, fylt opp fra reserven
+function four(r, cands, pool) { const out = [r]; for (const v of [...cands, ...shuffle(pool)]) if (v != null && v !== '' && !out.includes(v) && out.length < 4) out.push(v); return out; }
+// Navn med små bokstaver, men forkortelser i parentes beholdes (LPG)
+const lc = n => n.toLowerCase().replace(/\(([^)]*)\)/, (m, x) => '(' + (x.length <= 4 ? x.toUpperCase() : x) + ')');
+const tcTxt = s => s.tc === '-' ? '(-)' : `(${s.tc})`;
+const pgTxt = s => s.pg || '–';
+const labTxt = s => s.lab.join(' + ');
+
+const LABGEN = {
+  // Slå opp i et utdrag av Tabell A
+  tabA() {
+    const rows = shuffle(SUBST).slice(0, 6), s = pick(rows), others = rows.filter(r => r !== s);
+    const kind = pick(['cls', 'tk', 'tc', 'hz', 'lq', 'lab', 'pg', 'un', 'tk']);
+    const show = `<div class="tabA"><table><tr><th><b>(1)</b>UN-nr.</th><th><b>(2)</b>Navn og beskrivelse</th><th><b>(3a)</b>Klasse</th><th><b>(4)</b>Emb.gr.</th><th><b>(5)</b>Faresedler</th><th><b>(7a)</b>Begr. mengder</th><th><b>(15)</b>Transportkat. (tunnelkode)</th><th><b>(20)</b>Farenr.</th></tr>
+      ${rows.map(r => `<tr><td class="n">${r.un}</td><td>${esc(r.name)}</td><td>${r.cls}</td><td>${pgTxt(r)}</td><td>${esc(labTxt(r))}</td><td>${esc(r.lq)}</td><td>${r.tk}<br>${tcTxt(r)}</td><td>${esc(r.hz)}</td></tr>`).join('')}</table></div>
+      <p class="muted" style="margin:0;font-size:13px">Utdrag av Tabell A med noen av kolonnene. Slå opp i boka når du vil sjekke resten.</p>`;
+    const name = `UN ${s.un} ${lc(s.name)}`;
+    const col = (q, f, n, ex) => ({ kind, q, o: four(f(s), others.map(f), SUBST.map(f)), ex: ex || `Se kolonne ${n} i raden for UN ${s.un}.`, show, tag: s.un, src: 'ADR 3.2.1, Tabell A' });
+    switch (kind) {
+      case 'cls': return col(`Hvilken klasse har ${name}?`, r => r.cls, '(3a)');
+      case 'tk': return col(`Hvilken transportkategori har ${name}?`, r => String(r.tk), '(15)', `Transportkategorien står øverst i kolonne (15). For UN ${s.un} er den ${s.tk}${s.tk ? `, så mengden ganges med ${[0, 50, 3, 1, 0][s.tk]} i 1.1.3.6` : ', som betyr at unntaket i 1.1.3.6 aldri gjelder'}.`);
+      case 'tc': return col(`Hvilken tunnelkode har ${name}?`, tcTxt, '(15)', `Tunnelkoden står i parentes nederst i kolonne (15).`);
+      case 'hz': return col(`Hvilket farenummer skal stå på det oransje skiltet for ${name}?`, r => r.hz, '(20)', `Farenummer ${s.hz} betyr ${HZ[s.hz]}.`);
+      case 'lq': return col(`Hvor mye kan hver innerbeholder inneholde når ${name} sendes som begrensede mengder?`, r => r.lq, '(7a)', s.lq === '0' ? '«0» betyr at stoffet ikke kan sendes som begrensede mengder.' : `Se kolonne (7a). Kolliet kan veie høyst 30 kg brutto.`);
+      case 'lab': return col(`Hvilke faresedler skal kolliene med ${name} ha?`, labTxt, '(5)');
+      case 'pg': return col(`Hvilken emballasjegruppe har ${name}?`, pgTxt, '(4)', s.pg ? `Emballasjegruppe ${s.pg} betyr ${{ I: 'stor', II: 'middels', III: 'liten' }[s.pg]} fare.` : 'Gasser og mange gjenstander har ikke emballasjegruppe.');
+      default: return { kind, q: `Hvilket UN-nummer har ${lc(s.name)}?`, o: four(s.un, others.map(r => r.un), SUBST.map(r => r.un)), ex: `UN-nummeret står i kolonne (1). Bare navnet? Bruk den alfabetiske Tabell B.`, show, tag: s.un, src: 'ADR 3.2.1 og 3.2.2' };
+    }
+  },
+  // Kjenn igjen faresedlene
+  sedler() {
+    const keys = ['1', '1.4S', '2.1', '2.2', '2.3', '3', '4.1', '4.2', '4.3', '5.1', '5.2', '6.1', '6.2', '7', '8', '9', '9A'];
+    const c = pick(keys), near = { '2.1': ['3', '4.3'], '3': ['2.1', '4.1'], '4.1': ['4.2', '3'], '4.2': ['4.1', '5.2'], '5.1': ['5.2', '4.3'], '5.2': ['5.1', '4.2'], '2.3': ['6.1', '6.2'], '6.1': ['2.3', '6.2'], '6.2': ['6.1', '9'], '9': ['9A', '8'], '9A': ['9', '4.3'], '1': ['1.4S', '7'], '1.4S': ['1', '2.1'], '2.2': ['2.1', '5.1'], '4.3': ['2.2', '4.1'], '7': ['5.1', '1'], '8': ['6.1', '9'] };
+    const o = four(c, near[c] || [], keys);
+    return { kind: c, q: 'Hvilken fareseddel er dette?', o: o.map(k => CLASSNAME[k]), ex: `${CLASSNAME[c]}.`, show: `<div class="big">${labelSVG(c)}</div>`, tag: c, src: 'ADR 5.2.2.2' };
+  },
+  // Les det oransje skiltet
+  skilt() {
+    const withHz = SUBST.filter(s => s.hz), s = pick(withHz), kind = pick(['what', 'meaning', 'make', 'blank', 'what', 'meaning']);
+    if (kind === 'what') {
+      const o = four(`UN ${s.un} ${s.name}`, shuffle(withHz.filter(r => r.hz === s.hz && r.un !== s.un)).map(r => `UN ${r.un} ${r.name}`), withHz.map(r => `UN ${r.un} ${r.name}`));
+      return { kind, q: 'Tankbilen har dette skiltet. Hvilket stoff har den i tanken?', o, ex: `UN-nummeret nederst (${s.un}) forteller hvilket stoff det er. Farenummeret øverst (${s.hz}) betyr ${HZ[s.hz]}.`, show: `<div class="big">${plateSVG(s.hz, s.un)}</div>`, tag: s.un, src: 'ADR 5.3.2.1 og 5.3.2.3' };
+    }
+    if (kind === 'meaning') {
+      const o = four(HZ[s.hz], [], Object.values(HZ));
+      return { kind, q: `Hva betyr farenummeret ${s.hz} øverst på skiltet?`, o, ex: s.hz[0] === 'X' ? 'X betyr at stoffet reagerer farlig med vann.' : `Les sifrene: ${s.hz.split('').map(d => ({ 2: '2 gass', 3: '3 brannfarlig', 4: '4 brannfarlig fast stoff', 5: '5 oksiderende', 6: '6 giftig eller smitte', 8: '8 etsende', 9: '9 diverse eller voldsom reaksjon', 0: '0 ingen tilleggsfare' })[d] || d).join(', ')}.`, show: `<div class="big">${plateSVG(s.hz, s.un)}</div>`, tag: s.hz, src: 'ADR 5.3.2.3' };
+    }
+    if (kind === 'make') {
+      const t = pick(SUBST.filter(r => r.tank)), wrongHz = pick(SUBST.filter(r => r.hz !== t.hz && r.tank)).hz;
+      const opts = [[t.hz, t.un], [t.un, t.hz], [wrongHz, t.un], [null, null]];
+      return { kind, q: `Tankbilen frakter bare UN ${t.un} ${lc(t.name)}. Hvilket skilt skal sitte foran og bak?`, o: opts.map(x => x.join('/')), html: opts.map(([a, b]) => plateSVG(a, b)), pics: true, ex: `Farenummeret ${t.hz} øverst og UN-nummeret ${t.un} nederst. Begge står i Tabell A, kolonne (20) og (1).`, tag: t.un, src: 'ADR 5.3.2.1 og 5.3.2.2.2' };
+    }
+    const k = pick(SUBST.filter(r => r.packs.length && !r.noPts));
+    const opts = [[null, null], [k.hz, k.un], [k.un, k.hz], ['1', k.cls]];
+    return { kind, q: `Lastebilen har kolli med UN ${k.un} ${lc(k.name)}, langt over 1000 poeng. Hvilket skilt skal sitte foran og bak?`, o: opts.map(x => x.join('/')), html: opts.map(([a, b]) => plateSVG(a, b)), pics: true, ex: 'Stykkgods skal ha blanke oransje skilt. Skilt med tall brukes på tank og bulk.', tag: k.un, src: 'ADR 5.3.2.1.1' };
+  },
+  // Regn 1000 poeng
+  poeng() {
+    const cand = SUBST.filter(s => s.packs.length && !s.noPts && s.tk >= 1);
+    const n = pick([1, 2, 2, 3]), items = shuffle(cand).slice(0, n).map(s => { const [desc, amt] = pick(s.packs); const max = Math.max(1, Math.floor(({ 1: 15, 2: 400, 3: 1400 })[s.tk] / amt)); return { s, desc, amt, cnt: 1 + Math.floor(Math.random() * Math.min(max, 12)) }; });
+    const mult = { 1: 50, 2: 3, 3: 1 };
+    const unit = s => ({ L: 'L', S: 'kg', G: 'kg', C: 'L', A: 'kg' })[s.form];
+    const sum = items.reduce((a, x) => a + x.cnt * x.amt * mult[x.s.tk], 0), raw = items.reduce((a, x) => a + x.cnt * x.amt, 0);
+    const lines = items.map(x => `${x.cnt} × ${x.amt} ${unit(x.s)} = ${x.cnt * x.amt} ${unit(x.s)} i kategori ${x.s.tk}, × ${mult[x.s.tk]} = <b>${x.cnt * x.amt * mult[x.s.tk]}</b>`);
+    const show = `<div class="load">${items.map(x => `<div class="li">${x.s.lab.map(l => labelSVG(l)).join('')}<span><b>${x.cnt} ${esc(x.desc)}</b> · UN ${x.s.un} ${esc(lc(x.s.name))} · transportkategori ${x.s.tk}</span></div>`).join('')}</div>`;
+    const ex = `<span class="calc">${lines.map(l => `<span>${l}</span>`).join('')}<span>Sum: <b>${sum} poeng</b> – ${sum <= 1000 ? 'innenfor 1.1.3.6. Bilen trenger ikke oransje skilt.' : 'over 1000. Hele ADR gjelder, med oransje skilt og skriftlige instruksjoner.'}</span></span>`;
+    if (Math.random() < .55) {
+      const wrongMult = items.reduce((a, x) => a + x.cnt * x.amt * (x.s.tk === 2 ? 50 : x.s.tk === 1 ? 3 : 1), 0);
+      return { kind: 'sum', q: 'Hvor mange poeng er lasten etter 1.1.3.6?', o: four(String(sum), [String(raw), String(wrongMult), String(sum + items[0].amt * mult[items[0].s.tk])], [String(Math.round(sum * 1.5)), String(Math.round(sum / 2))]), ex, show, src: 'ADR 1.1.3.6.3 og 1.1.3.6.4' };
+    }
+    const yes = sum > 1000;
+    return { kind: 'over', q: 'Må bilen ha oransje skilt for denne lasten?', o: yes ? ['Ja, lasten er over 1000 poeng', 'Nei, lasten er innenfor 1.1.3.6'] : ['Nei, lasten er innenfor 1.1.3.6', 'Ja, lasten er over 1000 poeng'], ex, show, src: 'ADR 1.1.3.6' };
+  },
+  // Pakk utstyret (8.1.5) – flervalg
+  utstyr() {
+    // Batterier er gjenstander og holdes utenfor, siden 8.1.5.3 gjelder faste stoffer og væsker
+    const n = pick([1, 1, 2]), items = shuffle(SUBST.filter(s => s.packs.length && s.form !== 'A')).slice(0, n);
+    const labs = new Set(items.flatMap(s => s.lab.map(l => l === '9A' ? '9' : l)));
+    const noEye = ['1', '1.4', '1.5', '1.6', '2.1', '2.2', '2.3'];
+    const need = {
+      kloss: true, sign: true, vest: true, lykt: true, hansker: true, oye: true,
+      skyll: [...labs].some(l => !noEye.includes(l)),
+      maske: labs.has('2.3') || labs.has('6.1'),
+      spade: [...labs].some(l => ['3', '4.1', '4.3', '8', '9'].includes(l)) && items.some(s => ['L', 'S'].includes(s.form) && s.lab.some(l => ['3', '4.1', '4.3', '8', '9'].includes(l)))
+    };
+    const EQ = [['kloss', 'Stoppekloss'], ['sign', 'To frittstående varselsignaler'], ['skyll', 'Øyeskyllemiddel'], ['vest', 'Varselvest til hver i mannskapet'], ['lykt', 'Lommelykt til hver i mannskapet'], ['hansker', 'Vernehansker til hver i mannskapet'], ['oye', 'Øyebeskyttelse til hver i mannskapet'], ['maske', 'Fluktmaske til hver i mannskapet'], ['spade', 'Spade, tetning for sluk og oppsamlingsbeholder'], ['teppe', 'Brannteppe'], ['gass', 'Gassmåler'], ['kjede', 'Slepekjetting']];
+    const why = { skyll: need.skyll ? 'Øyeskyllemiddel kreves fordi lasten har andre faresedler enn 1 og 2.' : 'Øyeskyllemiddel trengs ikke når lasten bare har faresedlene 1 eller 2.', maske: need.maske ? 'Fluktmaske kreves ved fareseddel 2.3 eller 6.1.' : 'Fluktmaske kreves bare ved 2.3 eller 6.1.', spade: need.spade ? 'Spade, tetning og oppsamlingsbeholder kreves for faste stoffer og væsker med 3, 4.1, 4.3, 8 eller 9.' : 'Spade, tetning og oppsamlingsbeholder kreves bare for faste stoffer og væsker med 3, 4.1, 4.3, 8 eller 9.' };
+    return { multi: true, kind: [...labs].join('+'), EQ, need, why, show: `<div class="load">${items.map(s => `<div class="li">${s.lab.map(l => labelSVG(l)).join('')}<span><b>UN ${s.un}</b> ${esc(lc(s.name))}</span></div>`).join('')}<span class="muted" style="font-size:13px">Lasten er over 1000 poeng.</span></div>` };
+  },
+  // Kan de lastes sammen? (7.5.2.1)
+  samlast() {
+    const other = ['2.1', '2.2', '2.3', '3', '4.1', '4.2', '4.3', '5.2', '6.1', '6.2', '8'];
+    const r = Math.random();
+    let a, b;
+    if (r < .4) { a = '1'; b = pick(other); }
+    else if (r < .55) { a = '1.4S'; b = pick([...other, '5.1', '9']); }
+    else { [a, b] = shuffle([...other, '5.1', '9']).slice(0, 2); }
+    if (Math.random() < .5) [a, b] = [b, a];
+    const has1 = a === '1' || b === '1', ok = !has1;
+    const ex = has1 ? 'Kolli med fareseddel 1 kan som hovedregel ikke lastes sammen med andre klasser. Bare 1.4S kan lastes med de fleste.' : (a === '1.4S' || b === '1.4S') ? '1.4S kan samlastes med de andre klassene (fotnote 1 i tabellen).' : 'Klassene 2–9 kan lastes sammen i kolli etter tabellen i 7.5.2.1. Last og sikre likevel så kolliene ikke skades.';
+    return { kind: [a, b].sort().join('+'), q: 'Kan disse kolliene lastes i samme kjøretøy?', o: ok ? ['Ja', 'Nei'] : ['Nei', 'Ja'], ex, show: `<div class="pair"><figure>${labelSVG(a)}<figcaption>${esc(CLASSNAME[a])}</figcaption></figure><figure>${labelSVG(b)}<figcaption>${esc(CLASSNAME[b])}</figcaption></figure></div>`, src: 'ADR 7.5.2.1' };
+  },
+  // Tunnelkontroll (8.6)
+  tunnel() {
+    const cat = pick(['A', 'B', 'C', 'D', 'E', 'D', 'E']);
+    const inTank = Math.random() < .4;
+    let items, under = false;
+    if (inTank) items = [pick(SUBST.filter(s => s.tank))];
+    else {
+      items = shuffle(SUBST.filter(s => s.packs.length && !s.noPts && s.tk >= 1)).slice(0, pick([1, 2]));
+      under = Math.random() < .25;
+    }
+    const forb = tunnelForbidden(items.map(s => s.tc), inTank);
+    const allowed = under || !forb.includes(cat);
+    const worst = items.map(s => s.tc).sort((x, y) => tunnelForbidden([y], inTank).length - tunnelForbidden([x], inTank).length)[0];
+    const ex = under ? 'Lasten er innenfor 1000 poeng etter 1.1.3.6, så tunnelbegrensningene gjelder ikke (8.6.3.3).'
+      : `${items.length > 1 ? `Den strengeste koden, (${worst}), gjelder hele lasten. ` : ''}Med kode (${worst}) ${inTank ? 'i tank' : 'i kolli'} er ${forb.length ? 'kategori ' + forb.join(', ') + ' forbudt' : 'alle tunneler tillatt'}. ${cat === 'A' ? 'Tunneler uten skilt er kategori A, uten begrensninger.' : `Tunnelen er kategori ${cat}.`}`;
+    const show = `<div class="scene">${tunnelSVG(cat)}<div class="load">${items.map(s => `<div class="li">${s.lab.map(l => labelSVG(l)).join('')}<span><b>UN ${s.un}</b> ${esc(lc(s.name))} · tunnelkode ${tcTxt(s)}</span></div>`).join('')}<span>${inTank ? 'I tankbil' : under ? 'I kolli, innenfor 1000 poeng (ingen oransje skilt)' : 'I kolli, over 1000 poeng (oransje skilt)'}</span></div></div>`;
+    return { kind: (inTank ? 'tank' : under ? 'under' : 'kolli') + cat, q: 'Kan bilen kjøre gjennom tunnelen?', o: allowed ? ['Ja, det er tillatt', 'Nei, det er forbudt'] : ['Nei, det er forbudt', 'Ja, det er tillatt'], ex, show, src: 'ADR 8.6.3 og 8.6.4' };
+  }
+};
+// Tunnelkategoriene som er forbudt for en last med disse kodene (8.6.4). Strengeste kode vinner.
+function tunnelForbidden(codes, tank) {
+  const from = l => ['B', 'C', 'D', 'E'].slice(['B', 'C', 'D', 'E'].indexOf(l));
+  const out = new Set();
+  for (const c of codes) {
+    if (c === '-') continue;
+    const [t, k] = c.includes('/') ? c.split('/') : [c, c];
+    from(tank ? t : k).forEach(x => out.add(x));
+  }
+  return ['B', 'C', 'D', 'E'].filter(x => out.has(x));
+}
+// Flervalgsoppgave for utstyrslaben
+function runMulti(run, keepScroll) {
+  const tk = run.task, L = LABS[run.key];
+  tk.sel = tk.sel || {};
+  const p = goPlay(`<div class="quiz">
+    <div class="qbar"><span>${esc(L.name)} · oppgave <b>${run.i + 1}</b> av <b>${LAB_N}</b></span><span>Riktig <b>${run.right}</b></span><button class="btn" id="quit">Avslutt</button></div>
+    ${tk.show}<p class="qtext">Kryss av alt utstyret transportenheten skal ha.</p>
+    <div class="eqs">${tk.EQ.map(([k, n]) => `<button class="eq" data-k="${k}" aria-pressed="${!!tk.sel[k]}">${esc(n)}</button>`).join('')}</div>
+    <div class="row"><button class="btn primary" id="check">Sjekk</button></div><div id="fb"></div></div>`, keepScroll);
+  $('#quit').onclick = goHome;
+  const eqs = p.querySelector('.eqs');
+  eqs.addEventListener('click', e => { const b = e.target.closest('.eq'); if (!b || tk.checked) return; tk.sel[b.dataset.k] = !tk.sel[b.dataset.k]; b.setAttribute('aria-pressed', tk.sel[b.dataset.k]); });
+  $('#check').onclick = () => {
+    if (tk.checked) return;
+    tk.checked = true;
+    let ok = true;
+    eqs.querySelectorAll('.eq').forEach(b => { const k = b.dataset.k, want = !!tk.need[k], got = !!tk.sel[k]; b.disabled = true; if (want !== got) ok = false; if (want) b.classList.add(got ? 'right' : 'wrong'); else if (got) b.classList.add('wrong'); });
+    if (ok) run.right++;
+    kv('lab', { k: 'utstyr.' + tk.kind, a: ok ? 'riktig' : 'feil', m: '' });
+    $('#check').hidden = true;
+    $('#fb').innerHTML = `<div class="fb ${ok ? 'ok' : 'no'}"><b>${ok ? 'Riktig' : 'Ikke helt. Grønt er det som skal med, rødt er feil.'}</b><span>Alle transportenheter: stoppekloss og to varselsignaler. Alle i mannskapet: varselvest, lommelykt, vernehansker og øyebeskyttelse.</span>${['skyll', 'maske', 'spade'].map(k => `<span>${tk.why[k]}</span>`).join('')}<span class="src">Kilde: ADR 8.1.5.2 og 8.1.5.3</span></div>
+      <div class="row" style="margin-top:10px"><button class="btn primary" id="next">${run.i < LAB_N - 1 ? 'Neste' : 'Se resultat'}</button></div>`;
+    $('#next').focus(); $('#next').onclick = () => { run.i++; run.task = null; runLab(run); };
+  };
+}
+
+renderHome();
+</script>
+</body>
+</html>
