@@ -60,10 +60,10 @@ h2::after{content:"";flex:1;height:1px;background:var(--line)}
 .badge{flex:none;font-family:var(--f-display);font-weight:700;font-size:22px;line-height:1;padding:8px 6px;min-width:46px;text-align:center;border-radius:3px;background:var(--ink);color:var(--sheet)}
 .card h3{margin:0;font-family:var(--f-display);font-weight:700;font-size:24px;line-height:1.05;text-transform:uppercase;letter-spacing:.01em}
 .card .for{margin:3px 0 0;font-size:13px;color:var(--muted)}
-/* Kort med bilde: bildet går kant til kant øverst */
-.card:has(> .art){grid-template-rows:auto auto 1fr auto;padding-top:0;overflow:hidden}
-.card > .art{display:block;margin:0 -16px}
-.card > .art img{display:block;width:100%;height:auto}
+/* Bildekort: hele kortet er et bilde som åpner verktøyet */
+.card.bilde{display:block;padding:0;overflow:hidden}
+.card.bilde img{display:block;width:100%;height:100%;object-fit:cover}
+.card.bilde:hover,.card.bilde:focus-visible{border-color:var(--accent)}
 .card p.desc{margin:0;font-size:14.5px;max-width:60ch}
 .foot{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;padding-top:12px;border-top:1px solid var(--line)}
 .tags{display:flex;flex-wrap:wrap;gap:6px;flex:1 1 100%;min-width:0}
@@ -146,13 +146,7 @@ footer{margin-top:40px;color:var(--muted);font-size:13px;max-width:70ch}
         <div class="foot"><div class="tags"><span class="tag">Alene</span><span class="tag off">Uten nett</span></div>
           <a class="open" href="https://seiknes-ui.github.io/trekk/">Åpne</a></div>
       </article>
-      <article class="card">
-        <a class="art" href="tuktuk/index.html" tabindex="-1" aria-hidden="true"><img src="bilder/kort/tuktuk.webp" alt="" width="900" height="502" loading="lazy"></a>
-        <div class="top"><div><h3>Tuktuk kjøreskole</h3><p class="for">Kjøreopplæring, å instruere en elev</p></div></div>
-        <p class="desc">Arve og André fra Sauda vinner i Lotto og starter tuk-tuk-kjøreskole i Thailand. Du er læreren som gir beskjeder til en nervøs elev på en tre minutters kjøretur, og må finne balansen mellom å veilede og å mase.</p>
-        <div class="foot"><div class="tags"><span class="tag">Alene</span><span class="tag">Mobil</span><span class="tag off">Uten nett</span></div>
-          <a class="open" href="tuktuk/index.html">Åpne</a></div>
-      </article>
+      <a class="card bilde" href="tuktuk/index.html"><img src="bilder/kort/tuktuk.webp" alt="Tuktuk kjøreskole" width="900" height="502" loading="lazy"></a>
     </div>
   </section>
 
