@@ -61,9 +61,11 @@ h2::after{content:"";flex:1;height:1px;background:var(--line)}
 .card h3{margin:0;font-family:var(--f-display);font-weight:700;font-size:24px;line-height:1.05;text-transform:uppercase;letter-spacing:.01em}
 .card .for{margin:3px 0 0;font-size:13px;color:var(--muted)}
 /* Bildekort: hele kortet er et bilde som åpner verktøyet */
-.card.bilde{display:block;padding:0;overflow:hidden}
+.card.bilde{display:block;position:relative;padding:0;overflow:hidden}
 .card.bilde img{display:block;width:100%;height:100%;object-fit:cover}
 .card.bilde:hover,.card.bilde:focus-visible{border-color:var(--accent)}
+.card.bilde .open{position:absolute;right:16px;bottom:14px;font-weight:600;font-size:14px;padding:7px 14px;border-radius:4px;background:var(--ink);color:var(--sheet);border:1px solid var(--ink)}
+.card.bilde:hover .open,.card.bilde:focus-visible .open{background:var(--accent);border-color:var(--accent);color:var(--badge-ink)}
 .card p.desc{margin:0;font-size:14.5px;max-width:60ch}
 .foot{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;padding-top:12px;border-top:1px solid var(--line)}
 .tags{display:flex;flex-wrap:wrap;gap:6px;flex:1 1 100%;min-width:0}
@@ -146,7 +148,7 @@ footer{margin-top:40px;color:var(--muted);font-size:13px;max-width:70ch}
         <div class="foot"><div class="tags"><span class="tag">Alene</span><span class="tag off">Uten nett</span></div>
           <a class="open" href="https://seiknes-ui.github.io/trekk/">Åpne</a></div>
       </article>
-      <a class="card bilde" href="tuktuk/index.html"><img src="bilder/kort/tuktuk.webp?v=2" alt="Tuktuk kjøreskole" width="900" height="502" loading="lazy"></a>
+      <a class="card bilde" href="tuktuk/index.html"><img src="bilder/kort/tuktuk.webp?v=2" alt="Tuktuk kjøreskole" width="900" height="502" loading="lazy"><span class="open" aria-hidden="true">Åpne</span></a>
     </div>
   </section>
 
