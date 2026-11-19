@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- DSB via NDLA (CC BY-SA 4.0), beskåret. Generator: Adobe Illustrator 25.2.3, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="28.00 50.93 244.50 244.50" xml:space="preserve">
+<style type="text/css">
+	.st0{fill:#FFFFFF;}
+	
+		.st1{clip-path:url(#SVGID_2_);fill:none;stroke:#231F20;stroke-width:0.4;stroke-linecap:square;stroke-miterlimit:2;stroke-dasharray:2,2;}
+	.st2{fill:none;stroke:#231F20;stroke-width:0.8;stroke-linecap:square;stroke-miterlimit:2;}
+	.st3{fill:#231F20;}
+	.st4{font-family:Helvetica,Arial,sans-serif;}
+	.st5{font-size:23.2581px;}
+	.st6{font-size:33.2258px;}
+	.st7{font-size:18.2742px;}
+	.st8{font-size:11.629px;}
+	.st9{fill:#ED1C24;}
+	.st10{fill:none;stroke:#231F20;stroke-width:0.4;}
+</style>
+<g>
+	<polyline class="st0" points="272.5,173.18 150.25,50.93 28,173.18 150.25,295.43 272.5,173.18 	"/>
+	<g>
+		<defs>
+			<polyline id="SVGID_1_" points="27.06,3.81 272.94,3.81 272.94,296.19 27.06,296.19 27.06,3.81 			"/>
+		</defs>
+		<clipPath id="SVGID_2_">
+			<use xlink:href="#SVGID_1_"  style="overflow:visible;"/>
+		</clipPath>
+		<polygon class="st1" points="272.5,173.18 150.25,50.93 28,173.18 150.25,295.43 272.5,173.18 		"/>
+	</g>
+	<polygon class="st2" points="257.89,172.99 150.44,65.54 43,172.99 150.44,280.44 257.89,172.99 	"/>
+	<text transform="matrix(1 0 0 1 141.1942 263.8078)" class="st3 st4 st6">7</text>
+	<path class="st3" d="M149.39,119.04c-3.95,2.56-5.12,6.98-6.28,11.16h-20.93c0-10.93,5.58-23.03,16.75-28.61L149.39,119.04"/>
+	<path class="st3" d="M148.34,141.77c4.19,2.14,8.6,0.94,12.81-0.14l10.47,18.13c-9.47,5.47-22.73,6.68-33.15-0.2L148.34,141.77"/>
+	<path class="st3" d="M168.55,131.31c-0.24-4.7-3.48-7.92-6.53-11.02l10.47-18.13c9.47,5.46,17.15,16.35,16.4,28.81L168.55,131.31"
+		/>
+	<path class="st3" d="M164.28,127.65c-0.23,4.19-1.16,8.61-5.58,10.7c-3.02,1.16-6.51,0.47-8.6-1.86c-2.56-2.56-3.26-6.75-1.86-10
+		c1.4-3.26,4.65-4.65,7.91-4.88C160.09,122.07,161.72,125.79,164.28,127.65"/>
+	<text transform="matrix(0.95 0 0 1 84.7099 189.3879)" class="st3 st4 st7">RADIOACTIVE</text>
+	<text transform="matrix(0.95 0 0 1 86.1884 202.677)" class="st3 st4 st8">CONTENT ......................</text>
+	<text transform="matrix(0.95 0 0 1 98.9599 213.9699)" class="st3 st4 st8">ACTIVITY ................</text>
+	<polyline class="st9" points="216.67,190.11 216.67,175.76 212.63,175.76 212.63,190.11 216.67,190.11 	"/>
+	<line class="st10" x1="43" y1="172.99" x2="257.89" y2="172.99"/>
+</g>
+</svg>
