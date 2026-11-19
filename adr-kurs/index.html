@@ -1089,11 +1089,13 @@ function showFacts(st) {
 }
 
 // ---------- Øving ----------
-// Feil svar settes inn igjen tre plasser frem i køen. st = null øver på alle stasjonene.
+// Usette spørsmål kommer først, så de som ikke er mestret, så resten. Feil svar kommer igjen sist i runden.
+// st = null øver på alle stasjonene.
+const seen = q => q.id in store.streak;
 function startPractice(st) {
   const p = st ? qsOf(st) : QS;
-  const fresh = shuffle(p.filter(q => !mastered(q))), rest = shuffle(p.filter(mastered));
-  const run = { st, queue: [...fresh, ...rest].slice(0, st ? Math.max(12, fresh.length) : 20), right: 0, wrong: 0 };
+  const unseen = shuffle(p.filter(q => !seen(q))), fresh = shuffle(p.filter(q => seen(q) && !mastered(q))), rest = shuffle(p.filter(mastered));
+  const run = { st, queue: [...unseen, ...fresh, ...rest].slice(0, st ? Math.max(12, unseen.length + fresh.length) : 20), right: 0, wrong: 0 };
   run.total = run.queue.length;
   run.queue.forEach(q => delete q._order);
   nextPractice(run);
@@ -1113,7 +1115,7 @@ function nextPractice(run, keepScroll) {
     const ok = answer(p, q, i, q.ex ? `<span>${esc(q.ex)}</span>` : '', run.queue.length + (i === 0 ? 0 : 1) ? 'Neste' : 'Ferdig', () => nextPractice(run), q.src);
     record(q, ok); kvSvar(q, i, 'øving');
     delete q._order;
-    if (ok) run.right++; else { run.wrong++; run.queue.splice(Math.min(3, run.queue.length), 0, q); }
+    if (ok) run.right++; else { run.wrong++; run.queue.push(q); }
   });
 }
 function endPractice(run) {
