@@ -66,6 +66,13 @@ h2::after{content:"";flex:1;height:1px;background:var(--line)}
 .card.bilde:hover,.card.bilde:focus-visible{border-color:var(--accent)}
 .card.bilde .open{position:absolute;right:16px;bottom:14px;font-weight:600;font-size:14px;padding:7px 14px;border-radius:4px;background:var(--ink);color:var(--sheet);border:1px solid var(--ink)}
 .card.bilde:hover .open,.card.bilde:focus-visible .open{background:var(--accent);border-color:var(--accent);color:var(--badge-ink)}
+.card.bilde:focus-within{border-color:var(--accent)}
+.card.bilde .cover{display:block}
+.card.bilde .cover:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+/* Bildekort med brukermanual: manualen er en egen knapp nede til venstre */
+.card.bilde .manual-btn{position:absolute;left:16px;bottom:14px;font-weight:500;font-size:14px;padding:7px 12px;border-radius:4px;background:var(--sheet);color:var(--ink);border:1px solid var(--line);text-decoration:none}
+.card.bilde .manual-btn:hover{border-color:var(--accent)}
+.card.bilde .manual-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .card p.desc{margin:0;font-size:14.5px;max-width:60ch}
 .foot{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;padding-top:12px;border-top:1px solid var(--line)}
 .tags{display:flex;flex-wrap:wrap;gap:6px;flex:1 1 100%;min-width:0}
@@ -106,19 +113,9 @@ footer{margin-top:40px;color:var(--muted);font-size:13px;max-width:70ch}
   <section aria-labelledby="h-kjoretoy">
     <h2 id="h-kjoretoy">Kjøretøy og sikkerhet</h2>
     <div class="grid">
-      <article class="card">
-        <div class="top"><span class="badge">TR</span><div><h3>Truck</h3><p class="for">Truckførerkurs modul 1.1 og 2.2</p></div></div>
-        <p class="desc">Truckstabilitet, Første skift med vernerunde og farlig gods, og avsluttende teoriprøve med øving og prøve som på eksamen.</p>
-        <div class="foot"><div class="tags"><span class="tag">3 verktøy</span><span class="tag">NO · EN · УКР</span><span class="tag off">Uten nett</span></div>
-          <a class="open" href="truckkurs/">Åpne</a></div>
-      </article>
+      <a class="card bilde" href="truckkurs/"><img src="bilder/kort/truckkurs.webp?v=1" alt="Truck kurs" width="900" height="502" loading="lazy"><span class="open" aria-hidden="true">Åpne</span></a>
       <a class="card bilde" href="adr-kurs/index.html"><img src="bilder/kort/adr.webp?v=1" alt="ADR grunnkurs" width="900" height="502" loading="lazy"><span class="open" aria-hidden="true">Åpne</span></a>
-      <article class="card">
-        <div class="top"><span class="badge">YS</span><div><h3>Yrkessjåfør</h3><p class="for">Kjøretøy og last</p></div></div>
-        <p class="desc">Aksellast-lab, Luftbrems og Trekkort samlet på én side.</p>
-        <div class="foot"><div class="tags"><span class="tag">3 verktøy</span></div>
-          <a class="open" href="yrkessjafor/">Åpne</a></div>
-      </article>
+      <a class="card bilde" href="yrkessjafor/"><img src="bilder/kort/yrkessjafor.webp?v=1" alt="Yrkessjåfør" width="900" height="502" loading="lazy"><span class="open" aria-hidden="true">Åpne</span></a>
       <a class="card bilde" href="ysk/"><img src="bilder/kort/ysk.webp?v=1" alt="Yrkessjåfør YSK" width="900" height="502" loading="lazy"><span class="open" aria-hidden="true">Åpne</span></a>
       <a class="card bilde" href="tuktuk/index.html"><img src="bilder/kort/tuktuk.webp?v=2" alt="Tuktuk kjøreskole" width="900" height="502" loading="lazy"><span class="open" aria-hidden="true">Åpne</span></a>
     </div>
@@ -127,33 +124,13 @@ footer{margin-top:40px;color:var(--muted);font-size:13px;max-width:70ch}
   <section aria-labelledby="h-logistikk">
     <h2 id="h-logistikk">Logistikk og drift</h2>
     <div class="grid">
-      <article class="card">
-        <div class="top"><span class="badge">FV</span><div><h3>Fraktvekt-labben</h3><p class="for">Vg2 transport og logistikk</p></div></div>
-        <p class="desc">Faktisk vekt, volumvekt og lastemetervekt på gods på bil. Øv på omregningsfaktor og volumenheter i fire nivåer, og løs oppdrag som eleven leverer som rapport.</p>
-        <div class="foot"><div class="tags"><span class="tag">Alene</span><span class="tag off">Uten nett</span></div>
-          <a class="open" href="https://seiknes-ui.github.io/opplaring/fraktvekt-labben/">Åpne</a></div>
-      </article>
-      <article class="card">
-        <div class="top"><span class="badge">TL</span><div><h3>Taktlinja</h3><p class="for">Lean, takt og linjebalansering</p></div></div>
-        <p class="desc">Små hus bygges på linje eller i grupper og hentes i takt med bestillingene. Kjør som simulering, eller la elevene bygge på egne enheter mens tavla viser flyten.</p>
-        <div class="foot"><div class="tags"><span class="tag">Hele klassen</span><span class="tag">Lærerinnlogging</span></div>
-          <a class="manual" href="manualer/taktlinja.pdf" target="_blank" rel="noopener">Brukermanual</a>
-          <a class="open" data-app="takt">Åpne</a></div>
-      </article>
-      <article class="card">
-        <div class="top"><span class="badge">KS</span><div><h3>Kundeservice</h3><p class="for">Kommunikasjon med kunder</p></div></div>
-        <p class="desc">Eleven svarer sju kunder med ulikt temperament i chatten, med firmaets retningslinjer ved siden av. Får vurdering og gjennomgang av hvert svar etterpå.</p>
-        <div class="foot"><div class="tags"><span class="tag">Alene</span><span class="tag">Klassekode for rapporter</span></div>
-          <a class="manual" href="manualer/kundeservice.pdf" target="_blank" rel="noopener">Brukermanual</a>
-          <a class="open" data-app="takt" data-path="kundeservice.html">Åpne</a></div>
-      </article>
-      <article class="card">
-        <div class="top"><span class="badge">SP</span><div><h3>Speditøren</h3><p class="for">Transport- og lagerøkonomi</p></div></div>
-        <p class="desc">Elevene driver hver sin transport- og lagerbedrift, kjøper lager og lastebiler og byr mot hverandre på kontrakter. Læreren styrer rundene fra et eget panel.</p>
-        <div class="foot"><div class="tags"><span class="tag">Hele klassen</span><span class="tag">Lærerinnlogging</span></div>
-          <a class="manual" href="manualer/speditoren.pdf" target="_blank" rel="noopener">Spilleguide</a>
-          <a class="open" data-app="speditoren">Åpne</a></div>
-      </article>
+      <a class="card bilde" href="https://seiknes-ui.github.io/opplaring/fraktvekt-labben/"><img src="bilder/kort/fraktvekt.webp?v=1" alt="Fraktvekt-labben" width="900" height="502" loading="lazy"><span class="open" aria-hidden="true">Åpne</span></a>
+      <div class="card bilde"><a class="cover" data-app="takt"><img src="bilder/kort/taktlinja.webp?v=1" alt="Taktlinja" width="900" height="502" loading="lazy"><span class="open" aria-hidden="true">Åpne</span></a>
+        <a class="manual-btn" href="manualer/taktlinja.pdf" target="_blank" rel="noopener">Brukermanual</a></div>
+      <div class="card bilde"><a class="cover" data-app="takt" data-path="kundeservice.html"><img src="bilder/kort/kundeservice.webp?v=1" alt="Kundeservice" width="900" height="502" loading="lazy"><span class="open" aria-hidden="true">Åpne</span></a>
+        <a class="manual-btn" href="manualer/kundeservice.pdf" target="_blank" rel="noopener">Brukermanual</a></div>
+      <div class="card bilde"><a class="cover" data-app="speditoren"><img src="bilder/kort/speditoren.webp?v=1" alt="Speditøren" width="900" height="502" loading="lazy"><span class="open" aria-hidden="true">Åpne</span></a>
+        <a class="manual-btn" href="manualer/speditoren.pdf" target="_blank" rel="noopener">Spilleguide</a></div>
     </div>
   </section>
 
@@ -166,11 +143,11 @@ const ADRESSER = {
   takt: 'https://black-coast-081791b1e.1.azurestaticapps.net/',
   speditoren: 'https://agreeable-stone-0e1eff91e.2.azurestaticapps.net/'
 };
-document.querySelectorAll('a.open[data-app]').forEach(a => {
+document.querySelectorAll('a[data-app]').forEach(a => {
   const base = ADRESSER[a.dataset.app];
   if (base) a.href = base.replace(/\/?$/, '/') + (a.dataset.path || '');
 });
-document.querySelectorAll('a.open:not([href])').forEach(a => {
+document.querySelectorAll('a.open:not([href]), a.cover:not([href]) .open').forEach(a => {
   a.textContent = 'Adresse mangler';
   a.setAttribute('aria-disabled', 'true');
 });
