@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="nb">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Surringslabben</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;600;700&display=swap">
+<style>
+/* Layout: samme verkstedstil som Kundeservice – oppdrag øverst, lasteplanet tegnet fra siden og bakfra, og kreftene i hver retning under. */
+:root {
+  --bg: #E8EBE7; --surface: #F7F8F5; --ink: #1B201E; --muted: #5A6560; --line: #C6CDC8;
+  --accent: #F2B300; --on-accent: #1B201E;
+  --ok: #2B9A58; --on-ok: #FFFFFF; --warn: #D89A00; --bad: #D0392A;
+  --strap: #2F6FD0; --deck: #7A5B33; --cargo: #B3ACA2; --cargo-ink: #1B201E; --steel: #3A423F; --wheel: #1B201E;
+  --display: "Big Shoulders Display", "Arial Narrow", Impact, sans-serif;
+  --body: "Public Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #131715; --surface: #1C2120; --ink: #E6EBE7; --muted: #99A49E; --line: #343C38;
+    --accent: #F5BF1F; --on-accent: #131715; --ok: #3FBF72; --on-ok: #0B1A11; --warn: #F0B429; --bad: #F05A47;
+    --strap: #5A9BF0; --deck: #8A6A40; --cargo: #8E877D; --cargo-ink: #131715; --steel: #6F7B75; --wheel: #050807;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #131715; --surface: #1C2120; --ink: #E6EBE7; --muted: #99A49E; --line: #343C38;
+  --accent: #F5BF1F; --on-accent: #131715; --ok: #3FBF72; --on-ok: #0B1A11; --warn: #F0B429; --bad: #F05A47;
+  --strap: #5A9BF0; --deck: #8A6A40; --cargo: #8E877D; --cargo-ink: #131715; --steel: #6F7B75; --wheel: #050807;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 28px 64px;
+}
+.wrap { max-width: 1180px; margin: 0 auto; display: grid; gap: 36px; }
+h1, h2, h3 { font-family: var(--display); font-weight: 800; letter-spacing: .01em; margin: 0; text-wrap: balance; line-height: 1; text-transform: uppercase; }
+h1 { font-size: clamp(52px, 9vw, 92px); }
+h2 { font-size: 32px; }
+h3 { font-size: 22px; }
+p { margin: 0; }
+.eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+button, input, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+.top { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 24px 40px; align-items: end; }
+.top .lede { max-width: 60ch; margin-top: 12px; color: var(--muted); font-size: 16px; }
+.hazard { height: 10px; background: repeating-linear-gradient(-45deg, var(--accent) 0 14px, var(--ink) 14px 28px); border-radius: 2px; margin-bottom: 18px; max-width: 220px; }
+.kpis { display: grid; grid-template-columns: repeat(4, minmax(110px, auto)); border: 2px solid var(--ink); background: var(--surface); }
+.kpi { padding: 10px 16px 12px; border-left: 1px solid var(--line); min-width: 0; }
+.kpi:first-child { border-left: 0; }
+.kpi .eyebrow { font-size: 11px; }
+.kpi b { display: block; font-family: var(--display); font-size: 40px; line-height: 1.05; font-weight: 800; font-variant-numeric: tabular-nums; }
+.kpi small { color: var(--muted); font-size: 12px; }
+.kpi[data-state="bad"] b { color: var(--bad); }
+.kpi[data-state="ok"] b { color: var(--ok); }
+.kpi[data-state="warn"] b { color: var(--warn); }
+
+section { display: grid; gap: 16px; min-width: 0; }
+.sec-head { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: end; justify-content: space-between; }
+.sec-head p { color: var(--muted); max-width: 64ch; margin-top: 6px; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 18px; min-width: 0; }
+
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+.card { border: 2px solid var(--ink); background: var(--surface); border-radius: 6px; padding: 12px 14px; text-align: left; display: grid; gap: 6px; align-content: start; }
+.card:hover { box-shadow: inset 0 0 0 2px var(--accent); }
+.card[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.card[aria-pressed="true"] .cs { color: var(--bg); opacity: .8; }
+.card b { font-family: var(--display); font-size: 22px; text-transform: uppercase; line-height: 1; }
+.card .cs { font-size: 13px; color: var(--muted); line-height: 1.35; }
+.card .cb { font-size: 12px; font-family: var(--mono); color: var(--muted); }
+.card .cb.done { color: var(--ok); }
+.card[aria-pressed="true"] .cb { color: var(--accent); }
+.brief { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 16px 28px; }
+.brief p { max-width: 66ch; }
+.goals { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.goals li { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; flex-wrap: wrap; }
+.goals .mk { flex: none; width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--line); display: grid; place-items: center; font-size: 12px; font-weight: 700; margin-top: 1px; }
+.goals li.met .mk { background: var(--ok); border-color: var(--ok); color: var(--on-ok); }
+.goals input { width: 80px; background: var(--bg); border: 1px solid var(--line); border-radius: 4px; padding: 3px 8px; font-family: var(--mono); }
+.goals li.met input { border-color: var(--ok); }
+.win { padding: 8px 12px; border-radius: 4px; background: var(--ok); color: var(--on-ok); font-weight: 700; }
+
+.bench { display: grid; grid-template-columns: minmax(260px, 330px) minmax(0, 1fr); gap: 16px; align-items: start; }
+.ctl { display: grid; gap: 14px; }
+.field { display: grid; gap: 4px; }
+.field .lab { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; font-weight: 600; }
+.field .lab output { font-family: var(--mono); font-weight: 500; }
+.field input[type=range] { width: 100%; accent-color: var(--accent); }
+.field select { background: var(--bg); border: 1px solid var(--line); border-radius: 4px; padding: 6px 8px; width: 100%; }
+.dims { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.dims label { display: grid; gap: 2px; font-size: 11px; font-family: var(--mono); color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+.dims input { width: 100%; background: var(--bg); border: 1px solid var(--line); border-radius: 4px; padding: 4px 6px; font-family: var(--mono); font-size: 13px; text-transform: none; color: var(--ink); }
+.check { display: flex; gap: 8px; align-items: flex-start; font-size: 14px; }
+.check input { margin-top: 4px; }
+.stepper { display: flex; align-items: center; gap: 8px; }
+.stepper button { width: 36px; height: 36px; border: 2px solid var(--ink); background: var(--surface); border-radius: 4px; font-weight: 800; font-size: 18px; }
+.stepper button:hover { background: var(--ink); color: var(--bg); }
+.stepper b { font-family: var(--display); font-size: 34px; min-width: 2ch; text-align: center; font-variant-numeric: tabular-nums; }
+.view { display: grid; gap: 14px; min-width: 0; }
+.status { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 999px; font-weight: 700; font-size: 14px; }
+.status::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: currentColor; flex: none; }
+.status.ok { color: var(--ok); background: color-mix(in srgb, var(--ok) 14%, transparent); }
+.status.bad { color: var(--bad); background: color-mix(in srgb, var(--bad) 14%, transparent); }
+.status.warn { color: var(--warn); background: color-mix(in srgb, var(--warn) 16%, transparent); }
+.figs { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 12px; }
+.fig { background: var(--bg); border-radius: 6px; padding: 8px; min-width: 0; }
+.fig svg { display: block; width: 100%; height: auto; }
+.fig .eyebrow { font-size: 10px; margin: 2px 4px 4px; }
+.label-tag { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2px 12px; background: var(--strap); color: #fff; border-radius: 4px; padding: 10px 14px; font-family: var(--mono); font-size: 12px; max-width: 360px; }
+.label-tag b { grid-column: 1 / -1; font-family: var(--display); font-size: 18px; letter-spacing: .04em; }
+.tbl-scroll { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 13px; }
+th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+td.n { font-family: var(--mono); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+tr.gov td:first-child { box-shadow: inset 4px 0 0 var(--accent); }
+tr:last-child td { border-bottom: 0; }
+.formula { display: inline-block; margin-top: 6px; padding: 6px 10px; border-radius: 4px; background: var(--bg); font-family: var(--mono); font-size: 13px; overflow-x: auto; max-width: 100%; }
+footer { color: var(--muted); font-size: 13px; max-width: 90ch; display: grid; gap: 6px; }
+
+@media (max-width: 900px) {
+  .top, .brief, .bench, .figs { grid-template-columns: 1fr; }
+  .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .kpi:nth-child(3) { border-left: 0; }
+  .kpi:nth-child(n+3) { border-top: 1px solid var(--line); }
+}
+@media (max-width: 480px) { .kpi b { font-size: 32px; } }
+body{margin:0}[hidden]{display:none!important}
+.back{display:inline-block;margin-bottom:14px;font-size:14px;font-weight:600;color:var(--ink);text-decoration:underline;text-decoration-color:var(--accent);text-underline-offset:3px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <a class="back" href="./">← YSK-modulene</a>
+      <div class="hazard" aria-hidden="true"></div>
+      <p class="eyebrow">YSK · Modul G4 · Læreplanmål G 4.4</p>
+      <h1>Surringslabben</h1>
+      <p class="lede">Hvor mange stropper trenger lasten? Endre vekt, underlag, surringsvinkel og stropp, og se hvordan friksjon, nedsurring og stenging deler på jobben.</p>
+    </div>
+    <div class="kpis" id="kpis"></div>
+  </header>
+
+  <section aria-labelledby="h-oppdrag">
+    <div class="sec-head"><div><h2 id="h-oppdrag">Oppdrag</h2><p>Velg et oppdrag. Det stiller inn lasten, og målene sjekkes mens du endrer.</p></div></div>
+    <div class="cards" id="cards"></div>
+    <div class="panel brief" id="brief"></div>
+  </section>
+
+  <section aria-labelledby="h-plan">
+    <div class="sec-head"><div><h2 id="h-plan">Lasteplanet</h2><p>Nedsurring presser lasten mot planet, slik at friksjonen blir større. Stropper over lasten holder den ikke fast på noen annen måte.</p></div></div>
+    <div class="bench">
+      <div class="panel ctl">
+        <div class="field"><span class="lab"><label for="c-type">Last</label></span><select id="c-type"></select></div>
+        <div class="dims">
+          <label for="c-m">Vekt kg<input id="c-m" type="number" min="100" max="30000" step="100"></label>
+          <label for="c-l">Lengde m<input id="c-l" type="number" min="0.3" max="13" step="0.1"></label>
+          <label for="c-w">Bredde m<input id="c-w" type="number" min="0.3" max="2.5" step="0.1"></label>
+          <label for="c-h">Høyde m<input id="c-h" type="number" min="0.1" max="3" step="0.1"></label>
+        </div>
+        <div class="field"><span class="lab"><label for="c-mu">Underlag</label></span><select id="c-mu"></select></div>
+        <div class="field"><span class="lab"><label for="c-a">Surringsvinkel α</label><output id="o-a"></output></span><input id="c-a" type="range" min="10" max="90" step="1"></div>
+        <div class="field"><span class="lab"><label for="c-stf">Stropp (forspenning STF)</label></span><select id="c-stf"></select></div>
+        <label class="check" for="c-front"><input type="checkbox" id="c-front"> <span>Lasten står inntil frontveggen<br><small style="color:var(--muted)">Stenging forover. Frontveggen tåler 5 000 daN.</small></span></label>
+        <label class="check" for="c-side"><input type="checkbox" id="c-side"> <span>Lasten er stengt sideveis helt opp over tyngdepunktet<br><small style="color:var(--muted)">For eksempel mot stolper og lemmer.</small></span></label>
+        <div class="field"><span class="lab">Stropper du har lagt på</span><div class="stepper"><button type="button" id="n-minus" aria-label="Færre stropper">−</button><b id="n-val" aria-live="polite"></b><button type="button" id="n-plus" aria-label="Flere stropper">+</button></div></div>
+      </div>
+      <div class="view">
+        <div id="status"></div>
+        <div class="figs">
+          <div class="fig"><p class="eyebrow">Fra siden</p><svg id="side" viewBox="0 0 640 220" role="img" aria-label="Lasten sett fra siden"></svg></div>
+          <div class="fig"><p class="eyebrow">Bakfra</p><svg id="back" viewBox="0 0 300 220" role="img" aria-label="Lasten sett bakfra med surringsvinkel"></svg></div>
+        </div>
+        <div class="tbl-scroll"><table id="tbl"></table></div>
+        <p style="font-size:13px;color:var(--muted)">Antall stropper ved nedsurring (NS-EN 12195-1):<br><span class="formula">n = (c − µ · c<sub>z</sub>) · m · g · f<sub>s</sub> / (2 · µ · sin α · F<sub>T</sub>)</span></p>
+        <div class="label-tag" id="tag"></div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>Akselerasjoner for vegtransport etter NS-EN 12195-1: 0,8 g forover, 0,5 g bakover og 0,5 g sideveis (0,6 g når velting sjekkes). c<sub>z</sub> = 1. Sikkerhetsfaktor f<sub>s</sub> = 1,1 i lengderetningen og 1,25 sideveis. Friksjonstallene er typiske verdier fra standardens tillegg B. Frontveggen er regnet som en vanlig frontvegg etter NS-EN 12642 klasse L.</p>
+    <p>Forenklinger: én kolli står alene, og stroppene er like og like stramme. Ikke med: direktesurring, sløyfesurring, stablet last, flere kolli, stengsel med kiler eller bjelker og kravet til selve stroppen (LC). Velting vises bare som en kontroll. Verktøyet er laget for opplæring. Ved reell lasting gjelder standarden, lastsikringsveilederen og produsentens anvisninger.</p>
+  </footer>
+</div>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const nb = (v, d = 0) => Number(v).toLocaleString('nb-NO', { minimumFractionDigits: d, maximumFractionDigits: d });
+  function save(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+  function load(k) { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } }
+  const G = 9.81, FRONT = 5000; // daN
+
+  const LAST = [
+    { id: 'betong', navn: 'Betongelement', m: 6000, l: 3.0, w: 2.4, h: 0.4 },
+    { id: 'pall', navn: 'Pall med sement', m: 1000, l: 1.2, w: 0.8, h: 1.0 },
+    { id: 'kasse', navn: 'Maskin i trekasse', m: 2500, l: 2.0, w: 1.2, h: 2.2 },
+    { id: 'stal', navn: 'Bunt med stålbjelker', m: 8000, l: 6.0, w: 1.0, h: 0.5 },
+    { id: 'egen', navn: 'Egen last', m: 3000, l: 2.0, w: 1.5, h: 1.0 },
+  ];
+  const UNDERLAG = [
+    { id: 'tre-ply', navn: 'Tre mot kryssfiner', mu: 0.45 },
+    { id: 'tre-alu', navn: 'Tre mot riflet aluminium', mu: 0.40 },
+    { id: 'tre-stal', navn: 'Tre mot stålplate', mu: 0.30 },
+    { id: 'betong-tre', navn: 'Ru betong mot trelekter', mu: 0.70 },
+    { id: 'stal-stal', navn: 'Stål mot stålplate', mu: 0.20 },
+    { id: 'anti', navn: 'Antisklimatte', mu: 0.60 },
+  ];
+  const STF = [250, 350, 400, 500];
+
+  // ---------- Beregning ----------
+  function beregn(s) {
+    const mu = UNDERLAG.find(u => u.id === s.mu).mu;
+    const W = s.m * G; // N
+    const per = 2 * mu * Math.sin(s.a * Math.PI / 180) * s.stf * 10; // N friksjonskraft per stropp
+    const dir = [
+      { id: 'fram', navn: 'Forover', c: 0.8, fs: 1.1, blokk: s.front },
+      { id: 'bak', navn: 'Bakover', c: 0.5, fs: 1.1, blokk: false },
+      { id: 'side', navn: 'Sideveis', c: 0.5, fs: 1.25, blokk: s.side },
+    ].map(d => {
+      const F = d.c * W, fr = mu * W, rest = Math.max(0, F - fr);
+      let n = rest > 0 ? rest * d.fs / per : 0;
+      let note = '';
+      if (d.blokk && d.id === 'fram') {
+        if (rest / 10 <= FRONT) { n = 0; note = `Frontveggen tar ${nb(rest / 10)} daN av ${nb(FRONT)}`; }
+        else note = `For tungt for frontveggen (${nb(rest / 10)} daN)`;
+      }
+      if (d.blokk && d.id === 'side') { n = 0; note = 'Stengt sideveis'; }
+      return { ...d, F, fr, rest, n, nUp: Math.ceil(n - 1e-9), note };
+    });
+    const req = Math.max(...dir.map(d => d.nUp));
+    const tip = 0.6 * s.h > s.w; // velter hvis c_y · h > c_z · b
+    return { mu, per, dir, req, tip, tipOk: !tip || s.side };
+  }
+
+  // ---------- Oppdrag ----------
+  const base = { type: 'betong', m: 6000, l: 3.0, w: 2.4, h: 0.4, mu: 'tre-ply', a: 80, stf: 400, front: false, side: false, n: 2 };
+  const OPP = [
+    { id: 'o1', tittel: 'Betongelementet', kort: 'Hvor mange stropper?',
+      tekst: 'Et betongelement på 6 tonn står rett på kryssfinerdørken, midt på planet. Stroppene har STF 400 daN og ligger med 80° vinkel. Regn ut hvor mange stropper som trengs, og legg dem på.',
+      sett: { ...base }, mål: [{ q: 'Antall stropper', ans: () => 7, tol: 0 }, { t: 'Nok stropper er lagt på', f: (s, r) => s.n >= r.req }] },
+    { id: 'o2', tittel: 'Inntil frontveggen', kort: 'Stenging sparer stropper.',
+      tekst: 'Samme element, men nå kan det flyttes helt fram mot frontveggen. Bruk stenging forover og finn ut hvor mange stropper som trengs da. Legg på akkurat så mange.',
+      sett: { ...base, n: 7 }, mål: [{ t: 'Lasten er stengt mot frontveggen', f: s => s.front }, { t: 'Akkurat nok stropper', f: (s, r) => s.n === r.req }] },
+    { id: 'o3', tittel: 'Antisklimatte', kort: 'Mer friksjon, færre stropper.',
+      tekst: 'Frontveggen er opptatt av annen last. Legg antisklimatte under elementet, og sikr det med høyst 3 stropper uten stenging.',
+      sett: { ...base, n: 7 }, mål: [{ t: 'Ingen stenging forover', f: s => !s.front }, { t: 'Høyst 3 stropper, og det er nok', f: (s, r) => s.n <= 3 && s.n >= r.req }] },
+    { id: 'o4', tittel: 'Flat vinkel', kort: 'Lav last gir lav vinkel.',
+      tekst: 'Stålbjelkene ligger lavt og bredt, så stroppene får bare 30° vinkel mot planet. Hvor mange stropper trengs nå? Sammenlign med 80°.',
+      sett: { ...base, type: 'stal', m: 8000, l: 6.0, w: 1.0, h: 0.5, mu: 'tre-ply', a: 30, n: 4, front: true },
+      mål: [{ q: 'Antall stropper ved 30°', ans: () => beregn({ ...base, m: 8000, mu: 'tre-ply', a: 30, front: true }).req, tol: 0 }, { t: 'Nok stropper er lagt på', f: (s, r) => s.n >= r.req }] },
+    { id: 'o5', tittel: 'Høy kasse', kort: 'Kan den velte?',
+      tekst: 'En maskin i trekasse er 2,2 meter høy og bare 1,2 meter bred. Den kan velte sideveis selv om den ikke sklir. Sikre den mot velting og legg på nok stropper.',
+      sett: { ...base, type: 'kasse', m: 2500, l: 2.0, w: 1.2, h: 2.2, mu: 'tre-ply', a: 75, n: 2 },
+      mål: [{ t: 'Kassen kan ikke velte', f: (s, r) => r.tipOk }, { t: 'Nok stropper er lagt på', f: (s, r) => s.n >= r.req }] },
+    { id: 'o6', tittel: 'Kort strammer', kort: 'STF 250 mot 500 daN.',
+      tekst: 'Stroppene i bilen har vanlig strammer med STF 250 daN. Lageret har også stropper med langt håndtak og STF 500 daN. Hvor mange stropper trengs med STF 250 for pallen på stålplate? Bytt så til STF 500 og se forskjellen.',
+      sett: { ...base, type: 'pall', m: 1000, l: 1.2, w: 0.8, h: 1.0, mu: 'tre-stal', a: 80, stf: 250, n: 1 },
+      mål: [{ q: 'Antall stropper med STF 250', ans: () => beregn({ ...base, m: 1000, mu: 'tre-stal', a: 80, stf: 250 }).req, tol: 0 }, { t: 'Byttet til STF 500 og lagt på nok stropper', f: (s, r) => s.stf === 500 && s.n >= r.req }] },
+  ];
+
+  // ---------- Tilstand ----------
+  const S = { aktiv: 'o1', s: { ...base }, svar: {} };
+  let done = load('surringslabben.done') || {};
+
+  function velg(id) { const o = OPP.find(x => x.id === id); S.aktiv = id; S.svar = {}; S.s = { ...o.sett }; drawCards(); sync(); update(); }
+  function drawCards() {
+    $('cards').innerHTML = OPP.map(o => `<button class="card" type="button" data-id="${o.id}" aria-pressed="${o.id === S.aktiv}"><b>${o.tittel}</b><span class="cs">${o.kort}</span><span class="cb ${done[o.id] ? 'done' : ''}">${done[o.id] ? '✓ Fullført' : 'Ikke fullført'}</span></button>`).join('');
+    $('cards').querySelectorAll('.card').forEach(b => b.onclick = () => velg(b.dataset.id));
+  }
+  function drawBrief(r) {
+    const o = OPP.find(x => x.id === S.aktiv);
+    const gs = o.mål.map((g, i) => {
+      if (g.q) { const v = parseFloat(String(S.svar[i] ?? '').replace(',', '.')); return { ...g, i, met: !isNaN(v) && Math.abs(v - g.ans()) <= g.tol }; }
+      return { ...g, i, met: !!g.f(S.s, r) };
+    });
+    const all = gs.every(g => g.met);
+    if (all && !done[o.id]) { done[o.id] = true; save('surringslabben.done', done); drawCards(); }
+    $('brief').innerHTML = `<div><p class="eyebrow">Oppdrag</p><h3 style="margin:6px 0 8px">${o.tittel}</h3><p>${o.tekst}</p></div>
+      <div style="display:grid;gap:10px;align-content:start"><ul class="goals">${gs.map(g => `<li class="${g.met ? 'met' : ''}"><span class="mk">${g.met ? '✓' : ''}</span>${g.q ? `<label for="q-${g.i}">${g.q}</label> <input id="q-${g.i}" data-i="${g.i}" inputmode="numeric" value="${S.svar[g.i] ?? ''}">` : g.t}</li>`).join('')}</ul>
+      ${all ? '<div class="win">Oppdraget er løst. Lasten er sikret.</div>' : ''}</div>`;
+    $('brief').querySelectorAll('input').forEach(inp => inp.addEventListener('change', () => { S.svar[inp.dataset.i] = inp.value; update(); }));
+  }
+
+  // ---------- Kontroller ----------
+  function sync() {
+    const s = S.s;
+    $('c-type').innerHTML = LAST.map(l => `<option value="${l.id}" ${l.id === s.type ? 'selected' : ''}>${l.navn}</option>`).join('');
+    $('c-mu').innerHTML = UNDERLAG.map(u => `<option value="${u.id}" ${u.id === s.mu ? 'selected' : ''}>${u.navn} (µ = ${nb(u.mu, 2)})</option>`).join('');
+    $('c-stf').innerHTML = STF.map(v => `<option value="${v}" ${v === s.stf ? 'selected' : ''}>STF ${v} daN</option>`).join('');
+    $('c-m').value = s.m; $('c-l').value = s.l; $('c-w').value = s.w; $('c-h').value = s.h; $('c-a').value = s.a;
+    $('c-front').checked = s.front; $('c-side').checked = s.side;
+  }
+  $('c-type').addEventListener('change', e => { const l = LAST.find(x => x.id === e.target.value); Object.assign(S.s, { type: l.id, m: l.m, l: l.l, w: l.w, h: l.h }); sync(); update(); });
+  [['c-m', 'm'], ['c-l', 'l'], ['c-w', 'w'], ['c-h', 'h']].forEach(([id, k]) => $(id).addEventListener('input', e => { const v = parseFloat(e.target.value); if (v > 0) { S.s[k] = v; S.s.type = 'egen'; $('c-type').value = 'egen'; update(); } }));
+  $('c-mu').addEventListener('change', e => { S.s.mu = e.target.value; update(); });
+  $('c-a').addEventListener('input', e => { S.s.a = +e.target.value; update(); });
+  $('c-stf').addEventListener('change', e => { S.s.stf = +e.target.value; update(); });
+  $('c-front').addEventListener('change', e => { S.s.front = e.target.checked; update(); });
+  $('c-side').addEventListener('change', e => { S.s.side = e.target.checked; update(); });
+  $('n-minus').onclick = () => { S.s.n = Math.max(0, S.s.n - 1); update(); };
+  $('n-plus').onclick = () => { S.s.n = Math.min(20, S.s.n + 1); update(); };
+
+  // ---------- Tegninger ----------
+  function drawSide(s, r) {
+    const X0 = 40, deckL = 13.6, sc = 560 / deckL, deckY = 150, hs = 40; // hs: px per meter høyde
+    const ch = Math.min(s.h, 3) * hs, cl = Math.min(s.l, deckL) * sc;
+    const cx = s.front ? X0 + 8 : X0 + (560 - cl) / 2;
+    let h = `<rect x="${X0}" y="${deckY - 52}" width="8" height="52" fill="var(--steel)"/>`;
+    h += `<rect x="${X0}" y="${deckY}" width="560" height="12" fill="var(--deck)"/><rect x="${X0}" y="${deckY + 12}" width="560" height="10" fill="var(--steel)"/>`;
+    [430, 470, 510].forEach(x => h += `<circle cx="${X0 + x}" cy="${deckY + 38}" r="17" fill="var(--wheel)"/><circle cx="${X0 + x}" cy="${deckY + 38}" r="6" fill="var(--steel)"/>`);
+    h += `<rect x="${cx}" y="${deckY - ch}" width="${cl}" height="${ch}" fill="var(--cargo)" stroke="var(--cargo-ink)" stroke-opacity=".5" stroke-width="2"/>`;
+    h += `<text x="${cx + cl / 2}" y="${deckY - ch / 2 + 5}" text-anchor="middle" fill="var(--cargo-ink)" style="font:600 13px var(--mono)">${nb(s.m)} kg</text>`;
+    const n = s.n;
+    for (let i = 0; i < n; i++) {
+      const x = cx + cl * (i + 0.5) / n;
+      h += `<line x1="${x}" y1="${deckY - ch - 2}" x2="${x}" y2="${deckY + 4}" stroke="var(--strap)" stroke-width="5"/>`;
+    }
+    if (s.front) h += `<text x="${X0 + 14}" y="${deckY - 58}" fill="var(--ok)" style="font:600 12px var(--body)">Stengt mot frontveggen</text>`;
+    h += `<text x="${X0 + 560}" y="20" text-anchor="end" fill="var(--muted)" style="font:12px var(--mono)">Lasteplan 13,6 m</text>`;
+    h += `<text x="${X0 + 300}" y="20" text-anchor="middle" fill="var(--muted)" style="font:12px var(--mono)">← Fram</text>`;
+    $('side').innerHTML = h;
+  }
+  function drawBack(s, r) {
+    const cx = 150, deckY = 170, deckW = 2.55, sc = 100 / deckW;
+    const w = Math.min(s.w, 2.5) * sc, hgt = Math.min(s.h, 3) * 40;
+    const a = s.a * Math.PI / 180;
+    const top = deckY - hgt, xl = cx - w / 2, xr = cx + w / 2;
+    // stroppen går fra toppkant ned til planet med vinkel α
+    const run = Math.min(70, hgt / Math.tan(Math.max(a, 0.17)));
+    let h = `<rect x="${cx - deckW * sc / 2 - 30}" y="${deckY}" width="${deckW * sc + 60}" height="12" fill="var(--deck)"/>`;
+    h += `<rect x="${xl}" y="${top}" width="${w}" height="${hgt}" fill="var(--cargo)" stroke="var(--cargo-ink)" stroke-opacity=".5" stroke-width="2"/>`;
+    if (s.side) h += `<rect x="${xl - 10}" y="${top - 6}" width="8" height="${hgt + 6}" fill="var(--ok)"/><rect x="${xr + 2}" y="${top - 6}" width="8" height="${hgt + 6}" fill="var(--ok)"/>`;
+    h += `<path d="M ${xl - run} ${deckY} L ${xl} ${top} L ${xr} ${top} L ${xr + run} ${deckY}" fill="none" stroke="var(--strap)" stroke-width="4" stroke-linejoin="round"/>`;
+    h += `<path d="M ${xr + run - 26} ${deckY} A 26 26 0 0 0 ${xr + run - 26 * Math.cos(a)} ${deckY - 26 * Math.sin(a)}" fill="none" stroke="var(--ink)" stroke-width="1.5"/><text x="${xr + run - 34}" y="${deckY - 8}" text-anchor="end" fill="var(--ink)" style="font:600 13px var(--mono)">α ${s.a}°</text>`;
+    if (r.tip && !s.side) h += `<text x="${cx}" y="20" text-anchor="middle" fill="var(--bad)" style="font:700 13px var(--body)">Kan velte sideveis</text>`;
+    $('back').innerHTML = h;
+  }
+
+  // ---------- Oppdatering ----------
+  function update() {
+    const s = S.s, r = beregn(s);
+    $('o-a').textContent = s.a + '°';
+    $('n-val').textContent = s.n;
+    const enough = s.n >= r.req;
+    const st = !r.tipOk ? ['bad', 'Kassen kan velte sideveis. Nedsurring alene hindrer ikke det. Steng lasten sideveis.']
+      : enough ? ['ok', `${s.n} stropper er nok. Lasten trenger ${r.req}.`]
+      : ['bad', `For få stropper. Lasten trenger ${r.req}, du har lagt på ${s.n}.`];
+    $('status').innerHTML = `<span class="status ${st[0]}">${st[1]}</span>`;
+    drawSide(s, r); drawBack(s, r);
+    $('tbl').innerHTML = `<thead><tr><th>Retning</th><th style="text-align:right">Kraft fra lasten</th><th style="text-align:right">Friksjon holder</th><th style="text-align:right">Må sikres</th><th style="text-align:right">Stropper</th><th>Merknad</th></tr></thead><tbody>
+      ${r.dir.map(d => `<tr class="${d.nUp === r.req && r.req > 0 ? 'gov' : ''}"><td>${d.navn} <span style="color:var(--muted);font-family:var(--mono);font-size:12px">${nb(d.c, 1)} g</span></td><td class="n">${nb(d.F / 10)} daN</td><td class="n">${nb(d.fr / 10)} daN</td><td class="n">${nb(d.rest / 10)} daN</td><td class="n"><b>${d.nUp}</b> <span style="color:var(--muted)">(${nb(d.n, 2)})</span></td><td>${d.note || (d.rest === 0 ? 'Friksjonen holder alene' : '')}</td></tr>`).join('')}</tbody>`;
+    $('tag').innerHTML = `<b>EN 12195-2 · surringsstropp</b><span>STF</span><span>${s.stf} daN · forspenning</span><span>LC</span><span>2 500 daN · tillatt last</span><span>Hver</span><span>presser til ${nb(r.per / 10)} daN friksjon</span>`;
+    const kp = [
+      ['Trengs', r.req, 'stropper', ''],
+      ['Lagt på', s.n, enough ? 'nok' : 'for få', enough && r.tipOk ? 'ok' : 'bad'],
+      ['Friksjon µ', nb(r.mu, 2), UNDERLAG.find(u => u.id === s.mu).navn.toLowerCase(), ''],
+      ['Oppdrag', Object.keys(done).length + '/' + OPP.length, 'fullført', ''],
+    ];
+    $('kpis').innerHTML = kp.map(([l, v, sm, stt]) => `<div class="kpi" data-state="${stt}"><span class="eyebrow">${l}</span><b>${v}</b><small>${sm}</small></div>`).join('');
+    drawBrief(r);
+  }
+
+  drawCards(); sync(); update();
+})();
+</script>
+</body>
+</html>

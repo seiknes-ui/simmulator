@@ -1,0 +1,516 @@
+<!doctype html>
+<html lang="nb">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Hviletidsuka</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;600;700&display=swap">
+<style>
+/* Layout: samme verkstedstil som Kundeservice – oppdragskort øverst, ukeskiva som fartsskriverdiagram i midten, brudd og dagsoversikt under. */
+:root {
+  --bg: #E8EBE7; --surface: #F7F8F5; --ink: #1B201E; --muted: #5A6560; --line: #C6CDC8;
+  --accent: #F2B300; --on-accent: #1B201E;
+  --ok: #2B9A58; --on-ok: #FFFFFF; --warn: #D89A00; --bad: #D0392A;
+  --k: #2E6B8A; --a: #C0662E; --t: #8A7FB8; --h: #DCE2DD;
+  --display: "Big Shoulders Display", "Arial Narrow", Impact, sans-serif;
+  --body: "Public Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #131715; --surface: #1C2120; --ink: #E6EBE7; --muted: #99A49E; --line: #343C38;
+    --accent: #F5BF1F; --on-accent: #131715; --ok: #3FBF72; --on-ok: #0B1A11; --warn: #F0B429; --bad: #F05A47;
+    --k: #5AA6CC; --a: #E08A4E; --t: #A99FD6; --h: #2A312E;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #131715; --surface: #1C2120; --ink: #E6EBE7; --muted: #99A49E; --line: #343C38;
+  --accent: #F5BF1F; --on-accent: #131715; --ok: #3FBF72; --on-ok: #0B1A11; --warn: #F0B429; --bad: #F05A47;
+  --k: #5AA6CC; --a: #E08A4E; --t: #A99FD6; --h: #2A312E;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 28px 64px;
+}
+.wrap { max-width: 1180px; margin: 0 auto; display: grid; gap: 36px; }
+h1, h2, h3 { font-family: var(--display); font-weight: 800; letter-spacing: .01em; margin: 0; text-wrap: balance; line-height: 1; text-transform: uppercase; }
+h1 { font-size: clamp(52px, 9vw, 92px); }
+h2 { font-size: 32px; }
+h3 { font-size: 22px; }
+p { margin: 0; }
+.eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+button, input { font: inherit; color: inherit; }
+button { cursor: pointer; }
+button:focus-visible, input:focus-visible, summary:focus-visible, .cell:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+.top { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 24px 40px; align-items: end; }
+.top .lede { max-width: 60ch; margin-top: 12px; color: var(--muted); font-size: 16px; }
+.hazard { height: 10px; background: repeating-linear-gradient(-45deg, var(--accent) 0 14px, var(--ink) 14px 28px); border-radius: 2px; margin-bottom: 18px; max-width: 220px; }
+.kpis { display: grid; grid-template-columns: repeat(4, minmax(110px, auto)); border: 2px solid var(--ink); background: var(--surface); }
+.kpi { padding: 10px 16px 12px; border-left: 1px solid var(--line); min-width: 0; }
+.kpi:first-child { border-left: 0; }
+.kpi .eyebrow { font-size: 11px; }
+.kpi b { display: block; font-family: var(--display); font-size: 40px; line-height: 1.05; font-weight: 800; font-variant-numeric: tabular-nums; }
+.kpi small { color: var(--muted); font-size: 12px; }
+.kpi[data-state="bad"] b { color: var(--bad); }
+.kpi[data-state="ok"] b { color: var(--ok); }
+
+section { display: grid; gap: 16px; min-width: 0; }
+.sec-head { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: end; justify-content: space-between; }
+.sec-head p { color: var(--muted); max-width: 64ch; margin-top: 6px; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 18px; min-width: 0; }
+.btn { border: 2px solid var(--ink); background: transparent; padding: 7px 14px; border-radius: 4px; font-weight: 700; font-size: 14px; }
+.btn:hover { background: var(--ink); color: var(--bg); }
+.btn.small { padding: 4px 10px; font-size: 13px; border-width: 1px; }
+
+/* Oppdrag */
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+.card { border: 2px solid var(--ink); background: var(--surface); border-radius: 6px; padding: 12px 14px; text-align: left; display: grid; gap: 6px; align-content: start; }
+.card:hover { box-shadow: inset 0 0 0 2px var(--accent); }
+.card[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.card[aria-pressed="true"] .cs { color: var(--bg); opacity: .8; }
+.card b { font-family: var(--display); font-size: 22px; text-transform: uppercase; line-height: 1; }
+.card .cs { font-size: 13px; color: var(--muted); line-height: 1.35; }
+.card .cb { font-size: 12px; font-family: var(--mono); color: var(--muted); }
+.card .cb.done { color: var(--ok); }
+.card[aria-pressed="true"] .cb { color: var(--accent); }
+.brief { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 16px 28px; }
+.brief p { max-width: 66ch; }
+.goals { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.goals li { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; }
+.goals .mk { flex: none; width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--line); display: grid; place-items: center; font-size: 12px; font-weight: 700; margin-top: 1px; }
+.goals li.met .mk { background: var(--ok); border-color: var(--ok); color: var(--on-ok); }
+.win { padding: 8px 12px; border-radius: 4px; background: var(--ok); color: var(--on-ok); font-weight: 700; }
+
+/* Verktøy */
+.tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.tool { display: inline-flex; gap: 8px; align-items: center; border: 2px solid var(--line); background: var(--surface); border-radius: 4px; padding: 6px 12px 6px 8px; font-weight: 600; font-size: 14px; }
+.tool[aria-pressed="true"] { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+.tool svg { width: 22px; height: 22px; flex: none; }
+.sw { width: 14px; height: 14px; border-radius: 3px; flex: none; }
+.sw.K { background: var(--k); } .sw.A { background: var(--a); } .sw.T { background: var(--t); } .sw.H { background: var(--h); border: 1px solid var(--line); }
+.tools .sep { flex: 1 1 auto; }
+
+/* Ukeskiva */
+.grid-scroll { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px 12px; }
+.week { display: grid; grid-template-columns: 58px 864px 128px; gap: 6px 10px; align-items: center; width: max-content; user-select: none; -webkit-user-select: none; }
+.axis { display: grid; grid-template-columns: repeat(24, 36px); font-family: var(--mono); font-size: 10px; color: var(--muted); }
+.axis span { border-left: 1px solid var(--line); padding-left: 3px; }
+.dlabel { font-family: var(--display); font-weight: 800; font-size: 20px; text-transform: uppercase; }
+.row { position: relative; display: grid; grid-template-columns: repeat(96, 9px); height: 30px; touch-action: none; border-radius: 3px; overflow: hidden; }
+.cell { height: 100%; border-right: 1px solid transparent; }
+.cell:nth-child(4n) { border-right-color: color-mix(in srgb, var(--line) 70%, transparent); }
+.cell.H { background: var(--h); }
+.cell.K { background: var(--k); }
+.cell.A { background: var(--a); }
+.cell.T { background: var(--t); }
+.cell.flag { box-shadow: inset 0 -5px 0 var(--bad); }
+.dsum { font-family: var(--mono); font-size: 12px; color: var(--muted); line-height: 1.3; }
+.dsum b { color: var(--ink); font-weight: 500; }
+.dsum .bad { color: var(--bad); font-weight: 500; }
+.hint { font-size: 13px; color: var(--muted); }
+
+/* Resultat */
+.res { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.viol { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.viol li { display: grid; grid-template-columns: 8px minmax(0, 1fr); gap: 12px; padding: 10px 12px; background: var(--bg); border-radius: 4px; }
+.viol li::before { content: ""; border-radius: 4px; background: var(--bad); }
+.viol li.info::before { background: var(--warn); }
+.viol li.good::before { background: var(--ok); }
+.viol b { display: block; font-size: 14px; }
+.viol span { font-size: 13px; color: var(--muted); }
+.viol .when { font-family: var(--mono); font-size: 12px; color: var(--ink); }
+.tbl-scroll { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 13px; }
+th, td { padding: 7px 10px; text-align: left; border-bottom: 1px solid var(--line); }
+th { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+td.n { font-family: var(--mono); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+td.n.bad { color: var(--bad); font-weight: 500; }
+tr:last-child td { border-bottom: 0; }
+.prev { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 13px; color: var(--muted); margin-top: 12px; }
+.prev input { width: 72px; background: var(--bg); border: 1px solid var(--line); border-radius: 4px; padding: 4px 8px; font-family: var(--mono); }
+
+/* Regler */
+details.rules summary { cursor: pointer; font-family: var(--display); font-weight: 800; font-size: 26px; text-transform: uppercase; }
+.rgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 12px; margin-top: 14px; }
+.rgrid div { background: var(--bg); border-radius: 4px; padding: 10px 12px; }
+.rgrid b { display: block; font-size: 13px; font-family: var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+.rgrid p { font-size: 14px; margin-top: 4px; }
+footer { color: var(--muted); font-size: 13px; max-width: 90ch; display: grid; gap: 6px; }
+
+@media (max-width: 900px) {
+  .top, .brief, .res { grid-template-columns: 1fr; }
+  .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .kpi:nth-child(3) { border-left: 0; }
+  .kpi:nth-child(n+3) { border-top: 1px solid var(--line); }
+}
+@media (max-width: 480px) { .kpi b { font-size: 32px; } }
+body{margin:0}[hidden]{display:none!important}
+.back{display:inline-block;margin-bottom:14px;font-size:14px;font-weight:600;color:var(--ink);text-decoration:underline;text-decoration-color:var(--accent);text-underline-offset:3px}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-K" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2.2"/><circle cx="12" cy="12" r="2.4" fill="currentColor"/><path d="M3.5 11h6.1M14.4 11h6.1M12 14.4V21" stroke="currentColor" stroke-width="2.2" fill="none"/></symbol>
+    <symbol id="i-A" viewBox="0 0 24 24"><path d="M4 20l8-8M20 20l-8-8" stroke="currentColor" stroke-width="2.4" fill="none" stroke-linecap="round"/><path d="M8.5 3.5l4 4-3 3-4-4zM15.5 3.5l-4 4 3 3 4-4z" fill="currentColor"/></symbol>
+    <symbol id="i-T" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M3.5 20.5l17-17" stroke="currentColor" stroke-width="2.2"/></symbol>
+    <symbol id="i-H" viewBox="0 0 24 24"><path d="M3 18V7M3 14h18v4M21 14v-2a3 3 0 0 0-3-3h-7v5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><circle cx="7" cy="11" r="2" fill="currentColor"/></symbol>
+  </defs>
+</svg>
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <a class="back" href="./">← YSK-modulene</a>
+      <div class="hazard" aria-hidden="true"></div>
+      <p class="eyebrow">YSK · Modul 1 · Læreplanmål 1.3</p>
+      <h1>Hviletidsuka</h1>
+      <p class="lede">Planlegg en arbeidsuke slik fartsskriveren registrerer den. Mal inn kjøring, annet arbeid, tilgjengelighet og hvile, og se med en gang hvilke regler for kjøre- og hviletid som brytes.</p>
+    </div>
+    <div class="kpis" id="kpis"></div>
+  </header>
+
+  <section aria-labelledby="h-oppdrag">
+    <div class="sec-head">
+      <div>
+        <h2 id="h-oppdrag">Oppdrag</h2>
+        <p>Hvert oppdrag starter med en uke som har en feil. Finn feilen og rett den uten å fjerne kjøringen. Velg <b>Fri planlegging</b> for å tegne en uke selv.</p>
+      </div>
+    </div>
+    <div class="cards" id="cards"></div>
+    <div class="panel brief" id="brief"></div>
+  </section>
+
+  <section aria-labelledby="h-uke">
+    <div class="sec-head">
+      <div>
+        <h2 id="h-uke">Uka</h2>
+        <p>Velg aktivitet og dra over timene. Én rute er 15 minutter. Rød strek under en rute viser hvor et brudd skjer.</p>
+      </div>
+    </div>
+    <div class="tools" id="tools"></div>
+    <div class="grid-scroll"><div class="week" id="week"></div></div>
+    <p class="hint">Uka starter mandag kl. 00:00 rett etter en vanlig ukehvile. Hvile som går ut søndag kveld, regnes som fortsatt hvile inn i neste uke.</p>
+  </section>
+
+  <section class="res" aria-label="Kontroll">
+    <div class="panel">
+      <div class="sec-head" style="margin-bottom:12px"><h3>Kontroll</h3></div>
+      <ul class="viol" id="viol"></ul>
+    </div>
+    <div class="panel">
+      <div class="sec-head" style="margin-bottom:12px"><h3>Arbeidsperioder</h3></div>
+      <div class="tbl-scroll"><table id="periods"></table></div>
+      <label class="prev" for="in-prev">Kjøretid forrige uke <input id="in-prev" type="number" min="0" max="56" step="0.25" value="40"> timer</label>
+    </div>
+  </section>
+
+  <section class="panel">
+    <details class="rules" open>
+      <summary>Reglene som sjekkes</summary>
+      <div class="rgrid">
+        <div><b>Sammenhengende kjøring</b><p>Etter 4 t 30 min kjøring skal du ha pause på minst 45 min. Pausen kan deles i 15 min + 30 min, i den rekkefølgen.</p></div>
+        <div><b>Daglig kjøretid</b><p>Høyst 9 timer mellom to døgnhviler. To ganger i uka kan den økes til 10 timer.</p></div>
+        <div><b>Døgnhvile</b><p>Innen 24 timer etter forrige hvile skal du ha minst 11 timer sammenhengende hvile, eller 3 t + 9 t. Høyst tre ganger mellom to ukehviler kan den reduseres til 9 timer.</p></div>
+        <div><b>Ukehvile</b><p>Senest etter seks døgn (seks perioder på 24 timer) skal ukehvilen starte: minst 45 timer, eller redusert til minst 24 timer med kompensasjon senere.</p></div>
+        <div><b>Ukentlig kjøretid</b><p>Høyst 56 timer i en kalenderuke og høyst 90 timer i to uker på rad.</p></div>
+        <div><b>Arbeidstid</b><p>Etter forskrift om arbeidstid for sjåfører: høyst 60 timer arbeid (kjøring + annet arbeid) i en uke, og ikke over 6 timer arbeid i strekk uten pause.</p></div>
+      </div>
+    </details>
+  </section>
+
+  <footer>
+    <p>Bygger på forordning (EF) nr. 561/2006 med endringer fra mobilitetspakken (forordning (EU) 2020/1054) og forskrift om arbeidstid for sjåfører og andre innenfor vegtransport. Symbolene er de samme som på fartsskriveren.</p>
+    <p>Forenklinger: tiden telles i hele kvarter. Tilgjengelighet regnes verken som pause eller arbeid. Ikke med: flere sjåfører i bilen, ferje og tog, kompensasjon for redusert ukehvile, nattarbeid og gjennomsnittsberegning av arbeidstid. Verktøyet er laget for opplæring og erstatter ikke regelverket.</p>
+  </footer>
+</div>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const DAYS = ['Man', 'Tir', 'Ons', 'Tor', 'Fre', 'Lør', 'Søn'];
+  const SLOTS = 96, END = 7 * SLOTS;
+  const NAME = { K: 'Kjøring', A: 'Annet arbeid', T: 'Tilgjengelighet', H: 'Pause / hvile' };
+  const fmtT = n => { const m = n * 15; return Math.floor(m / 60) + ':' + String(m % 60).padStart(2, '0'); };
+  const fmtH = n => { const m = n * 15, h = Math.floor(m / 60), r = m % 60; return r ? `${h} t ${r} min` : `${h} t`; };
+  const when = i => `${DAYS[Math.floor(i / SLOTS)]} ${fmtT(i % SLOTS).padStart(5, '0')}`;
+  function save(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+  function load(k) { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } }
+
+  // ---------- Ukeplaner ----------
+  // En dag beskrives som [fra, til, kode] i timer. Alt som ikke er fylt ut, er hvile.
+  function week(days) {
+    const c = Array(END).fill('H');
+    days.forEach((blocks, d) => (blocks || []).forEach(([f, t, k]) => {
+      for (let i = Math.round(f * 4); i < Math.round(t * 4); i++) c[d * SLOTS + i] = k;
+    }));
+    return c;
+  }
+  // En vanlig arbeidsdag: 06:00–16:15, daglig kontroll, to kjøreøkter og lunsjpause
+  const normal = [[6, 6.25, 'A'], [6.25, 10.25, 'K'], [10.25, 11, 'H'], [11, 15, 'K'], [15, 16, 'A']];
+
+  const OPPDRAG = [
+    {
+      id: 'o1', tittel: 'For lang økt', kort: 'Langtur uten pause.',
+      tekst: 'Mandag kjører sjåføren fra Sauda kl. 06:00 og tar ikke pause før kl. 11:30. Flytt pausen eller legg inn en ny, slik at ingen kjøreøkt blir over 4 t 30 min. Du skal fortsatt ha minst 8 timer kjøring mandag.',
+      plan: () => week([[[5.75, 6, 'A'], [6, 11.5, 'K'], [11.5, 12.25, 'H'], [12.25, 15, 'K'], [15, 15.5, 'A']], normal, normal, normal, normal]),
+      mål: [['Ingen brudd på reglene', r => r.brudd === 0], ['Minst 8 timer kjøring mandag', r => r.dag[0].K >= 32]],
+    },
+    {
+      id: 'o2', tittel: 'Delt pause', kort: '30 + 15 eller 15 + 30?',
+      tekst: 'Tirsdag har sjåføren delt pausen i to: først 30 minutter, så 15 minutter. Det godtas ikke. Bytt rekkefølgen eller gjør pausen lang nok, uten å kjøre mindre enn 8 t 30 min tirsdag.',
+      plan: () => week([normal, [[6, 6.25, 'A'], [6.25, 8.75, 'K'], [8.75, 9.25, 'H'], [9.25, 10.75, 'K'], [10.75, 11, 'H'], [11, 13.5, 'K'], [13.5, 14.25, 'H'], [14.25, 16.75, 'K'], [16.75, 17, 'A']], normal, normal, normal]),
+      mål: [['Ingen brudd på reglene', r => r.brudd === 0], ['Minst 8 t 30 min kjøring tirsdag', r => r.dag[1].K >= 34]],
+    },
+    {
+      id: 'o3', tittel: 'Tre lange dager', kort: '10 timer kjøring for ofte.',
+      tekst: 'Sjåføren kjører 10 timer både mandag, onsdag og fredag. Det er lov bare to ganger i uka. Rett opp planen så uka fortsatt har minst 45 timer kjøring.',
+      plan: () => {
+        const lang = [[5, 5.25, 'A'], [5.25, 9.75, 'K'], [9.75, 10.5, 'H'], [10.5, 15, 'K'], [15, 15.75, 'H'], [15.75, 16.75, 'K'], [16.75, 17, 'A']];
+        const ni = [[5, 5.25, 'A'], [5.25, 9.75, 'K'], [9.75, 10.5, 'H'], [10.5, 15, 'K'], [15, 15.25, 'A']];
+        return week([lang, ni, lang, ni, lang]);
+      },
+      mål: [['Ingen brudd på reglene', r => r.brudd === 0], ['Minst 45 timer kjøring i uka', r => r.sumK >= 180]],
+    },
+    {
+      id: 'o4', tittel: 'Kort natt', kort: 'Døgnhvilen ble for kort.',
+      tekst: 'Onsdag kveld blir sjåføren forsinket på terminalen og starter igjen torsdag kl. 05:00. Det gir for kort døgnhvile. Flytt starten torsdag, eller korte ned onsdagen, slik at hvilen holder.',
+      plan: () => week([normal, normal, [[8, 8.25, 'A'], [8.25, 12.75, 'K'], [12.75, 13.5, 'H'], [13.5, 17.75, 'K'], [17.75, 18.25, 'H'], [18.25, 21, 'A']], [[5, 5.25, 'A'], [5.25, 9.5, 'K'], [9.5, 10.25, 'H'], [10.25, 14, 'K'], [14, 14.5, 'A']], normal]),
+      mål: [['Ingen brudd på reglene', r => r.brudd === 0], ['Minst 8 timer kjøring både onsdag og torsdag', r => r.dag[2].K >= 32 && r.dag[3].K >= 32]],
+    },
+    {
+      id: 'o5', tittel: 'Ingen ukehvile', kort: 'Seks dager på rad og vel så det.',
+      tekst: 'Sjåføren kjører mandag til lørdag og starter igjen søndag morgen. Ukehvilen kommer for sent. Rett opp slik at ukehvilen (minst 24 timer) starter i tide, og uka fortsatt har minst 40 timer kjøring.',
+      plan: () => {
+        const kort = [[7, 7.25, 'A'], [7.25, 11, 'K'], [11, 11.75, 'H'], [11.75, 14.75, 'K'], [14.75, 15, 'A']];
+        return week([kort, kort, kort, kort, kort, kort, kort]);
+      },
+      mål: [['Ingen brudd på reglene', r => r.brudd === 0], ['Minst 40 timer kjøring i uka', r => r.sumK >= 160]],
+    },
+    {
+      id: 'o6', tittel: 'Fri planlegging', kort: 'Sauda–Oslo og tilbake.',
+      tekst: 'Planlegg en uke med to turer Sauda–Oslo tur-retur. Hver vei er omtrent 7 t 30 min kjøring, og lasting og lossing tar 1 time i hver ende. Planen skal være lovlig.',
+      plan: () => week([]),
+      mål: [['Minst 30 timer kjøring i uka', r => r.sumK >= 120], ['Minst 4 timer annet arbeid', r => r.sumA >= 16], ['Ingen brudd på reglene', r => r.brudd === 0]],
+    },
+  ];
+
+  // ---------- Regelmotor ----------
+  function runs(c) {
+    const out = []; let s = 0;
+    for (let i = 1; i <= END; i++) if (i === END || c[i] !== c[s]) { out.push({ k: c[s], s, e: i, len: i - s }); s = i; }
+    return out;
+  }
+  function check(c, prevH) {
+    const V = [], flag = new Set();
+    const add = (type, tekst, forkl, i, n = 1) => { V.push({ type, tekst, forkl, i }); if (type === 'bad') for (let j = 0; j < n; j++) flag.add(i + j); };
+    const R = runs(c), rests = R.filter(r => r.k === 'H');
+    const atEnd = r => r.e === END;
+
+    // 1. Sammenhengende kjøring og pauser (4 t 30 min)
+    let d = 0, first = false, flagged = false;
+    for (const r of R) {
+      if (r.k === 'K') {
+        for (let i = r.s; i < r.e; i++) {
+          d++;
+          if (d > 18 && !flagged) { add('bad', 'Over 4 t 30 min kjøring uten godkjent pause', 'Ta minst 45 min pause, eller 15 + 30 min i den rekkefølgen, før du har kjørt 4 t 30 min.', i, r.e - i); flagged = true; }
+        }
+      } else if (r.k === 'H') {
+        if (r.len >= 3 || (first && r.len >= 2)) { d = 0; first = false; flagged = false; }
+        else if (r.len >= 1) first = true;
+      }
+    }
+
+    // 2. Arbeid over 6 timer i strekk
+    let w = 0, wf = false;
+    for (let i = 0; i < END; i++) {
+      if (c[i] === 'K' || c[i] === 'A') { w++; if (w > 24 && !wf) { add('bad', 'Over 6 timer arbeid uten pause', 'Arbeidstidsforskriften krever pause før 6 timer arbeid i strekk.', i); wf = true; } }
+      else if (c[i] === 'H') { w = 0; wf = false; }
+    }
+
+    // 3. Døgnhvile og daglig kjøretid, periode for periode
+    const periods = [];
+    let s = 0, reduced = 0, extended = 0;
+    while (true) {
+      while (s < END && c[s] === 'H') s++;
+      if (s >= END) break;
+      const lim = s + SLOTS;
+      let rest = null, split = false;
+      for (const r of rests) {
+        if (r.s <= s || r.s >= lim) continue;
+        const inside = atEnd(r) ? 999 : Math.min(r.e, lim) - r.s;
+        if (inside >= 36) { rest = { ...r, inside }; break; }
+      }
+      const stop = rest ? rest.s : Math.min(lim, END);
+      let K = 0, A = 0;
+      for (let i = s; i < stop; i++) { if (c[i] === 'K') K++; if (c[i] === 'A') A++; }
+      const p = { s, stop, K, A, rest: null };
+      if (rest) {
+        split = rests.some(r => r.s > s && r.e <= rest.s && r.len >= 12);
+        if (rest.inside >= 44) p.rest = 'Vanlig';
+        else if (split) p.rest = 'Delt 3 + 9';
+        else {
+          p.rest = 'Redusert'; reduced++;
+          if (reduced > 3) add('bad', 'For mange reduserte døgnhviler', 'Mellom to ukehviler kan døgnhvilen reduseres til 9 timer høyst tre ganger.', rest.s, rest.len);
+          else add('info', `Redusert døgnhvile (${reduced} av 3)`, `Hvilen er ${fmtH(rest.inside)} innenfor 24 timer. Det er lov, men bare tre ganger mellom to ukehviler.`, rest.s);
+        }
+        p.restLen = atEnd(rest) ? null : rest.len;
+        if (!atEnd(rest) && rest.len >= 96 && rest.s <= 576) p.rest = rest.len >= 180 ? 'Ukehvile' : 'Redusert ukehvile';
+        if (atEnd(rest) && rest.s <= 576) p.rest = 'Ukehvile';
+      } else if (lim <= END) {
+        add('bad', 'Mangler døgnhvile', `Innen 24 timer etter at arbeidet startet (${when(s)}) må du ha minst 9 timer sammenhengende hvile.`, Math.min(lim, END) - 4, 4);
+        p.rest = 'Mangler';
+      } else p.rest = 'Fortsetter';
+      if (K > 40) add('bad', `Daglig kjøretid er ${fmtH(K)}`, 'Daglig kjøretid kan ikke være over 10 timer.', s, Math.min(stop - s, 8));
+      else if (K > 36) {
+        extended++;
+        if (extended > 2) add('bad', `Daglig kjøretid ${fmtH(K)}: tredje lange dag`, 'Kjøretiden kan økes til 10 timer bare to ganger i uka.', s, Math.min(stop - s, 8));
+        else add('info', `Økt daglig kjøretid (${extended} av 2)`, `${fmtH(K)} kjøring fra ${when(s)}. Lov to ganger i uka.`, s);
+      }
+      periods.push(p);
+      if (!rest) { s = lim; continue; }
+      if (atEnd(rest)) break;
+      s = rest.e;
+    }
+
+    // 4. Ukehvile
+    const wr = rests.find(r => r.s > 0 && r.s <= 576 && (r.len >= 96 || atEnd(r)));
+    if (!wr) {
+      const anyWork = c.some(x => x !== 'H');
+      if (anyWork) add('bad', 'Ukehvilen starter for sent', 'Ukehvilen på minst 24 timer må starte senest seks døgn etter forrige ukehvile, her søndag kl. 00:00.', 576, 8);
+    } else if (!atEnd(wr) && wr.len < 180) {
+      add('info', `Redusert ukehvile (${fmtH(wr.len)})`, 'Lov, men reduksjonen må tas igjen samlet før utgangen av tredje uke etter.', wr.s);
+    }
+
+    // 5. Grenser for én og to uker
+    const sumK = c.filter(x => x === 'K').length, sumA = c.filter(x => x === 'A').length;
+    if (sumK > 224) add('bad', `Ukentlig kjøretid er ${fmtH(sumK)}`, 'Høyst 56 timer kjøring i en kalenderuke.', END - 4, 4);
+    if (sumK / 4 + prevH > 90) add('bad', `${fmtH(Math.round((sumK / 4 + prevH) * 4))} kjøring på to uker`, 'Høyst 90 timer kjøring i to uker på rad. Husk forrige ukes kjøretid.', END - 4, 4);
+    if (sumK + sumA > 240) add('bad', `Arbeidstid ${fmtH(sumK + sumA)} i uka`, 'Arbeidstidsforskriften tillater høyst 60 timer arbeid i en enkelt uke.', END - 4, 4);
+
+    const dag = DAYS.map((_, i) => {
+      const sl = c.slice(i * SLOTS, (i + 1) * SLOTS);
+      return { K: sl.filter(x => x === 'K').length, A: sl.filter(x => x === 'A').length };
+    });
+    V.sort((a, b) => a.i - b.i);
+    return { V, flag, periods, dag, sumK, sumA, brudd: V.filter(v => v.type === 'bad').length };
+  }
+
+  // ---------- Tilstand ----------
+  let cells = null, tool = 'K', aktiv = OPPDRAG[0].id, res = null;
+  let done = load('hviletidsuka.done') || {};
+
+  // ---------- Tegning ----------
+  function drawWeek() {
+    const W = $('week');
+    let h = '<div></div><div class="axis">' + Array.from({ length: 24 }, (_, i) => `<span>${String(i).padStart(2, '0')}</span>`).join('') + '</div><div></div>';
+    DAYS.forEach((d, di) => {
+      h += `<div class="dlabel">${d}</div><div class="row" data-d="${di}" role="group" aria-label="${d}">`;
+      for (let i = 0; i < SLOTS; i++) h += `<div class="cell" data-i="${di * SLOTS + i}"></div>`;
+      h += `</div><div class="dsum" id="ds-${di}"></div>`;
+    });
+    W.innerHTML = h;
+  }
+  function paintCells() {
+    document.querySelectorAll('.cell').forEach(el => {
+      const i = +el.dataset.i;
+      el.className = 'cell ' + cells[i] + (res && res.flag.has(i) ? ' flag' : '');
+      el.title = `${when(i)} · ${NAME[cells[i]]}`;
+    });
+  }
+
+  function drawTools() {
+    $('tools').innerHTML = ['K', 'A', 'T', 'H'].map(k =>
+      `<button class="tool" type="button" data-k="${k}" aria-pressed="${k === tool}"><span class="sw ${k}"></span><svg aria-hidden="true"><use href="#i-${k}"/></svg>${NAME[k]}</button>`
+    ).join('') + '<span class="sep"></span><button class="btn small" type="button" id="btn-reset">Start oppdraget på nytt</button><button class="btn small" type="button" id="btn-clear">Tøm uka</button>';
+    $('tools').querySelectorAll('.tool').forEach(b => b.onclick = () => { tool = b.dataset.k; drawTools(); });
+    $('btn-reset').onclick = () => loadOppdrag(aktiv);
+    $('btn-clear').onclick = () => { cells = Array(END).fill('H'); update(); };
+  }
+
+  function drawCards() {
+    $('cards').innerHTML = OPPDRAG.map(o =>
+      `<button class="card" type="button" data-id="${o.id}" aria-pressed="${o.id === aktiv}"><b>${o.tittel}</b><span class="cs">${o.kort}</span><span class="cb ${done[o.id] ? 'done' : ''}">${done[o.id] ? '✓ Fullført' : 'Ikke fullført'}</span></button>`
+    ).join('');
+    $('cards').querySelectorAll('.card').forEach(b => b.onclick = () => loadOppdrag(b.dataset.id));
+  }
+
+  function drawBrief() {
+    const o = OPPDRAG.find(x => x.id === aktiv);
+    const met = o.mål.map(([t, f]) => [t, f(res)]);
+    const all = met.every(m => m[1]);
+    if (all && !done[o.id]) { done[o.id] = true; save('hviletidsuka.done', done); drawCards(); }
+    $('brief').innerHTML = `<div><p class="eyebrow">Oppdrag</p><h3 style="margin:6px 0 8px">${o.tittel}</h3><p>${o.tekst}</p></div>
+      <div style="display:grid;gap:10px;align-content:start"><ul class="goals">${met.map(([t, m]) => `<li class="${m ? 'met' : ''}"><span class="mk">${m ? '✓' : ''}</span>${t}</li>`).join('')}</ul>
+      ${all ? '<div class="win">Oppdraget er løst. Planen er lovlig.</div>' : ''}</div>`;
+  }
+
+  function drawResults() {
+    $('viol').innerHTML = res.V.length
+      ? res.V.map(v => `<li class="${v.type === 'bad' ? '' : 'info'}"><div><b>${v.tekst}</b><span class="when">${when(v.i)}</span> <span>· ${v.forkl}</span></div></li>`).join('')
+      : `<li class="good"><div><b>Ingen brudd</b><span>Uka følger reglene for kjøre-, hvile- og arbeidstid som sjekkes her.</span></div></li>`;
+    $('periods').innerHTML = '<thead><tr><th>Start</th><th>Kjøring</th><th>Annet arbeid</th><th>Hvile etterpå</th></tr></thead><tbody>' +
+      (res.periods.length ? res.periods.map(p => `<tr><td class="n" style="text-align:left">${when(p.s)}</td><td class="n ${p.K > 40 ? 'bad' : ''}">${fmtH(p.K)}</td><td class="n">${fmtH(p.A)}</td><td>${p.rest}${p.restLen ? ' · ' + fmtH(p.restLen) : ''}</td></tr>`).join('')
+        : '<tr><td colspan="4" style="color:var(--muted)">Ingen arbeid lagt inn ennå.</td></tr>') + '</tbody>';
+    DAYS.forEach((_, i) => {
+      const d = res.dag[i];
+      $('ds-' + i).innerHTML = `<b>${fmtH(d.K)}</b> kjøring<br>${fmtH(d.A)} arbeid`;
+    });
+    const prev = +$('in-prev').value || 0;
+    const kp = [
+      ['Kjøretid uke', fmtH(res.sumK).replace(' min', ''), 'av 56 t', res.sumK > 224 ? 'bad' : ''],
+      ['To uker', Math.round(res.sumK / 4 + prev) + ' t', 'av 90 t', res.sumK / 4 + prev > 90 ? 'bad' : ''],
+      ['Brudd', res.brudd, res.brudd ? 'må rettes' : 'lovlig plan', res.brudd ? 'bad' : 'ok'],
+      ['Oppdrag', Object.keys(done).length + '/' + OPPDRAG.length, 'fullført', ''],
+    ];
+    $('kpis').innerHTML = kp.map(([l, v, s, st]) => `<div class="kpi" data-state="${st}"><span class="eyebrow">${l}</span><b>${v}</b><small>${s}</small></div>`).join('');
+  }
+
+  function update() {
+    res = check(cells, +$('in-prev').value || 0);
+    paintCells(); drawResults(); drawBrief();
+  }
+
+  function loadOppdrag(id) {
+    aktiv = id;
+    cells = OPPDRAG.find(o => o.id === id).plan();
+    drawCards(); update();
+  }
+
+  // ---------- Maling med mus og finger ----------
+  let painting = false, anchor = null, before = null;
+  function cellAt(e) {
+    const el = document.elementFromPoint(e.clientX, e.clientY);
+    return el && el.classList.contains('cell') ? +el.dataset.i : null;
+  }
+  function fill(a, b) {
+    cells = before.slice();
+    const row = Math.floor(a / SLOTS), lo = Math.min(a, b), hi = Math.max(a, b);
+    for (let i = lo; i <= hi; i++) if (Math.floor(i / SLOTS) === row) cells[i] = tool;
+    res = null; paintCells();
+  }
+  $('week').addEventListener('pointerdown', e => {
+    const i = cellAt(e); if (i == null) return;
+    e.preventDefault(); painting = true; anchor = i; before = cells.slice(); fill(i, i);
+  });
+  window.addEventListener('pointermove', e => {
+    if (!painting) return;
+    const i = cellAt(e);
+    if (i != null && Math.floor(i / SLOTS) === Math.floor(anchor / SLOTS)) fill(anchor, i);
+  });
+  window.addEventListener('pointerup', () => { if (painting) { painting = false; update(); } });
+  $('in-prev').addEventListener('input', update);
+
+  drawWeek(); drawTools(); loadOppdrag(aktiv);
+})();
+</script>
+</body>
+</html>

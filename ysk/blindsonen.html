@@ -1,0 +1,447 @@
+<!doctype html>
+<html lang="nb">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Blindsonen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;600;700&display=swap">
+<style>
+/* Layout: samme verkstedstil som Kundeservice – oppdrag øverst, krysset sett ovenfra i midten med speilfelt, speilpanel og liste over trafikantene ved siden av. */
+:root {
+  --bg: #E8EBE7; --surface: #F7F8F5; --ink: #1B201E; --muted: #5A6560; --line: #C6CDC8;
+  --accent: #F2B300; --on-accent: #1B201E;
+  --ok: #2B9A58; --on-ok: #FFFFFF; --warn: #D89A00; --bad: #D0392A;
+  --asphalt: #5B6460; --verge: #9DAE95; --walk: #C9CFCB; --mark: #F7F8F5; --cab: #2E6B8A; --body-c: #DCE2DD;
+  --m2: #2F6FD0; --m4: #6E5BB8; --m5: #C0662E; --m6: #2B9A58; --cam: #D89A00; --blind: #D0392A;
+  --display: "Big Shoulders Display", "Arial Narrow", Impact, sans-serif;
+  --body: "Public Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #131715; --surface: #1C2120; --ink: #E6EBE7; --muted: #99A49E; --line: #343C38;
+    --accent: #F5BF1F; --on-accent: #131715; --ok: #3FBF72; --on-ok: #0B1A11; --warn: #F0B429; --bad: #F05A47;
+    --asphalt: #2F3533; --verge: #3E4A3B; --walk: #4A524E; --mark: #C9CFCB; --cab: #4A86AE; --body-c: #8D9993;
+    --m2: #5A9BF0; --m4: #A99FD6; --m5: #E08A4E; --m6: #3FBF72; --cam: #F0B429; --blind: #F05A47;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #131715; --surface: #1C2120; --ink: #E6EBE7; --muted: #99A49E; --line: #343C38;
+  --accent: #F5BF1F; --on-accent: #131715; --ok: #3FBF72; --on-ok: #0B1A11; --warn: #F0B429; --bad: #F05A47;
+  --asphalt: #2F3533; --verge: #3E4A3B; --walk: #4A524E; --mark: #C9CFCB; --cab: #4A86AE; --body-c: #8D9993;
+  --m2: #5A9BF0; --m4: #A99FD6; --m5: #E08A4E; --m6: #3FBF72; --cam: #F0B429; --blind: #F05A47;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 28px 64px;
+}
+.wrap { max-width: 1180px; margin: 0 auto; display: grid; gap: 36px; }
+h1, h2, h3 { font-family: var(--display); font-weight: 800; letter-spacing: .01em; margin: 0; text-wrap: balance; line-height: 1; text-transform: uppercase; }
+h1 { font-size: clamp(52px, 9vw, 92px); }
+h2 { font-size: 32px; }
+h3 { font-size: 22px; }
+p { margin: 0; }
+.eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+button, input, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+button:focus-visible, input:focus-visible, select:focus-visible, .fig:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+.top { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 24px 40px; align-items: end; }
+.top .lede { max-width: 60ch; margin-top: 12px; color: var(--muted); font-size: 16px; }
+.hazard { height: 10px; background: repeating-linear-gradient(-45deg, var(--accent) 0 14px, var(--ink) 14px 28px); border-radius: 2px; margin-bottom: 18px; max-width: 220px; }
+.kpis { display: grid; grid-template-columns: repeat(4, minmax(110px, auto)); border: 2px solid var(--ink); background: var(--surface); }
+.kpi { padding: 10px 16px 12px; border-left: 1px solid var(--line); min-width: 0; }
+.kpi:first-child { border-left: 0; }
+.kpi .eyebrow { font-size: 11px; }
+.kpi b { display: block; font-family: var(--display); font-size: 40px; line-height: 1.05; font-weight: 800; font-variant-numeric: tabular-nums; }
+.kpi small { color: var(--muted); font-size: 12px; }
+.kpi[data-state="bad"] b { color: var(--bad); }
+.kpi[data-state="ok"] b { color: var(--ok); }
+
+section { display: grid; gap: 16px; min-width: 0; }
+.sec-head { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: end; justify-content: space-between; }
+.sec-head p { color: var(--muted); max-width: 64ch; margin-top: 6px; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 18px; min-width: 0; }
+.btn { border: 2px solid var(--ink); background: transparent; padding: 7px 14px; border-radius: 4px; font-weight: 700; font-size: 14px; }
+.btn:hover { background: var(--ink); color: var(--bg); }
+.btn.small { padding: 4px 10px; font-size: 13px; border-width: 1px; }
+
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+.card { border: 2px solid var(--ink); background: var(--surface); border-radius: 6px; padding: 12px 14px; text-align: left; display: grid; gap: 6px; align-content: start; }
+.card:hover { box-shadow: inset 0 0 0 2px var(--accent); }
+.card[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.card[aria-pressed="true"] .cs { color: var(--bg); opacity: .8; }
+.card b { font-family: var(--display); font-size: 22px; text-transform: uppercase; line-height: 1; }
+.card .cs { font-size: 13px; color: var(--muted); line-height: 1.35; }
+.card .cb { font-size: 12px; font-family: var(--mono); color: var(--muted); }
+.card .cb.done { color: var(--ok); }
+.card[aria-pressed="true"] .cb { color: var(--accent); }
+.brief { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 16px 28px; }
+.brief p { max-width: 66ch; }
+.goals { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.goals li { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; flex-wrap: wrap; }
+.goals .mk { flex: none; width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--line); display: grid; place-items: center; font-size: 12px; font-weight: 700; margin-top: 1px; }
+.goals li.met .mk { background: var(--ok); border-color: var(--ok); color: var(--on-ok); }
+.goals input, .goals select { background: var(--bg); border: 1px solid var(--line); border-radius: 4px; padding: 3px 8px; font-family: var(--mono); }
+.goals input { width: 80px; }
+.goals li.met input, .goals li.met select { border-color: var(--ok); }
+.win { padding: 8px 12px; border-radius: 4px; background: var(--ok); color: var(--on-ok); font-weight: 700; }
+
+.bench { display: grid; grid-template-columns: minmax(0, 1fr) minmax(250px, 300px); gap: 16px; align-items: start; }
+.stage { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 8px; min-width: 0; }
+.stage-scroll { overflow-x: auto; border-radius: 4px; }
+#map { display: block; width: 100%; min-width: 620px; height: auto; user-select: none; -webkit-user-select: none; touch-action: none; }
+.side { display: grid; gap: 14px; }
+.mirrors { display: grid; gap: 6px; }
+.mrow { display: grid; grid-template-columns: 14px minmax(0, 1fr) auto; gap: 10px; align-items: center; font-size: 14px; padding: 6px 0; border-bottom: 1px solid var(--line); }
+.mrow:last-child { border-bottom: 0; }
+.mrow i { width: 14px; height: 14px; border-radius: 3px; }
+.mrow small { display: block; font-size: 12px; color: var(--muted); }
+.mrow select { background: var(--bg); border: 1px solid var(--line); border-radius: 4px; padding: 3px 6px; font-size: 13px; }
+.mrow select:disabled { opacity: .5; }
+.check { display: flex; gap: 8px; align-items: center; font-size: 14px; }
+.people { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.people li { display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 10px; align-items: center; padding: 8px 10px; border-radius: 4px; background: var(--bg); font-size: 13px; }
+.people li b { display: block; font-size: 14px; }
+.people .ic { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; font-family: var(--display); font-size: 15px; color: #fff; }
+.people .ic.ok { background: var(--ok); } .people .ic.bad { background: var(--bad); }
+.add { display: flex; flex-wrap: wrap; gap: 6px; }
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 12px; }
+.facts div { background: var(--bg); border-radius: 4px; padding: 10px 12px; }
+.facts b { display: block; font-size: 12px; font-family: var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+.facts p { font-size: 14px; margin-top: 4px; }
+footer { color: var(--muted); font-size: 13px; max-width: 90ch; display: grid; gap: 6px; }
+
+/* SVG */
+.fig { cursor: grab; }
+.fig.drag { cursor: grabbing; }
+.fig.locked { cursor: not-allowed; }
+.lbl { font-family: var(--mono); font-size: 11px; fill: var(--ink); }
+
+@media (max-width: 900px) {
+  .top, .brief, .bench { grid-template-columns: 1fr; }
+  .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .kpi:nth-child(3) { border-left: 0; }
+  .kpi:nth-child(n+3) { border-top: 1px solid var(--line); }
+}
+@media (max-width: 480px) { .kpi b { font-size: 32px; } }
+body{margin:0}[hidden]{display:none!important}
+.back{display:inline-block;margin-bottom:14px;font-size:14px;font-weight:600;color:var(--ink);text-decoration:underline;text-decoration-color:var(--accent);text-underline-offset:3px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <a class="back" href="./">← YSK-modulene</a>
+      <div class="hazard" aria-hidden="true"></div>
+      <p class="eyebrow">YSK · Modul 5 · Læreplanmål 5.1</p>
+      <h1>Blindsonen</h1>
+      <p class="lede">Hva ser sjåføren, og hva er skjult? Dra fotgjengere og syklister rundt lastebilen, og se hvilke speil som fanger dem opp og hvor de forsvinner.</p>
+    </div>
+    <div class="kpis" id="kpis"></div>
+  </header>
+
+  <section aria-labelledby="h-oppdrag">
+    <div class="sec-head"><div><h2 id="h-oppdrag">Oppdrag</h2><p>Velg et oppdrag. Det plasserer trafikantene og stiller inn speilene.</p></div></div>
+    <div class="cards" id="cards"></div>
+    <div class="panel brief" id="brief"></div>
+  </section>
+
+  <section aria-labelledby="h-kryss">
+    <div class="sec-head"><div><h2 id="h-kryss">Krysset</h2><p>Lastebilen står ved stopplinja og skal svinge til høyre. Sjåføren sitter på venstre side. Fargede felt viser hva speilene dekker. Rødt viser hvor et barn ikke blir sett.</p></div></div>
+    <div class="bench">
+      <div class="stage"><div class="stage-scroll"><svg id="map" viewBox="0 0 780 560" role="img" aria-label="Lastebil i kryss sett ovenfra med speilfelt og trafikanter"></svg></div></div>
+      <div class="side">
+        <div class="panel">
+          <h3 style="margin-bottom:8px">Speil og kamera</h3>
+          <div class="mirrors" id="mirrors"></div>
+          <label class="check" for="t-blind" style="margin-top:10px"><input type="checkbox" id="t-blind" checked> Vis blindsoner</label>
+        </div>
+        <div class="panel">
+          <h3 style="margin-bottom:8px">Trafikanter</h3>
+          <ul class="people" id="people"></ul>
+          <div class="add" style="margin-top:10px"><button class="btn small" type="button" data-add="barn">+ Barn</button><button class="btn small" type="button" data-add="voksen">+ Voksen</button><button class="btn small" type="button" data-add="syklist">+ Syklist</button></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="facts">
+      <div><b>Klasse II · hovedspeil</b><p>Viser langs siden og bakover. Begge sider.</p></div>
+      <div><b>Klasse IV · vidvinkelspeil</b><p>Større felt langs siden, men alt ser mindre og lenger unna ut.</p></div>
+      <div><b>Klasse V · nærspeil</b><p>Ned langs høyre dør og forhjul. Her står syklister som venter på grønt.</p></div>
+      <div><b>Klasse VI · frontspeil</b><p>Rett foran førerhuset, under frontruta. Viktig når bilen starter fra rødt lys.</p></div>
+      <div><b>A-stolpen</b><p>Stolpen og speilene skjuler en kile skrått fram til høyre. En fotgjenger som går i samme fart som bilen svinger, kan bli borte i den hele tiden.</p></div>
+      <div><b>Bak bilen</b><p>Uten ryggekamera ser du ingenting rett bak. Bruk ryggevakt eller gå ut og se.</p></div>
+    </div>
+  </section>
+
+  <footer>
+    <p>Speilfeltene bygger på kravene i EU-regelverket for indirekte syn (FN-reglement nr. 46) for speil i klasse II, IV, V og VI, men er forenklet. Førerens øyne er plassert 1 m bak fronten og 0,7 m fra venstre side. Hva som er synlig direkte, avhenger av høyden på trafikanten: barn er regnet som 1,2 m høye, voksne og syklister som 1,7 m.</p>
+    <p>Feltene er omtrentlige og laget for opplæring. Hver bil er forskjellig. Juster speilene etter bilens instruksjonsbok, og bruk kontrollmatte eller avmerking på bakken.</p>
+  </footer>
+</div>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const nb = (v, d = 0) => Number(v).toLocaleString('nb-NO', { minimumFractionDigits: d, maximumFractionDigits: d });
+  function save(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+  function load(k) { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } }
+
+  // Koordinater i meter: x framover fra fronten av førerhuset, y mot venstre fra midten av bilen.
+  const XMIN = -16, XMAX = 8.4, YMIN = -9.5, YMAX = 8, SC = 32;
+  const sx = x => (x - XMIN) * SC, sy = y => (YMAX - y) * SC;
+  const EYE = { x: -1.0, y: 0.7 };
+  const CAB = { x0: -2.3, x1: 0, w: 1.25 }, BODY = { x0: -12.5, x1: -2.6 };
+  const TYPER = {
+    barn: { navn: 'Barn', h: 1.2, front: 2.0, right: 2.0, left: 1.0, bokstav: 'B' },
+    voksen: { navn: 'Voksen', h: 1.7, front: 1.0, right: 1.2, left: 0.5, bokstav: 'V' },
+    syklist: { navn: 'Syklist', h: 1.7, front: 1.0, right: 1.2, left: 0.5, bokstav: 'S' },
+  };
+
+  // ---------- Speilfelt (polygoner i meter) ----------
+  const poly = {
+    II_L: [[-3.5, 1.25], [-3.5, 2.3], [-16, 4.6], [-16, 1.25]],
+    II_R: [[-3.5, -1.25], [-3.5, -2.3], [-16, -4.6], [-16, -1.25]],
+    IV_L: [[-2.5, 1.25], [-2.5, 4.0], [-16, 7.5], [-16, 1.25]],
+    IV_R: [[-2.5, -1.25], [-2.5, -5.0], [-16, -9.5], [-16, -1.25]],
+    IV_R_feil: [[-6.5, -4.2], [-6.5, -7.5], [-16, -9.5], [-16, -5.2]],
+    V: [[-2.3, -1.25], [1.0, -1.25], [1.0, -3.25], [-2.3, -3.25]],
+    VI: [[0, 1.25], [2.0, 1.25], [2.0, -1.75], [0, -1.75]],
+    KAM: [[-12.5, -1.25], [1.0, -1.25], [1.0, -4.5], [-12.5, -4.5]],
+  };
+  const SPEIL = [
+    { id: 'II', navn: 'Klasse II', sub: 'Hovedspeil, begge sider', farge: 'var(--m2)', poly: ['II_L', 'II_R'] },
+    { id: 'IV', navn: 'Klasse IV', sub: 'Vidvinkel, begge sider', farge: 'var(--m4)', poly: ['IV_L', 'IV_R'], feil: ['IV_L', 'IV_R_feil'] },
+    { id: 'V', navn: 'Klasse V', sub: 'Nærspeil, høyre side', farge: 'var(--m5)', poly: ['V'] },
+    { id: 'VI', navn: 'Klasse VI', sub: 'Frontspeil', farge: 'var(--m6)', poly: ['VI'] },
+    { id: 'KAM', navn: 'Sidekamera', sub: 'Ekstrautstyr, høyre side', farge: 'var(--cam)', poly: ['KAM'] },
+  ];
+  function inPoly(p, P) {
+    let c = false;
+    for (let i = 0, j = P.length - 1; i < P.length; j = i++) {
+      const [xi, yi] = P[i], [xj, yj] = P[j];
+      if ((yi > p.y) !== (yj > p.y) && p.x < (xj - xi) * (p.y - yi) / (yj - yi) + xi) c = !c;
+    }
+    return c;
+  }
+  const deg = p => Math.atan2(p.y - EYE.y, p.x - EYE.x) * 180 / Math.PI;
+  function inPillar(p) {
+    const a = deg(p), d = Math.hypot(p.x - EYE.x, p.y - EYE.y);
+    return d > 1.6 && ((a <= -56 && a >= -74) || (a >= 25 && a <= 36));
+  }
+  function inVehicle(p) {
+    return (p.x <= CAB.x1 && p.x >= CAB.x0 && Math.abs(p.y) <= CAB.w) || (p.x <= BODY.x1 && p.x >= BODY.x0 && Math.abs(p.y) <= 1.27);
+  }
+  function direkte(p, t) {
+    const T = TYPER[t];
+    if (p.x > 0) {
+      if (p.x < T.front && p.y < 1.6 && p.y > -1.8) return false;
+      return !inPillar(p);
+    }
+    if (p.x >= CAB.x0) {
+      if (p.y > CAB.w) return p.y > CAB.w + T.left && !inPillar(p);
+      if (p.y < -CAB.w) return p.y < -CAB.w - T.right && !inPillar(p);
+    }
+    return false;
+  }
+  function sees(p, t, M) {
+    if (inVehicle(p)) return null;
+    const via = [];
+    if (direkte(p, t)) via.push('Direkte');
+    SPEIL.forEach(s => {
+      const st = M[s.id];
+      if (st === 'av') return;
+      const keys = st === 'feil' && s.feil ? s.feil : s.poly;
+      if (keys.some(k => inPoly(p, poly[k]))) via.push(s.navn);
+    });
+    return via;
+  }
+
+  // ---------- Oppdrag ----------
+  const alleOk = { II: 'ok', IV: 'ok', V: 'ok', VI: 'ok', KAM: 'av' };
+  const OPP = [
+    { id: 'o1', tittel: 'Nærspeilet', kort: 'Bare klasse V ser ham.',
+      tekst: 'Plasser syklisten et sted der sjåføren bare ser syklisten i nærspeilet (klasse V), verken direkte eller i andre speil. Det er her syklister ofte står ved rødt lys.',
+      M: { ...alleOk }, figs: [{ t: 'syklist', x: 4, y: -6 }],
+      mål: [{ t: 'Syklisten synes bare i klasse V', f: (F, M) => { const v = sees(F[0], F[0].t, M); return v && v.length === 1 && v[0] === 'Klasse V'; } }] },
+    { id: 'o2', tittel: 'Gjem deg', kort: 'Finn tre blindsoner.',
+      tekst: 'Alle speil er riktig justert. Likevel finnes det steder der ingen blir sett. Flytt de tre barna slik at ett er skjult foran bilen, ett på høyre side og ett bak bilen.',
+      M: { ...alleOk }, figs: [{ t: 'barn', x: 5, y: 4 }, { t: 'barn', x: 5, y: 0 }, { t: 'barn', x: 5, y: -4 }],
+      mål: [
+        { t: 'Et barn er skjult foran bilen', f: (F, M) => F.some(p => p.x > 0.3 && Math.abs(p.y) < 4.5 && blind(p, M)) },
+        { t: 'Et barn er skjult på høyre side', f: (F, M) => F.some(p => p.y < -1.3 && p.x > -12.5 && blind(p, M)) },
+        { t: 'Et barn er skjult bak bilen', f: (F, M) => F.some(p => p.x < -12.5 && blind(p, M)) },
+      ] },
+    { id: 'o3', tittel: 'Feiljustert speil', kort: 'Vidvinkelen peker feil.',
+      tekst: 'Etter vask av bilen er vidvinkelspeilet på høyre side skjøvet utover. Syklisten rett bak førerhuset er borte. Juster speilet slik at du ser syklisten igjen.',
+      M: { ...alleOk, IV: 'feil' }, figs: [{ t: 'syklist', x: -3.0, y: -3.5, lås: true }],
+      mål: [{ t: 'Vidvinkelspeilet er riktig justert', f: (F, M) => M.IV === 'ok' }, { t: 'Syklisten synes', f: (F, M) => !blind(F[0], M) }] },
+    { id: 'o4', tittel: 'Uten frontspeil', kort: 'Barnet foran bilen.',
+      tekst: 'Denne eldre bilen har ikke frontspeil. Et barn står rett foran førerhuset. Dra barnet rett fram og finn hvor langt fra fronten det må stå før sjåføren ser det direkte.',
+      M: { ...alleOk, VI: 'av' }, låsSpeil: ['VI'], figs: [{ t: 'barn', x: 0.6, y: 0 }],
+      mål: [{ q: 'Avstand fra fronten (m)', ans: 2.0, tol: 0.15 }, { t: 'Barnet synes nå', f: (F, M) => !blind(F[0], M) }] },
+    { id: 'o5', tittel: 'Høyresvingen', kort: 'Syklisten ved forhjulet.',
+      tekst: 'Bilen skal svinge til høyre. En syklist har stilt seg ved høyre forhjul for å kjøre rett fram. Hvilket speil viser syklisten? Slå så av det speilet og se hva som skjer.',
+      M: { ...alleOk }, figs: [{ t: 'syklist', x: 0.4, y: -2.2, lås: true }],
+      mål: [{ v: 'Hvilket speil viser syklisten?', valg: ['Klasse II', 'Klasse IV', 'Klasse V', 'Klasse VI'], ans: 'Klasse V' }, { t: 'Klasse V er slått av, og syklisten er borte', f: (F, M) => M.V === 'av' && blind(F[0], M) }] },
+    { id: 'o6', tittel: 'A-stolpen', kort: 'Fotgjengeren i kilen.',
+      tekst: 'En voksen fotgjenger skal over gangfeltet foran bilen. Finn et sted i gangfeltet der fotgjengeren er helt skjult bak A-stolpen og speilene på høyre side. Prøv å slå på sidekamera. Hjelper det?',
+      M: { ...alleOk }, figs: [{ t: 'voksen', x: 5.5, y: 2 }],
+      mål: [{ t: 'Fotgjengeren står i gangfeltet og er skjult', f: (F, M) => F[0].x > 3.5 && F[0].x < 7.5 && blind(F[0], M) }] },
+  ];
+  function blind(p, M) { const v = sees(p, p.t, M); return v !== null && v.length === 0; }
+
+  // ---------- Tilstand ----------
+  const S = { aktiv: 'o1', M: {}, F: [], svar: {}, showBlind: true, låsSpeil: [] };
+  let done = load('blindsonen.done') || {}, uid = 1;
+
+  function velg(id) {
+    const o = OPP.find(x => x.id === id);
+    S.aktiv = id; S.svar = {}; S.M = { ...o.M }; S.låsSpeil = o.låsSpeil || [];
+    S.F = o.figs.map(f => ({ ...f, id: uid++ }));
+    drawCards(); drawMirrors(); update();
+  }
+  function drawCards() {
+    $('cards').innerHTML = OPP.map(o => `<button class="card" type="button" data-id="${o.id}" aria-pressed="${o.id === S.aktiv}"><b>${o.tittel}</b><span class="cs">${o.kort}</span><span class="cb ${done[o.id] ? 'done' : ''}">${done[o.id] ? '✓ Fullført' : 'Ikke fullført'}</span></button>`).join('');
+    $('cards').querySelectorAll('.card').forEach(b => b.onclick = () => velg(b.dataset.id));
+  }
+  function goalState() {
+    const o = OPP.find(x => x.id === S.aktiv);
+    return o.mål.map((g, i) => {
+      if (g.q) { const v = parseFloat(String(S.svar[i] ?? '').replace(',', '.')); return { ...g, i, met: !isNaN(v) && Math.abs(v - g.ans) <= g.tol }; }
+      if (g.v) return { ...g, i, met: S.svar[i] === g.ans };
+      return { ...g, i, met: !!g.f(S.F, S.M) };
+    });
+  }
+  function drawBrief() {
+    const o = OPP.find(x => x.id === S.aktiv), gs = goalState(), all = gs.every(g => g.met);
+    if (all && !done[o.id]) { done[o.id] = true; save('blindsonen.done', done); drawCards(); }
+    $('brief').innerHTML = `<div><p class="eyebrow">Oppdrag</p><h3 style="margin:6px 0 8px">${o.tittel}</h3><p>${o.tekst}</p></div>
+      <div style="display:grid;gap:10px;align-content:start"><ul class="goals">${gs.map(g => `<li class="${g.met ? 'met' : ''}"><span class="mk">${g.met ? '✓' : ''}</span>${
+        g.q ? `<label for="q-${g.i}">${g.q}</label> <input id="q-${g.i}" data-i="${g.i}" inputmode="decimal" value="${S.svar[g.i] ?? ''}">`
+        : g.v ? `<label for="q-${g.i}">${g.v}</label> <select id="q-${g.i}" data-i="${g.i}"><option value="">Velg</option>${g.valg.map(x => `<option ${S.svar[g.i] === x ? 'selected' : ''}>${x}</option>`).join('')}</select>`
+        : g.t}</li>`).join('')}</ul>
+      ${all ? '<div class="win">Oppdraget er løst.</div>' : ''}</div>`;
+    $('brief').querySelectorAll('input, select').forEach(el => el.addEventListener('change', () => { S.svar[el.dataset.i] = el.value; update(); }));
+  }
+
+  function drawMirrors() {
+    $('mirrors').innerHTML = SPEIL.map(s => {
+      const opts = [['ok', s.id === 'KAM' ? 'På' : 'Riktig justert'], ['av', s.id === 'KAM' ? 'Av' : 'Mangler']];
+      if (s.feil) opts.push(['feil', 'Feiljustert']);
+      return `<div class="mrow"><i style="background:${s.farge}"></i><label for="m-${s.id}">${s.navn}<small>${s.sub}</small></label><select id="m-${s.id}" data-id="${s.id}" ${S.låsSpeil.includes(s.id) ? 'disabled' : ''}>${opts.map(([v, l]) => `<option value="${v}" ${S.M[s.id] === v ? 'selected' : ''}>${l}</option>`).join('')}</select></div>`;
+    }).join('');
+    $('mirrors').querySelectorAll('select').forEach(el => el.addEventListener('change', () => { S.M[el.dataset.id] = el.value; update(); }));
+  }
+  $('t-blind').addEventListener('change', e => { S.showBlind = e.target.checked; update(); });
+  document.querySelectorAll('[data-add]').forEach(b => b.onclick = () => { S.F.push({ t: b.dataset.add, x: 3 + Math.random() * 3, y: -6 + Math.random() * 3, id: uid++ }); update(); });
+
+  // ---------- Kartet ----------
+  const pts = P => P.map(([x, y]) => `${sx(x).toFixed(1)},${sy(y).toFixed(1)}`).join(' ');
+  function drawMap() {
+    let h = '';
+    // Veg, sideveg, sykkelfelt og gangfelt
+    h += `<rect x="0" y="0" width="${sx(XMAX)}" height="${sy(YMIN)}" fill="var(--verge)"/>`;
+    h += `<rect x="0" y="${sy(5)}" width="${sx(3)}" height="${sy(-1.9) - sy(5)}" fill="var(--asphalt)"/>`;
+    h += `<rect x="0" y="${sy(-1.9)}" width="${sx(3)}" height="${sy(-4.2) - sy(-1.9)}" fill="var(--walk)"/>`;
+    h += `<rect x="${sx(3)}" y="0" width="${sx(8.4) - sx(3)}" height="${sy(YMIN)}" fill="var(--asphalt)"/>`;
+    h += `<line x1="0" y1="${sy(1.6)}" x2="${sx(3)}" y2="${sy(1.6)}" stroke="var(--mark)" stroke-width="3" stroke-dasharray="18 14"/>`;
+    for (let y = 4.6; y > -9.5; y -= 0.9) h += `<rect x="${sx(3.6)}" y="${sy(y)}" width="${(7.4 - 3.6) * SC}" height="${0.45 * SC}" fill="var(--mark)" opacity=".85"/>`;
+    h += `<line x1="${sx(0.3)}" y1="${sy(1.6)}" x2="${sx(0.3)}" y2="${sy(-1.9)}" stroke="var(--mark)" stroke-width="5"/>`;
+    h += `<text x="${sx(-15.6)}" y="${sy(-3.3)}" class="lbl" style="fill:var(--ink)">Sykkelfelt</text><text x="${sx(3.8)}" y="${sy(5.2)}" class="lbl" style="fill:var(--mark)">Gangfelt</text>`;
+    // Blindsoner for barn
+    if (S.showBlind) {
+      const step = 0.5;
+      for (let x = XMIN + step / 2; x < XMAX; x += step) for (let y = YMIN + step / 2; y < YMAX; y += step) {
+        const p = { x, y };
+        const v = sees(p, 'barn', S.M);
+        if (v !== null && v.length === 0) h += `<rect x="${sx(x - step / 2)}" y="${sy(y + step / 2)}" width="${step * SC}" height="${step * SC}" fill="var(--blind)" opacity=".28"/>`;
+      }
+    }
+    // Speilfelt
+    SPEIL.forEach(s => {
+      const st = S.M[s.id]; if (st === 'av') return;
+      const keys = st === 'feil' && s.feil ? s.feil : s.poly;
+      keys.forEach(k => h += `<polygon points="${pts(poly[k])}" fill="${s.farge}" fill-opacity=".16" stroke="${s.farge}" stroke-width="2" stroke-dasharray="${st === 'feil' ? '6 5' : 'none'}"/>`);
+    });
+    // A-stolpe-kiler
+    const wedge = (a1, a2) => { const r = 30, p = a => [EYE.x + r * Math.cos(a * Math.PI / 180), EYE.y + r * Math.sin(a * Math.PI / 180)]; return pts([[EYE.x, EYE.y], p(a1), p(a2)]); };
+    h += `<polygon points="${wedge(-56, -74)}" fill="none" stroke="var(--blind)" stroke-width="1.5" stroke-dasharray="3 5"/><polygon points="${wedge(25, 36)}" fill="none" stroke="var(--blind)" stroke-width="1.5" stroke-dasharray="3 5"/>`;
+    // Lastebilen
+    h += `<rect x="${sx(BODY.x0)}" y="${sy(1.27)}" width="${(BODY.x1 - BODY.x0) * SC}" height="${2.54 * SC}" fill="var(--body-c)" stroke="var(--ink)" stroke-width="2" rx="3"/>`;
+    h += `<rect x="${sx(CAB.x0)}" y="${sy(1.25)}" width="${(CAB.x1 - CAB.x0) * SC}" height="${2.5 * SC}" fill="var(--cab)" stroke="var(--ink)" stroke-width="2" rx="6"/>`;
+    h += `<rect x="${sx(-0.35)}" y="${sy(1.1)}" width="${0.3 * SC}" height="${2.2 * SC}" fill="var(--surface)" opacity=".7" rx="2"/>`;
+    h += `<circle cx="${sx(EYE.x)}" cy="${sy(EYE.y)}" r="7" fill="var(--accent)" stroke="var(--ink)" stroke-width="2"/>`;
+    [[-0.3, 1.45], [-0.3, -1.45]].forEach(([x, y]) => h += `<rect x="${sx(x) - 4}" y="${sy(y) - 6}" width="8" height="12" fill="var(--ink)" rx="2"/>`);
+    h += `<text x="${sx(-7.5)}" y="${sy(0) + 5}" text-anchor="middle" class="lbl">Lastebil 12,5 m · kjører mot høyre</text>`;
+    // Trafikanter
+    S.F.forEach(f => {
+      const v = sees(f, f.t, S.M), ok = v && v.length > 0;
+      const c = ok ? 'var(--ok)' : 'var(--bad)';
+      h += `<g class="fig ${f.lås ? 'locked' : ''}" data-id="${f.id}" tabindex="0" role="button" aria-label="${TYPER[f.t].navn}, ${ok ? 'synlig' : 'ikke synlig'}">
+        <circle cx="${sx(f.x)}" cy="${sy(f.y)}" r="${f.t === 'barn' ? 10 : 13}" fill="${c}" stroke="var(--surface)" stroke-width="3"/>
+        <text x="${sx(f.x)}" y="${sy(f.y) + 5}" text-anchor="middle" style="font:800 14px var(--display);fill:#fff;pointer-events:none">${TYPER[f.t].bokstav}</text></g>`;
+    });
+    $('map').innerHTML = h;
+  }
+
+  // Dra trafikantene
+  let drag = null;
+  function toWorld(e) {
+    const svg = $('map'), pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
+    const p = pt.matrixTransform(svg.getScreenCTM().inverse());
+    return { x: Math.max(XMIN + .3, Math.min(XMAX - .3, p.x / SC + XMIN)), y: Math.max(YMIN + .3, Math.min(YMAX - .3, YMAX - p.y / SC)) };
+  }
+  $('map').addEventListener('pointerdown', e => {
+    const g = e.target.closest('.fig'); if (!g) return;
+    const f = S.F.find(x => x.id === +g.dataset.id); if (!f || f.lås) return;
+    drag = f; e.preventDefault();
+  });
+  window.addEventListener('pointermove', e => { if (!drag) return; const w = toWorld(e); drag.x = w.x; drag.y = w.y; drawMap(); });
+  window.addEventListener('pointerup', () => { if (drag) { drag = null; update(); } });
+  $('map').addEventListener('keydown', e => {
+    const g = e.target.closest('.fig'); if (!g) return;
+    const f = S.F.find(x => x.id === +g.dataset.id); if (!f || f.lås) return;
+    const d = { ArrowUp: [0, .25], ArrowDown: [0, -.25], ArrowLeft: [-.25, 0], ArrowRight: [.25, 0] }[e.key];
+    if (!d) return; e.preventDefault(); f.x += d[0]; f.y += d[1]; update();
+    const again = $('map').querySelector(`.fig[data-id="${f.id}"]`); if (again) again.focus();
+  });
+
+  function drawPeople() {
+    $('people').innerHTML = S.F.map(f => {
+      const v = sees(f, f.t, S.M), ok = v && v.length > 0;
+      const dist = f.x > 0 ? `${nb(f.x, 1)} m foran` : f.x < BODY.x0 ? `${nb(BODY.x0 - f.x, 1)} m bak` : (f.y < 0 ? `${nb(-f.y - 1.25, 1)} m til høyre` : `${nb(f.y - 1.25, 1)} m til venstre`);
+      return `<li><span class="ic ${ok ? 'ok' : 'bad'}">${TYPER[f.t].bokstav}</span><div><b>${TYPER[f.t].navn} · ${ok ? 'synlig' : 'ikke synlig'}</b>${v === null ? 'Står i bilen' : ok ? v.join(', ') : 'I blindsonen'} · ${dist}</div></li>`;
+    }).join('');
+  }
+
+  function update() {
+    drawMap(); drawPeople(); drawBrief();
+    const seen = S.F.filter(f => { const v = sees(f, f.t, S.M); return v && v.length; }).length;
+    let cells = 0;
+    for (let x = -16 + .25; x < 8; x += .5) for (let y = -9.5 + .25; y < 8; y += .5) { const v = sees({ x, y }, 'barn', S.M); if (v !== null && v.length === 0 && Math.hypot(x + 6, y) < 12) cells++; }
+    const kp = [
+      ['Synlige', `${seen}/${S.F.length}`, 'trafikanter', seen === S.F.length ? 'ok' : 'bad'],
+      ['Blindsone', nb(cells * 0.25) + ' m²', 'nær bilen, barn', ''],
+      ['Speil i bruk', SPEIL.filter(s => S.M[s.id] === 'ok').length, 'riktig justert', ''],
+      ['Oppdrag', Object.keys(done).length + '/' + OPP.length, 'fullført', ''],
+    ];
+    $('kpis').innerHTML = kp.map(([l, v, sm, st]) => `<div class="kpi" data-state="${st}"><span class="eyebrow">${l}</span><b>${v}</b><small>${sm}</small></div>`).join('');
+  }
+
+  drawCards(); velg('o1');
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="nb">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Transportkalkylen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;600;700&display=swap">
+<style>
+/* Layout: samme verkstedstil som Kundeservice – oppdrag øverst, kostnadsskjema til venstre og kalkyle, fordeling og tilbud til høyre. */
+:root {
+  --bg: #E8EBE7; --surface: #F7F8F5; --ink: #1B201E; --muted: #5A6560; --line: #C6CDC8;
+  --accent: #F2B300; --on-accent: #1B201E;
+  --ok: #2B9A58; --on-ok: #FFFFFF; --warn: #D89A00; --bad: #D0392A;
+  --c1: #2E6B8A; --c2: #8A7FB8; --c3: #C0662E; --c4: #2B9A58; --c5: #8D9993;
+  --display: "Big Shoulders Display", "Arial Narrow", Impact, sans-serif;
+  --body: "Public Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #131715; --surface: #1C2120; --ink: #E6EBE7; --muted: #99A49E; --line: #343C38;
+    --accent: #F5BF1F; --on-accent: #131715; --ok: #3FBF72; --on-ok: #0B1A11; --warn: #F0B429; --bad: #F05A47;
+    --c1: #5AA6CC; --c2: #A99FD6; --c3: #E08A4E; --c4: #3FBF72; --c5: #78827D;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #131715; --surface: #1C2120; --ink: #E6EBE7; --muted: #99A49E; --line: #343C38;
+  --accent: #F5BF1F; --on-accent: #131715; --ok: #3FBF72; --on-ok: #0B1A11; --warn: #F0B429; --bad: #F05A47;
+  --c1: #5AA6CC; --c2: #A99FD6; --c3: #E08A4E; --c4: #3FBF72; --c5: #78827D;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 28px 64px;
+}
+.wrap { max-width: 1180px; margin: 0 auto; display: grid; gap: 36px; }
+h1, h2, h3 { font-family: var(--display); font-weight: 800; letter-spacing: .01em; margin: 0; text-wrap: balance; line-height: 1; text-transform: uppercase; }
+h1 { font-size: clamp(48px, 8.5vw, 88px); }
+h2 { font-size: 32px; }
+h3 { font-size: 22px; }
+p { margin: 0; }
+.eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+button, input, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+.top { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 24px 40px; align-items: end; }
+.top .lede { max-width: 60ch; margin-top: 12px; color: var(--muted); font-size: 16px; }
+.hazard { height: 10px; background: repeating-linear-gradient(-45deg, var(--accent) 0 14px, var(--ink) 14px 28px); border-radius: 2px; margin-bottom: 18px; max-width: 220px; }
+.kpis { display: grid; grid-template-columns: repeat(4, minmax(110px, auto)); border: 2px solid var(--ink); background: var(--surface); }
+.kpi { padding: 10px 16px 12px; border-left: 1px solid var(--line); min-width: 0; }
+.kpi:first-child { border-left: 0; }
+.kpi .eyebrow { font-size: 11px; }
+.kpi b { display: block; font-family: var(--display); font-size: 40px; line-height: 1.05; font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.kpi small { color: var(--muted); font-size: 12px; }
+.kpi[data-state="bad"] b { color: var(--bad); }
+.kpi[data-state="ok"] b { color: var(--ok); }
+
+section { display: grid; gap: 16px; min-width: 0; }
+.sec-head { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: end; justify-content: space-between; }
+.sec-head p { color: var(--muted); max-width: 64ch; margin-top: 6px; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 18px; min-width: 0; }
+.btn { border: 2px solid var(--ink); background: transparent; padding: 7px 14px; border-radius: 4px; font-weight: 700; font-size: 14px; }
+.btn:hover { background: var(--ink); color: var(--bg); }
+.btn.small { padding: 4px 10px; font-size: 13px; border-width: 1px; }
+
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+.card { border: 2px solid var(--ink); background: var(--surface); border-radius: 6px; padding: 12px 14px; text-align: left; display: grid; gap: 6px; align-content: start; }
+.card:hover { box-shadow: inset 0 0 0 2px var(--accent); }
+.card[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.card[aria-pressed="true"] .cs { color: var(--bg); opacity: .8; }
+.card b { font-family: var(--display); font-size: 22px; text-transform: uppercase; line-height: 1; }
+.card .cs { font-size: 13px; color: var(--muted); line-height: 1.35; }
+.card .cb { font-size: 12px; font-family: var(--mono); color: var(--muted); }
+.card .cb.done { color: var(--ok); }
+.card[aria-pressed="true"] .cb { color: var(--accent); }
+.brief { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 16px 28px; }
+.brief p { max-width: 66ch; }
+.goals { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.goals li { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; flex-wrap: wrap; }
+.goals .mk { flex: none; width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--line); display: grid; place-items: center; font-size: 12px; font-weight: 700; margin-top: 1px; }
+.goals li.met .mk { background: var(--ok); border-color: var(--ok); color: var(--on-ok); }
+.goals input { width: 110px; background: var(--bg); border: 1px solid var(--line); border-radius: 4px; padding: 3px 8px; font-family: var(--mono); }
+.goals li.met input { border-color: var(--ok); }
+.win { padding: 8px 12px; border-radius: 4px; background: var(--ok); color: var(--on-ok); font-weight: 700; }
+
+/* Skjema og kalkyle */
+.bench { display: grid; grid-template-columns: minmax(280px, 380px) minmax(0, 1fr); gap: 16px; align-items: start; }
+.form { display: grid; gap: 18px; }
+.vehpick { display: flex; flex-wrap: wrap; border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
+.vehpick button { flex: 1 1 auto; border: 0; border-right: 1px solid var(--line); background: var(--bg); padding: 7px 10px; font-size: 13px; font-weight: 600; }
+.vehpick button:last-child { border-right: 0; }
+.vehpick button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+fieldset { border: 0; padding: 0; margin: 0; display: grid; gap: 6px; }
+legend { font-family: var(--display); font-weight: 800; font-size: 18px; text-transform: uppercase; margin-bottom: 4px; padding: 0; }
+.inrow { display: grid; grid-template-columns: minmax(0, 1fr) 118px; gap: 8px; align-items: center; font-size: 14px; }
+.inrow .u { display: flex; align-items: center; gap: 6px; }
+.inrow input { width: 100%; text-align: right; background: var(--bg); border: 1px solid var(--line); border-radius: 4px; padding: 4px 8px; font-family: var(--mono); font-size: 13px; }
+.inrow small { font-family: var(--mono); font-size: 11px; color: var(--muted); white-space: nowrap; min-width: 34px; }
+.out { display: grid; gap: 16px; min-width: 0; }
+.rates { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.rate { background: var(--bg); border-radius: 4px; padding: 10px 12px; }
+.rate b { display: block; font-family: var(--display); font-size: 34px; font-weight: 800; line-height: 1.05; font-variant-numeric: tabular-nums; }
+.rate small { font-size: 12px; color: var(--muted); }
+.dist { display: grid; gap: 8px; }
+.dbar { display: flex; height: 30px; border-radius: 4px; overflow: hidden; }
+.dbar span { height: 100%; }
+.dleg { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 4px 16px; font-size: 13px; }
+.dleg div { display: flex; gap: 8px; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line); padding: 3px 0; }
+.dleg i { width: 12px; height: 12px; border-radius: 3px; flex: none; }
+.dleg span { display: flex; gap: 8px; align-items: center; }
+.dleg em { font-style: normal; font-family: var(--mono); font-size: 12px; }
+
+/* Oppdrag og tilbud */
+.job { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
+.jobform { display: grid; gap: 10px; align-content: start; }
+.jobform select { background: var(--bg); border: 1px solid var(--line); border-radius: 4px; padding: 6px 8px; width: 100%; }
+.check { display: flex; gap: 8px; align-items: center; font-size: 14px; }
+.quote { background: var(--surface); border: 2px solid var(--ink); border-radius: 4px; padding: 16px 18px; display: grid; gap: 10px; }
+.quote .qh { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; border-bottom: 2px solid var(--ink); padding-bottom: 8px; }
+.quote .qh b { font-family: var(--display); font-size: 26px; text-transform: uppercase; }
+table { border-collapse: collapse; width: 100%; font-size: 13px; }
+td { padding: 5px 0; border-bottom: 1px dashed var(--line); }
+td.n { font-family: var(--mono); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; padding-left: 12px; }
+tr.sum td { border-bottom: 0; border-top: 2px solid var(--ink); font-weight: 700; padding-top: 8px; }
+tr.sub td { color: var(--muted); }
+.res-line { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; padding: 10px 12px; border-radius: 4px; font-weight: 700; }
+.res-line.ok { background: color-mix(in srgb, var(--ok) 15%, transparent); color: var(--ok); }
+.res-line.bad { background: color-mix(in srgb, var(--bad) 15%, transparent); color: var(--bad); }
+.res-line b { font-family: var(--mono); font-size: 18px; }
+.note { font-size: 13px; color: var(--muted); }
+footer { color: var(--muted); font-size: 13px; max-width: 90ch; display: grid; gap: 6px; }
+
+@media (max-width: 900px) {
+  .top, .brief, .bench, .job { grid-template-columns: 1fr; }
+  .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .kpi:nth-child(3) { border-left: 0; }
+  .kpi:nth-child(n+3) { border-top: 1px solid var(--line); }
+}
+@media (max-width: 520px) { .rates { grid-template-columns: 1fr; } .kpi b { font-size: 30px; } }
+body{margin:0}[hidden]{display:none!important}
+.back{display:inline-block;margin-bottom:14px;font-size:14px;font-weight:600;color:var(--ink);text-decoration:underline;text-decoration-color:var(--accent);text-underline-offset:3px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <a class="back" href="./">← YSK-modulene</a>
+      <div class="hazard" aria-hidden="true"></div>
+      <p class="eyebrow">YSK · Modul G3 · Læreplanmål G 3.3</p>
+      <h1>Transportkalkylen</h1>
+      <p class="lede">Hva koster det egentlig å ha en lastebil på vegen? Regn ut timekost og kilometerkost for bilen, og bruk dem til å gi et tilbud som faktisk gir fortjeneste.</p>
+    </div>
+    <div class="kpis" id="kpis"></div>
+  </header>
+
+  <section aria-labelledby="h-oppdrag">
+    <div class="sec-head"><div><h2 id="h-oppdrag">Oppdrag</h2><p>Velg et oppdrag. Svar og mål sjekkes mens du endrer tallene. Alle beløp er uten merverdiavgift.</p></div></div>
+    <div class="cards" id="cards"></div>
+    <div class="panel brief" id="brief"></div>
+  </section>
+
+  <section aria-labelledby="h-bil">
+    <div class="sec-head"><div><h2 id="h-bil">Bilen</h2><p>Kostnadene deles i tre: faste kostnader per år, sjåførkostnad per time og kjørekostnad per kilometer.</p></div><button class="btn small" type="button" id="btn-reset">Tilbakestill eksempeltallene</button></div>
+    <div class="bench">
+      <div class="panel form">
+        <div class="vehpick" id="veh" role="group" aria-label="Bil"></div>
+        <div id="form"></div>
+      </div>
+      <div class="out">
+        <div class="rates" id="rates"></div>
+        <div class="panel dist">
+          <h3>Kostnader per år</h3>
+          <div class="dbar" id="dbar" role="img" aria-label="Fordeling av årskostnader"></div>
+          <div class="dleg" id="dleg"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-tur">
+    <div class="sec-head"><div><h2 id="h-tur">Tilbud</h2><p>Regn ut selvkost for turen, legg på fortjeneste og sammenlign med det kunden er villig til å betale.</p></div></div>
+    <div class="job">
+      <div class="panel jobform">
+        <label class="inrow" for="j-route"><span>Tur fra Sauda</span></label>
+        <select id="j-route"></select>
+        <div id="jform"></div>
+        <label class="check" for="j-ret"><input type="checkbox" id="j-ret"> Bilen kjører tom tilbake til Sauda</label>
+        <label class="check" for="j-retload"><input type="checkbox" id="j-retload"> Vi har fått returlast</label>
+      </div>
+      <div class="quote" id="quote"></div>
+    </div>
+  </section>
+
+  <footer>
+    <p>Kapitalkostnad = avskrivning + rente. Avskrivning er (innkjøpspris − restverdi) delt på antall år. Renten regnes av gjennomsnittlig bundet kapital, (innkjøpspris + restverdi) / 2. Sosiale kostnader dekker feriepenger, arbeidsgiveravgift, pensjon og forsikringer for sjåføren.</p>
+    <p>Alle tall er eksempeltall laget for opplæring, ikke priser for en bestemt bil eller rute. Avstander og kjøretider fra Sauda er omtrentlige. Ikke med: skatt, finansiering med lån, administrasjon av ordre og ventetid hos kunde.</p>
+  </footer>
+</div>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const nb = (v, d = 0) => Number(v).toLocaleString('nb-NO', { minimumFractionDigits: d, maximumFractionDigits: d });
+  const kr = (v, d = 0) => nb(v, d) + ' kr';
+  function save(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+  function load(k) { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } }
+
+  // ---------- Felter ----------
+  const FELT = [
+    ['Kapital', [['pris', 'Innkjøpspris', 'kr', 10000], ['rest', 'Restverdi ved salg', 'kr', 10000], ['aar', 'Brukstid', 'år', 1], ['rente', 'Rente', '%', 0.5]]],
+    ['Andre faste kostnader per år', [['fors', 'Forsikring', 'kr', 1000], ['avg', 'Avgifter', 'kr', 1000], ['adm', 'Løyve, administrasjon og annet', 'kr', 1000], ['garasje', 'Garasje og oppstillingsplass', 'kr', 1000]]],
+    ['Sjåfør', [['lonn', 'Timelønn', 'kr/t', 5], ['sos', 'Sosiale kostnader', '%', 1]]],
+    ['Kjøring', [['forbruk', 'Dieselforbruk', 'l/mil', 0.1], ['diesel', 'Dieselpris', 'kr/l', 0.5], ['dekk', 'Dekk', 'kr/km', 0.05], ['vedl', 'Vedlikehold og reparasjoner', 'kr/km', 0.05]]],
+    ['Bruk per år', [['km', 'Kjørte kilometer', 'km', 1000], ['timer', 'Timer bilen er i arbeid', 't', 10]]],
+  ];
+  const BILER = {
+    ny: { navn: 'Ny trekkbil', v: { pris: 2000000, rest: 500000, aar: 6, rente: 6, fors: 60000, avg: 20000, adm: 40000, garasje: 20000, lonn: 260, sos: 35, forbruk: 4.0, diesel: 15, dekk: 0.6, vedl: 1.5, km: 130000, timer: 2100 } },
+    brukt: { navn: 'Brukt trekkbil', v: { pris: 900000, rest: 250000, aar: 4, rente: 6, fors: 45000, avg: 20000, adm: 40000, garasje: 20000, lonn: 260, sos: 35, forbruk: 4.3, diesel: 15, dekk: 0.65, vedl: 2.8, km: 130000, timer: 2000 } },
+  };
+  const RUTER = [
+    { id: 'hau', navn: 'Sauda–Haugesund', km: 100, t: 1.75, last: 1.0, bom: 250 },
+    { id: 'stav', navn: 'Sauda–Stavanger', km: 150, t: 2.5, last: 1.0, bom: 450 },
+    { id: 'berg', navn: 'Sauda–Bergen', km: 230, t: 4.25, last: 1.5, bom: 1100 },
+    { id: 'oslo', navn: 'Sauda–Oslo', km: 420, t: 7.5, last: 2.0, bom: 900 },
+  ];
+
+  // ---------- Beregning ----------
+  function kalk(v) {
+    const avskr = (v.pris - v.rest) / v.aar;
+    const rente = (v.pris + v.rest) / 2 * v.rente / 100;
+    const faste = v.fors + v.avg + v.adm + v.garasje;
+    const sjaafor = v.lonn * (1 + v.sos / 100);
+    const drivstoff = v.forbruk / 10 * v.diesel * 1.05; // 5 % AdBlue
+    const perKm = drivstoff + v.dekk + v.vedl;
+    const fastPerTime = (avskr + rente + faste) / v.timer;
+    const perTime = fastPerTime + sjaafor;
+    const aar = { kapital: avskr + rente, faste, lonn: sjaafor * v.timer, drivstoff: drivstoff * v.km, dekkVedl: (v.dekk + v.vedl) * v.km };
+    return { avskr, rente, faste, sjaafor, drivstoff, perKm, fastPerTime, perTime, aar, total: Object.values(aar).reduce((a, b) => a + b, 0) };
+  }
+  function tur(k, j) {
+    const km = j.km * (j.ret ? 2 : 1), timer = j.t * (j.ret ? 2 : 1) + j.last;
+    const tidKost = timer * k.perTime, kmKost = km * k.perKm, bom = j.bom * (j.ret ? 2 : 1);
+    const selv = tidKost + kmKost + bom;
+    const pris = selv * (1 + j.paa / 100);
+    const inntekt = j.kunde + (j.ret && j.retload ? j.retpris : 0);
+    return { km, timer, tidKost, kmKost, bom, selv, pris, inntekt, res: inntekt - selv, margin: inntekt ? (inntekt - selv) / inntekt * 100 : 0 };
+  }
+
+  // ---------- Oppdrag ----------
+  const OPP = [
+    { id: 'o1', tittel: 'Kilometerkost', kort: 'Hva koster én km?',
+      tekst: 'Bruk den nye trekkbilen med eksempeltallene. Hvor mye koster hver kilometer i drivstoff, AdBlue, dekk og vedlikehold? Regn selv før du ser på svaret i kalkylen.',
+      sett: { bil: 'ny' }, mål: [{ q: 'Kilometerkost (kr/km)', ans: S => kalk(S.v).perKm, tol: 0.1 }] },
+    { id: 'o2', tittel: 'Timekost', kort: 'Faste kostnader og sjåfør.',
+      tekst: 'Hvor mye koster bilen og sjåføren per time bilen er i arbeid? Ta med kapitalkostnad, andre faste kostnader og sjåførkostnad.',
+      sett: { bil: 'ny' }, mål: [{ q: 'Timekost (kr/t)', ans: S => kalk(S.v).perTime, tol: 3 }] },
+    { id: 'o3', tittel: 'Gi et tilbud', kort: 'Sauda–Stavanger mot konkurrenten.',
+      tekst: 'En kunde vil ha en tur med stålprodukter fra Sauda til Stavanger. Bilen kjører tom tilbake. Konkurrenten har gitt tilbud på 7 800 kr. Sett påslaget slik at prisen din er lavere enn konkurrentens, men gir minst 8 % fortjeneste.',
+      sett: { bil: 'ny', jobb: { route: 'stav', ret: true, retload: false, paa: 30 } }, brukPris: true,
+      mål: [{ t: 'Prisen er under 7 800 kr', f: (S, T) => T.pris < 7800 }, { t: 'Minst 8 % fortjeneste', f: (S, T) => T.margin >= 8 }] },
+    { id: 'o4', tittel: 'Tom retur', kort: 'Oslo-turen som ikke lønner seg.',
+      tekst: 'En kunde betaler 15 000 kr for en tur Sauda–Oslo, og bilen kjører tom hjem. Hvor mye taper eller tjener firmaet? Finn deretter hvor mye en returlast må betale for at turen skal gi minst 10 % fortjeneste.',
+      sett: { bil: 'ny', jobb: { route: 'oslo', ret: true, retload: true, kunde: 15000, retpris: 0, paa: 0 } },
+      mål: [{ q: 'Resultat uten returlast (kr, minus for tap)', ans: S => tur(kalk(S.v), { ...S.j, retload: false }).res, tol: 60 }, { t: 'Returlasten gir minst 10 % fortjeneste', f: (S, T) => S.j.retload && T.margin >= 10 }] },
+    { id: 'o5', tittel: 'Ny eller brukt', kort: 'Hvilken bil gir lavest selvkost?',
+      tekst: 'Firmaet vurderer en ny eller en brukt trekkbil. Den brukte er billigere å kjøpe, men bruker mer diesel, har høyere vedlikehold og står mer på verkstedet. Sammenlign selvkosten for en tur Sauda–Bergen tur-retur med begge bilene, og skriv inn den laveste.',
+      sett: { bil: 'ny', jobb: { route: 'berg', ret: true, retload: false } },
+      mål: [{ q: 'Laveste selvkost for turen (kr)', ans: () => Math.min(...['ny', 'brukt'].map(b => tur(kalk(BILER[b].v), { ...jobbFor('berg'), ret: true }).selv)), tol: 60 }] },
+    { id: 'o6', tittel: 'Dieselprisen', kort: 'Hva skjer når diesel stiger?',
+      tekst: 'Dieselprisen går opp fra 15 til 17 kr per liter. Hvor mye øker kilometerkosten? Prøv å endre dieselprisen i skjemaet og se. Husk at 5 % AdBlue er regnet med.',
+      sett: { bil: 'ny' }, mål: [{ q: 'Økning i kilometerkost (kr/km)', ans: S => S.v.forbruk / 10 * 2 * 1.05, tol: 0.03 }] },
+  ];
+  function jobbFor(id) { const r = RUTER.find(x => x.id === id); return { route: id, km: r.km, t: r.t, last: r.last, bom: r.bom, ret: false, retload: false, paa: 15, kunde: 0, retpris: 0 }; }
+
+  // ---------- Tilstand ----------
+  const S = { aktiv: 'o1', bil: 'ny', v: { ...BILER.ny.v }, j: jobbFor('hau'), svar: {} };
+  let done = load('transportkalkylen.done') || {};
+
+  function velg(id) {
+    const o = OPP.find(x => x.id === id);
+    S.aktiv = id; S.svar = {};
+    S.bil = o.sett.bil; S.v = { ...BILER[S.bil].v };
+    S.j = jobbFor(o.sett.jobb ? o.sett.jobb.route : 'hau');
+    if (o.sett.jobb) Object.assign(S.j, o.sett.jobb);
+    drawCards(); drawForm(); drawJob(); update();
+  }
+  function drawCards() {
+    $('cards').innerHTML = OPP.map(o => `<button class="card" type="button" data-id="${o.id}" aria-pressed="${o.id === S.aktiv}"><b>${o.tittel}</b><span class="cs">${o.kort}</span><span class="cb ${done[o.id] ? 'done' : ''}">${done[o.id] ? '✓ Fullført' : 'Ikke fullført'}</span></button>`).join('');
+    $('cards').querySelectorAll('.card').forEach(b => b.onclick = () => velg(b.dataset.id));
+  }
+  function goalState(T) {
+    const o = OPP.find(x => x.id === S.aktiv);
+    return o.mål.map((g, i) => {
+      if (g.q) { const val = parseFloat(String(S.svar[i] ?? '').replace(/\s/g, '').replace(',', '.')); return { ...g, i, met: !isNaN(val) && Math.abs(val - g.ans(S)) <= g.tol }; }
+      return { ...g, i, met: !!g.f(S, T) };
+    });
+  }
+  function drawBrief(T) {
+    const o = OPP.find(x => x.id === S.aktiv), gs = goalState(T), all = gs.every(g => g.met);
+    if (all && !done[o.id]) { done[o.id] = true; save('transportkalkylen.done', done); drawCards(); }
+    $('brief').innerHTML = `<div><p class="eyebrow">Oppdrag</p><h3 style="margin:6px 0 8px">${o.tittel}</h3><p>${o.tekst}</p></div>
+      <div style="display:grid;gap:10px;align-content:start"><ul class="goals">${gs.map(g => `<li class="${g.met ? 'met' : ''}"><span class="mk">${g.met ? '✓' : ''}</span>${g.q ? `<label for="q-${g.i}">${g.q}</label> <input id="q-${g.i}" data-i="${g.i}" inputmode="decimal" value="${S.svar[g.i] ?? ''}">` : g.t}</li>`).join('')}</ul>
+      ${all ? '<div class="win">Oppdraget er løst.</div>' : ''}</div>`;
+    $('brief').querySelectorAll('input').forEach(inp => inp.addEventListener('change', () => { S.svar[inp.dataset.i] = inp.value; update(); }));
+  }
+
+  // ---------- Skjema ----------
+  function drawForm() {
+    $('veh').innerHTML = Object.entries(BILER).map(([k, b]) => `<button type="button" data-k="${k}" aria-pressed="${k === S.bil}">${b.navn}</button>`).join('');
+    $('veh').querySelectorAll('button').forEach(b => b.onclick = () => { S.bil = b.dataset.k; S.v = { ...BILER[S.bil].v }; drawForm(); update(); });
+    $('form').innerHTML = FELT.map(([leg, fs]) => `<fieldset><legend>${leg}</legend>${fs.map(([k, l, u, st]) => `<label class="inrow" for="f-${k}"><span>${l}</span><span class="u"><input id="f-${k}" data-k="${k}" type="number" step="${st}" min="0" value="${S.v[k]}"><small>${u}</small></span></label>`).join('')}</fieldset>`).join('');
+    $('form').querySelectorAll('input').forEach(inp => inp.addEventListener('input', () => { const x = parseFloat(inp.value); if (!isNaN(x) && x >= 0) { S.v[inp.dataset.k] = x; update(); } }));
+  }
+  $('btn-reset').onclick = () => { S.v = { ...BILER[S.bil].v }; drawForm(); update(); };
+
+  function drawJob() {
+    $('j-route').innerHTML = RUTER.map(r => `<option value="${r.id}" ${r.id === S.j.route ? 'selected' : ''}>${r.navn} · ca. ${r.km} km</option>`).join('');
+    const f = [['km', 'Avstand en veg', 'km', 5], ['t', 'Kjøretid en veg', 't', 0.25], ['last', 'Lasting og lossing', 't', 0.25], ['bom', 'Bom og ferje en veg', 'kr', 50], ['paa', 'Påslag for fortjeneste', '%', 1], ['kunde', 'Kunden betaler', 'kr', 100], ['retpris', 'Returlasten betaler', 'kr', 100]];
+    $('jform').innerHTML = f.map(([k, l, u, st]) => `<label class="inrow" for="j-${k}"><span>${l}</span><span class="u"><input id="j-${k}" data-k="${k}" type="number" step="${st}" min="0" value="${S.j[k]}"><small>${u}</small></span></label>`).join('');
+    $('jform').querySelectorAll('input').forEach(inp => inp.addEventListener('input', () => { const x = parseFloat(inp.value); if (!isNaN(x) && x >= 0) { S.j[inp.dataset.k] = x; update(); } }));
+    $('j-ret').checked = S.j.ret; $('j-retload').checked = S.j.retload; $('j-retload').disabled = !S.j.ret;
+  }
+  $('j-route').addEventListener('change', e => { const keep = { ret: S.j.ret, retload: S.j.retload, paa: S.j.paa, kunde: S.j.kunde, retpris: S.j.retpris }; S.j = { ...jobbFor(e.target.value), ...keep }; drawJob(); update(); });
+  $('j-ret').addEventListener('change', e => { S.j.ret = e.target.checked; if (!S.j.ret) S.j.retload = false; drawJob(); update(); });
+  $('j-retload').addEventListener('change', e => { S.j.retload = e.target.checked; update(); });
+
+  // ---------- Visning ----------
+  function update() {
+    const k = kalk(S.v);
+    const o = OPP.find(x => x.id === S.aktiv);
+    const job = { ...S.j };
+    if (o.brukPris) job.kunde = tur(k, job).pris;
+    const T = tur(k, job);
+
+    $('rates').innerHTML = [
+      [kr(k.perTime), 'Timekost', `${kr(k.fastPerTime)} faste + ${kr(k.sjaafor)} sjåfør`],
+      [kr(k.perKm, 2), 'Kilometerkost', `${kr(k.drivstoff, 2)} drivstoff og AdBlue`],
+      [kr(Math.round(k.total / 1000) * 1000), 'Årskostnad', `${kr(k.total / S.v.km, 2)} per km i snitt`],
+    ].map(([v, l, s]) => `<div class="rate"><span class="eyebrow">${l}</span><b>${v}</b><small>${s}</small></div>`).join('');
+    const parts = [['kapital', 'Kapital (avskrivning + rente)', 'var(--c1)'], ['faste', 'Andre faste kostnader', 'var(--c2)'], ['lonn', 'Sjåfør', 'var(--c3)'], ['drivstoff', 'Drivstoff og AdBlue', 'var(--c4)'], ['dekkVedl', 'Dekk og vedlikehold', 'var(--c5)']];
+    $('dbar').innerHTML = parts.map(([key, , c]) => `<span style="width:${k.aar[key] / k.total * 100}%;background:${c}"></span>`).join('');
+    $('dleg').innerHTML = parts.map(([key, l, c]) => `<div><span><i style="background:${c}"></i>${l}</span><em>${kr(k.aar[key])} · ${nb(k.aar[key] / k.total * 100)} %</em></div>`).join('');
+
+    const r = RUTER.find(x => x.id === S.j.route);
+    $('quote').innerHTML = `<div class="qh"><b>Kalkyle</b><span class="eyebrow">${r.navn}${S.j.ret ? ' tur-retur' : ''}</span></div>
+      <table><tbody>
+        <tr class="sub"><td>${nb(T.timer, 2)} t × ${kr(k.perTime)}</td><td class="n">${kr(T.tidKost)}</td></tr>
+        <tr class="sub"><td>${nb(T.km)} km × ${kr(k.perKm, 2)}</td><td class="n">${kr(T.kmKost)}</td></tr>
+        <tr class="sub"><td>Bom og ferje</td><td class="n">${kr(T.bom)}</td></tr>
+        <tr class="sum"><td>Selvkost</td><td class="n">${kr(T.selv)}</td></tr>
+        <tr><td>Påslag ${nb(S.j.paa)} %</td><td class="n">${kr(T.pris - T.selv)}</td></tr>
+        <tr class="sum"><td>Tilbudspris</td><td class="n">${kr(T.pris)}</td></tr>
+        <tr><td>${o.brukPris ? 'Kunden betaler tilbudsprisen' : 'Kunden betaler'}</td><td class="n">${kr(job.kunde)}</td></tr>
+        ${S.j.ret && S.j.retload ? `<tr><td>Returlast</td><td class="n">${kr(S.j.retpris)}</td></tr>` : ''}
+      </tbody></table>
+      <div class="res-line ${T.res >= 0 ? 'ok' : 'bad'}"><span>${T.res >= 0 ? 'Fortjeneste' : 'Tap'}${T.inntekt ? ` · ${nb(T.margin, 1)} % av inntekten` : ''}</span><b>${kr(T.res)}</b></div>
+      ${S.j.ret && !S.j.retload ? '<p class="note">Tom retur: bilen og sjåføren koster like mye på hjemturen, men tjener ingenting.</p>' : ''}`;
+
+    const kp = [
+      ['Timekost', kr(k.perTime), 'bil og sjåfør', ''],
+      ['Km-kost', kr(k.perKm, 2), 'per kilometer', ''],
+      ['Turen', kr(T.res), T.res >= 0 ? 'fortjeneste' : 'tap', T.res >= 0 ? 'ok' : 'bad'],
+      ['Oppdrag', Object.keys(done).length + '/' + OPP.length, 'fullført', ''],
+    ];
+    $('kpis').innerHTML = kp.map(([l, v, s, st]) => `<div class="kpi" data-state="${st}"><span class="eyebrow">${l}</span><b>${v}</b><small>${s}</small></div>`).join('');
+    drawBrief(T);
+  }
+
+  drawCards(); drawForm(); drawJob(); update();
+})();
+</script>
+</body>
+</html>
