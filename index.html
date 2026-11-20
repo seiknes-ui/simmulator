@@ -49,6 +49,10 @@ dialog.qrbig small{display:block;margin-top:4px;font-size:15px;color:#56625D}
 @media (max-width:640px){header{grid-template-columns:minmax(0,1fr)}.qr{display:none}}
 h1{font-family:var(--f-display);font-weight:700;font-size:clamp(34px,5vw,54px);text-transform:uppercase;line-height:.95;margin:0;letter-spacing:.01em;text-wrap:balance}
 h1 span{color:var(--accent)}
+/* Toppbilde: over hele bredden, tittelen ligger i alt-teksten */
+h1.banner{grid-column:1/-1;font-size:0;line-height:0;margin:0 0 8px}
+h1.banner img{display:block;width:100%;height:auto;border-radius:4px;border:1px solid var(--line)}
+header .t{align-self:center}
 header p{margin:0;color:var(--muted);max-width:62ch}
 section{margin-top:30px}
 h2{font-family:var(--f-display);font-weight:600;font-size:16px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin:0 0 12px;
@@ -93,8 +97,8 @@ footer{margin-top:40px;color:var(--muted);font-size:13px;max-width:70ch}
 <body>
 <div class="wrap">
   <header>
+    <h1 class="banner"><img src="bilder/header.webp?v=1" alt="Transport og logistikk. Yrkessjåfør, Sauda vgs avd. Birkeland" width="2360" height="663"></h1>
     <div class="t">
-      <h1>Transport <span>og logistikk</span></h1>
       <p>Simulatorer og spill til undervisningen. De øverste virker for én elev eller på tavla uten internett. Spillene nederst kjøres for hele klassen med lærerinnlogging.</p>
     </div>
     <button class="qr" id="qrBtn" aria-haspopup="dialog" aria-label="Vis QR-koden stort">
