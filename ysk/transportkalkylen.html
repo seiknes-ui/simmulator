@@ -205,8 +205,15 @@ body{margin:0}[hidden]{display:none!important}
   </footer>
 </div>
 
+<script src="../kvalitet/kvalitet.js"></script>
+<script>
+// Kvalitet: anonym logg av bruk til kvalitetsdelen (se ../kvalitet/kvalitet.js). Ingen navn eller ID.
+function kv(h, d) { try { if (window.Kvalitet) Kvalitet.logg('ysk', h, d); } catch (e) {} }
+</script>
 <script>
 (() => {
+  const SIM = 'transportkalkylen', kvFull = {};
+  let sistGs = [];
   const $ = id => document.getElementById(id);
   const nb = (v, d = 0) => Number(v).toLocaleString('nb-NO', { minimumFractionDigits: d, maximumFractionDigits: d });
   const kr = (v, d = 0) => nb(v, d) + ' kr';
@@ -291,6 +298,7 @@ body{margin:0}[hidden]{display:none!important}
     S.j = jobbFor(o.sett.jobb ? o.sett.jobb.route : 'hau');
     if (o.sett.jobb) Object.assign(S.j, o.sett.jobb);
     drawCards(); drawForm(); drawJob(); update();
+    kv('start', { k: SIM, a: o.id, t: o.tittel });
   }
   function drawCards() {
     $('cards').innerHTML = OPP.map(o => `<button class="card" type="button" data-id="${o.id}" aria-pressed="${o.id === S.aktiv}"><b>${o.tittel}</b><span class="cs">${o.kort}</span><span class="cb ${done[o.id] ? 'done' : ''}">${done[o.id] ? '✓ Fullført' : 'Ikke fullført'}</span></button>`).join('');
@@ -305,11 +313,18 @@ body{margin:0}[hidden]{display:none!important}
   }
   function drawBrief(T) {
     const o = OPP.find(x => x.id === S.aktiv), gs = goalState(T), all = gs.every(g => g.met);
+    sistGs = gs;
+    if (all && !kvFull[o.id]) { kvFull[o.id] = 1; kv('fullfort', { k: SIM, a: o.id, t: o.tittel }); }
     if (all && !done[o.id]) { done[o.id] = true; save('transportkalkylen.done', done); drawCards(); }
     $('brief').innerHTML = `<div><p class="eyebrow">Oppdrag</p><h3 style="margin:6px 0 8px">${o.tittel}</h3><p>${o.tekst}</p></div>
       <div style="display:grid;gap:10px;align-content:start"><ul class="goals">${gs.map(g => `<li class="${g.met ? 'met' : ''}"><span class="mk">${g.met ? '✓' : ''}</span>${g.q ? `<label for="q-${g.i}">${g.q}</label> <input id="q-${g.i}" data-i="${g.i}" inputmode="decimal" value="${S.svar[g.i] ?? ''}">` : g.t}</li>`).join('')}</ul>
       ${all ? '<div class="win">Oppdraget er løst.</div>' : ''}</div>`;
-    $('brief').querySelectorAll('input').forEach(inp => inp.addEventListener('change', () => { S.svar[inp.dataset.i] = inp.value; update(); }));
+    $('brief').querySelectorAll('input').forEach(inp => inp.addEventListener('change', () => { S.svar[inp.dataset.i] = inp.value; update(); kvSvar(o, +inp.dataset.i, inp.value); }));
+  }
+  function kvSvar(o, i, verdi) {
+    const g = sistGs[i];
+    if (!g || String(verdi).trim() === '') return;
+    kv('svar', { k: `${SIM}.${o.id}.${i}`, t: `${o.tittel}: ${g.q || g.v}`, a: g.met ? 'riktig' : 'feil', m: g.met ? '' : verdi });
   }
 
   // ---------- Skjema ----------

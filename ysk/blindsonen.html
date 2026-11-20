@@ -191,8 +191,15 @@ body{margin:0}[hidden]{display:none!important}
   </footer>
 </div>
 
+<script src="../kvalitet/kvalitet.js"></script>
+<script>
+// Kvalitet: anonym logg av bruk til kvalitetsdelen (se ../kvalitet/kvalitet.js). Ingen navn eller ID.
+function kv(h, d) { try { if (window.Kvalitet) Kvalitet.logg('ysk', h, d); } catch (e) {} }
+</script>
 <script>
 (() => {
+  const SIM = 'blindsonen', kvFull = {};
+  let sistGs = [];
   const $ = id => document.getElementById(id);
   const nb = (v, d = 0) => Number(v).toLocaleString('nb-NO', { minimumFractionDigits: d, maximumFractionDigits: d });
   function save(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
@@ -311,6 +318,12 @@ body{margin:0}[hidden]{display:none!important}
     S.aktiv = id; S.svar = {}; S.M = { ...o.M }; S.låsSpeil = o.låsSpeil || [];
     S.F = o.figs.map(f => ({ ...f, id: uid++ }));
     drawCards(); drawMirrors(); update();
+    kv('start', { k: SIM, a: o.id, t: o.tittel });
+  }
+  function kvSvar(o, i, verdi) {
+    const g = sistGs[i];
+    if (!g || String(verdi).trim() === '') return;
+    kv('svar', { k: `${SIM}.${o.id}.${i}`, t: `${o.tittel}: ${g.q || g.v}`, a: g.met ? 'riktig' : 'feil', m: g.met ? '' : verdi });
   }
   function drawCards() {
     $('cards').innerHTML = OPP.map(o => `<button class="card" type="button" data-id="${o.id}" aria-pressed="${o.id === S.aktiv}"><b>${o.tittel}</b><span class="cs">${o.kort}</span><span class="cb ${done[o.id] ? 'done' : ''}">${done[o.id] ? '✓ Fullført' : 'Ikke fullført'}</span></button>`).join('');
@@ -326,6 +339,8 @@ body{margin:0}[hidden]{display:none!important}
   }
   function drawBrief() {
     const o = OPP.find(x => x.id === S.aktiv), gs = goalState(), all = gs.every(g => g.met);
+    sistGs = gs;
+    if (all && !kvFull[o.id]) { kvFull[o.id] = 1; kv('fullfort', { k: SIM, a: o.id, t: o.tittel }); }
     if (all && !done[o.id]) { done[o.id] = true; save('blindsonen.done', done); drawCards(); }
     $('brief').innerHTML = `<div><p class="eyebrow">Oppdrag</p><h3 style="margin:6px 0 8px">${o.tittel}</h3><p>${o.tekst}</p></div>
       <div style="display:grid;gap:10px;align-content:start"><ul class="goals">${gs.map(g => `<li class="${g.met ? 'met' : ''}"><span class="mk">${g.met ? '✓' : ''}</span>${
@@ -333,7 +348,7 @@ body{margin:0}[hidden]{display:none!important}
         : g.v ? `<label for="q-${g.i}">${g.v}</label> <select id="q-${g.i}" data-i="${g.i}"><option value="">Velg</option>${g.valg.map(x => `<option ${S.svar[g.i] === x ? 'selected' : ''}>${x}</option>`).join('')}</select>`
         : g.t}</li>`).join('')}</ul>
       ${all ? '<div class="win">Oppdraget er løst.</div>' : ''}</div>`;
-    $('brief').querySelectorAll('input, select').forEach(el => el.addEventListener('change', () => { S.svar[el.dataset.i] = el.value; update(); }));
+    $('brief').querySelectorAll('input, select').forEach(el => el.addEventListener('change', () => { S.svar[el.dataset.i] = el.value; update(); kvSvar(o, +el.dataset.i, el.value); }));
   }
 
   function drawMirrors() {

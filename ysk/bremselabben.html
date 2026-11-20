@@ -223,8 +223,15 @@ body{margin:0}[hidden]{display:none!important}
   </footer>
 </div>
 
+<script src="../kvalitet/kvalitet.js"></script>
+<script>
+// Kvalitet: anonym logg av bruk til kvalitetsdelen (se ../kvalitet/kvalitet.js). Ingen navn eller ID.
+function kv(h, d) { try { if (window.Kvalitet) Kvalitet.logg('ysk', h, d); } catch (e) {} }
+</script>
 <script>
 (() => {
+  const SIM = 'bremselabben', kvFull = {};
+  let sistGs = [];
   const $ = id => document.getElementById(id);
   const nb = (v, d = 0) => Number(v).toLocaleString('nb-NO', { minimumFractionDigits: d, maximumFractionDigits: d });
   const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
@@ -324,6 +331,7 @@ body{margin:0}[hidden]{display:none!important}
     if (o.sett.hill) Object.assign(S.hill, o.sett.hill);
     S.lås = o.lås || [];
     drawCards(); syncInputs(); update();
+    kv('start', { k: SIM, a: o.id, t: o.tittel });
     const target = o.del === 'Stopplengde' ? 'h-stopp' : 'h-bakke';
     if (id !== 'o1') $(target).scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
   }
@@ -335,13 +343,20 @@ body{margin:0}[hidden]{display:none!important}
       return { ...g, i, met: !!g.f(S) };
     });
   }
+  function kvSvar(o, i, verdi) {
+    const g = sistGs[i];
+    if (!g || String(verdi).trim() === '') return;
+    kv('svar', { k: `${SIM}.${o.id}.${i}`, t: `${o.tittel}: ${g.q || g.v}`, a: g.met ? 'riktig' : 'feil', m: g.met ? '' : verdi });
+  }
   function drawBrief() {
     const o = OPP.find(x => x.id === S.aktiv), gs = goalState(), all = gs.every(g => g.met);
+    sistGs = gs;
+    if (all && !kvFull[o.id]) { kvFull[o.id] = 1; kv('fullfort', { k: SIM, a: o.id, t: o.tittel }); }
     if (all && !done[o.id]) { done[o.id] = true; save('bremselabben.done', done); drawCards(); }
     $('brief').innerHTML = `<div><p class="eyebrow">Oppdrag · ${o.del}</p><h3 style="margin:6px 0 8px">${o.tittel}</h3><p>${o.tekst}</p></div>
       <div style="display:grid;gap:10px;align-content:start"><ul class="goals">${gs.map(g => `<li class="${g.met ? 'met' : ''}"><span class="mk">${g.met ? '✓' : ''}</span>${g.q ? `<label for="q-${g.i}">${g.q}</label> <input id="q-${g.i}" data-i="${g.i}" inputmode="decimal" value="${S.svar[g.i] ?? ''}">` : g.t}</li>`).join('')}</ul>
       ${all ? '<div class="win">Oppdraget er løst.</div>' : ''}</div>`;
-    $('brief').querySelectorAll('input').forEach(inp => inp.addEventListener('change', () => { S.svar[inp.dataset.i] = inp.value; drawBrief(); drawKpis(); }));
+    $('brief').querySelectorAll('input').forEach(inp => inp.addEventListener('change', () => { S.svar[inp.dataset.i] = inp.value; drawBrief(); drawKpis(); kvSvar(o, +inp.dataset.i, inp.value); }));
   }
 
   // ---------- Kontroller ----------

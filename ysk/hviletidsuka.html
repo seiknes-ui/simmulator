@@ -233,8 +233,14 @@ body{margin:0}[hidden]{display:none!important}
   </footer>
 </div>
 
+<script src="../kvalitet/kvalitet.js"></script>
+<script>
+// Kvalitet: anonym logg av bruk til kvalitetsdelen (se ../kvalitet/kvalitet.js). Ingen navn eller ID.
+function kv(h, d) { try { if (window.Kvalitet) Kvalitet.logg('ysk', h, d); } catch (e) {} }
+</script>
 <script>
 (() => {
+  const SIM = 'hviletidsuka', kvFull = {}, kvBrudd = new Set();
   const $ = id => document.getElementById(id);
   const DAYS = ['Man', 'Tir', 'Ons', 'Tor', 'Fre', 'Lør', 'Søn'];
   const SLOTS = 96, END = 7 * SLOTS;
@@ -447,6 +453,7 @@ body{margin:0}[hidden]{display:none!important}
     const o = OPPDRAG.find(x => x.id === aktiv);
     const met = o.mål.map(([t, f]) => [t, f(res)]);
     const all = met.every(m => m[1]);
+    if (all && !kvFull[o.id]) { kvFull[o.id] = 1; kv('fullfort', { k: SIM, a: o.id, t: o.tittel }); }
     if (all && !done[o.id]) { done[o.id] = true; save('hviletidsuka.done', done); drawCards(); }
     $('brief').innerHTML = `<div><p class="eyebrow">Oppdrag</p><h3 style="margin:6px 0 8px">${o.tittel}</h3><p>${o.tekst}</p></div>
       <div style="display:grid;gap:10px;align-content:start"><ul class="goals">${met.map(([t, m]) => `<li class="${m ? 'met' : ''}"><span class="mk">${m ? '✓' : ''}</span>${t}</li>`).join('')}</ul>
@@ -481,8 +488,10 @@ body{margin:0}[hidden]{display:none!important}
 
   function loadOppdrag(id) {
     aktiv = id;
-    cells = OPPDRAG.find(o => o.id === id).plan();
+    const o = OPPDRAG.find(x => x.id === id);
+    cells = o.plan();
     drawCards(); update();
+    kv('start', { k: SIM, a: o.id, t: o.tittel });
   }
 
   // ---------- Maling med mus og finger ----------
@@ -506,7 +515,17 @@ body{margin:0}[hidden]{display:none!important}
     const i = cellAt(e);
     if (i != null && Math.floor(i / SLOTS) === Math.floor(anchor / SLOTS)) fill(anchor, i);
   });
-  window.addEventListener('pointerup', () => { if (painting) { painting = false; update(); } });
+  window.addEventListener('pointerup', () => {
+    if (!painting) return;
+    painting = false; update();
+    // Logg hvert brudd eleven lager én gang per oppdrag, uten tall, så like brudd telles sammen
+    res.V.filter(v => v.type === 'bad').forEach(v => {
+      const regel = v.tekst.replace(/\d+( t)?( \d+ min)?|\d+:\d+/g, '').replace(/\s+/g, ' ').trim();
+      if (kvBrudd.has(aktiv + regel)) return;
+      kvBrudd.add(aktiv + regel);
+      kv('brudd', { k: SIM, t: regel, m: aktiv });
+    });
+  });
   $('in-prev').addEventListener('input', update);
 
   drawWeek(); drawTools(); loadOppdrag(aktiv);
