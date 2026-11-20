@@ -5,7 +5,7 @@ var I18N = {
 };
 // Tekster i grensesnittet. {navn} byttes ut med verdier.
 I18N.ui = {
-  back: { nb: '← Transport og logistikk', en: '← Transport and logistics', uk: '← Транспорт і логістика' },
+  back: { nb: '← Truck', en: '← Forklift', uk: '← Навантажувач' },
   title: { nb: 'Teoriprøve <span>truck</span>', en: 'Theory test <span>forklift</span>', uk: 'Теоретичний іспит <span>навантажувач</span>' },
   intro: { nb: 'Forbered deg til de avsluttende teoriprøvene i modul 1.1 og 2.2. Les fagstoffet, øv til du kan det, ta en prøve, eller tren på maskinskilt.', en: 'Prepare for the final theory tests in modules 1.1 and 2.2. Read the study notes, practise until you know it, take a test or train on data plates.', uk: 'Підготуйтеся до підсумкових теоретичних іспитів модулів 1.1 і 2.2. Читайте матеріал, тренуйтеся, доки не засвоїте, складіть пробний іспит або потренуйтеся читати таблички з характеристиками.' },
   langNote: { nb: '', en: 'The test in Dugga is in Norwegian. The Norwegian text is shown in small print so you learn the terms you will meet there.', uk: 'Іспит у Dugga складають норвезькою. Норвезький текст показано дрібним шрифтом, щоб ви вивчили терміни, які там трапляться.' },

@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="nb">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Truck</title>
+<meta name="description" content="Simuleringer og teoriprøve til truckførerkurset: stabilitet, HMS og avsluttende teoriprøve.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: samme hylle og kort som forsiden, verktøyene til truckførerkurset. */
+:root{
+  --bg:#E8EBE9; --sheet:#F6F7F5; --ink:#17201D; --muted:#56625D; --line:#C7CFCB;
+  --accent:#D49500; --accent-soft:rgba(212,149,0,.16); --badge-ink:#1a1300;
+  --f-display:'Barlow Condensed','Arial Narrow',sans-serif;
+  --f-body:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F1312; --sheet:#161B1A; --ink:#E3E8E5; --muted:#95A19C; --line:#2A3230;
+    --accent:#F0B21A; --accent-soft:rgba(240,178,26,.14);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F1312; --sheet:#161B1A; --ink:#E3E8E5; --muted:#95A19C; --line:#2A3230;
+  --accent:#F0B21A; --accent-soft:rgba(240,178,26,.14);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{background:var(--bg)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:calc(28px + env(safe-area-inset-top,0px)) calc(48px + env(safe-area-inset-bottom,0px))}
+.wrap{max-width:1180px;margin:0 auto}
+header{display:grid;gap:8px;margin-bottom:30px}
+.back{justify-self:start;font-size:14px;font-weight:500;color:var(--ink);text-decoration:underline;text-decoration-color:var(--accent);text-underline-offset:3px;margin-bottom:6px}
+.back:hover{text-decoration-thickness:2px}
+.back:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:2px}
+h1{font-family:var(--f-display);font-weight:700;font-size:clamp(34px,5vw,54px);text-transform:uppercase;line-height:.95;margin:0;letter-spacing:.01em;text-wrap:balance}
+h1 span{color:var(--accent)}
+header p{margin:0;color:var(--muted);max-width:62ch}
+section{margin-top:30px}
+h2{font-family:var(--f-display);font-weight:600;font-size:16px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin:0 0 12px;
+  display:flex;align-items:center;gap:12px}
+h2::after{content:"";flex:1;height:1px;background:var(--line)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr));gap:14px}
+.card{display:grid;grid-template-rows:auto 1fr auto;gap:12px;background:var(--sheet);border:1px solid var(--line);border-radius:4px;padding:16px 16px 14px;min-width:0}
+.top{display:flex;gap:12px;align-items:flex-start}
+.badge{flex:none;font-family:var(--f-display);font-weight:700;font-size:22px;line-height:1;padding:8px 6px;min-width:46px;text-align:center;border-radius:3px;background:var(--ink);color:var(--sheet)}
+.card h3{margin:0;font-family:var(--f-display);font-weight:700;font-size:24px;line-height:1.05;text-transform:uppercase;letter-spacing:.01em}
+.card .for{margin:3px 0 0;font-size:13px;color:var(--muted)}
+.card p.desc{margin:0;font-size:14.5px;max-width:60ch}
+.foot{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;padding-top:12px;border-top:1px solid var(--line)}
+.tags{display:flex;flex-wrap:wrap;gap:6px;flex:1 1 100%;min-width:0}
+.foot .tags + a{margin-left:auto}
+.tag{font-size:12px;padding:2px 8px;border:1px solid var(--line);border-radius:999px;color:var(--muted);white-space:nowrap}
+.tag.off{border-color:var(--accent);color:var(--ink);background:var(--accent-soft)}
+a.open{flex:none;display:inline-block;font-weight:600;font-size:14px;text-decoration:none;padding:7px 14px;border-radius:4px;background:var(--ink);color:var(--sheet);border:1px solid var(--ink)}
+a.open:hover{background:var(--accent);border-color:var(--accent);color:var(--badge-ink)}
+a.open:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.card:has(a.open[href]):hover .badge{background:var(--accent);color:var(--badge-ink)}
+/* Bildekort: hele kortet er et bilde som åpner verktøyet */
+.card.bilde{display:block;position:relative;padding:0;overflow:hidden;align-self:start}
+.card.bilde img{display:block;width:100%;height:auto}
+.card.bilde:hover,.card.bilde:focus-visible{border-color:var(--accent)}
+.card.bilde .open{position:absolute;right:16px;bottom:14px;font-weight:600;font-size:14px;padding:7px 14px;border-radius:4px;background:var(--ink);color:var(--sheet);border:1px solid var(--ink)}
+.card.bilde:hover .open,.card.bilde:focus-visible .open{background:var(--accent);border-color:var(--accent);color:var(--badge-ink)}
+footer{margin-top:40px;color:var(--muted);font-size:13px;max-width:70ch}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a class="back" href="../">← Alle simulatorer</a>
+    <h1>Truck<span>kurs</span></h1>
+    <p>Til truckførerkurset, modul 1.1 og 2.2. Stabilitet, HMS på lageret og avsluttende teoriprøve. Kjøringen tas på truck ute.</p>
+  </header>
+
+  <section aria-labelledby="h-truck">
+    <h2 id="h-truck">Verktøyene</h2>
+    <div class="grid">
+      <a class="card bilde" href="../truck/index.html"><img src="../bilder/kort/truckstabilitet.webp?v=1" alt="Truckstabilitet" width="900" height="502" loading="lazy"><span class="open" aria-hidden="true">Åpne</span></a>
+      <article class="card">
+        <div class="top"><span class="badge">FS</span><div><h3>Første skift</h3><p class="for">Truckførerkurs modul 1, HMS og grunnopplæring</p></div></div>
+        <p class="desc">Gå vernerunde og finn farene på lageret, ta imot farlig gods og avgjør hva som er lov. Dekker leksjon 1–6, og hvert svar viser hvilken leksjon det hører til.</p>
+        <div class="foot"><div class="tags"><span class="tag">Alene eller på tavla</span><span class="tag">Lagkamp</span><span class="tag">NO · EN · УКР</span><span class="tag off">Uten nett</span></div>
+          <a class="open" href="../hms/index.html">Åpne</a></div>
+      </article>
+      <article class="card">
+        <div class="top"><span class="badge">TP</span><div><h3>Teoriprøve truck</h3><p class="for">Avsluttende teoriprøve modul 1.1 og 2.2</p></div></div>
+        <p class="desc">Fagstoff som fyller hullene i lysbildene, øving med kilde på hvert svar, prøve som på eksamen, paragrafjakt og trening i å lese maskinskilt.</p>
+        <div class="foot"><div class="tags"><span class="tag">Alene eller på tavla</span><span class="tag">NO · EN · УКР</span><span class="tag off">Uten nett</span></div>
+          <a class="open" href="../teori/index.html">Åpne</a></div>
+      </article>
+    </div>
+  </section>
+
+  <footer>Det som er merket «Uten nett», virker uten internett. Teoriprøve truck og Truckstabilitet sender anonyme data om feilsvar og bruk til læreren når det er nett, uten navn eller andre personopplysninger.</footer>
+</div>
+</body>
+</html>

@@ -5,7 +5,7 @@ var I18N = {
 };
 // Tekster i grensesnittet. {navn} byttes ut med verdier.
 I18N.ui = {
-  back: { nb: '← Transport og logistikk', en: '← Transport and logistics', uk: '← Транспорт і логістика' },
+  back: { nb: '← Truck', en: '← Forklift', uk: '← Навантажувач' },
   title: { nb: 'Første <span>skift</span>', en: 'First <span>shift</span>', uk: 'Перша <span>зміна</span>' },
   intro: { nb: 'HMS for truckførere, modul 1. Gjør vernerunden, ta imot farlig gods og avgjør hva som er lov. Hvert svar viser hvilken leksjon det hører til.', en: 'Health and safety for forklift drivers, module 1. Do the safety round, receive dangerous goods and decide what is allowed. Every answer shows which lesson it belongs to.', uk: 'Охорона праці для водіїв навантажувачів, модуль 1. Пройдіть огляд безпеки, прийміть небезпечні вантажі й вирішіть, що дозволено. Кожна відповідь показує, до якого уроку вона належить.' },
   langNote: { nb: '', en: 'The test is in Norwegian. The Norwegian text is shown in small print so you learn the terms.', uk: 'Іспит складають норвезькою. Норвезький текст показано дрібним шрифтом, щоб ви вивчили терміни.' },
