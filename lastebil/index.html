@@ -1,0 +1,1141 @@
+<!doctype html>
+<html lang="nb">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Lastebilkalkylen</title>
+<meta name="description" content="Kalkulator og oppgaver i drift av et lastebilfirma: selvkost, tilbud, el mot diesel og årsregnskap.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: faner øverst. Turkalkylen har inndata til venstre og regnestykket til høyre, som et kalkyleark. */
+:root{
+  --bg:#E8EBE9; --sheet:#F6F7F5; --ink:#17201D; --muted:#56625D; --line:#C7CFCB; --grid:#E3E7E4;
+  --accent:#D49500; --accent-soft:rgba(212,149,0,.16); --accent-ink:#6B4C00; --badge-ink:#1a1300;
+  --ok:#1D7A4C; --ok-soft:rgba(29,122,76,.12); --warn:#B26600; --warn-soft:rgba(178,102,0,.12); --bad:#C0352B; --bad-soft:rgba(192,53,43,.10);
+  --s1:#257de0; --s2:#f47230; --s3:#00b894; --s4:#f2a600; --s5:#ee7fac;
+  --f-display:'Barlow Condensed','Arial Narrow',sans-serif;
+  --f-body:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --f-mono:'IBM Plex Mono',ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F1312; --sheet:#161B1A; --ink:#E3E8E5; --muted:#95A19C; --line:#2A3230; --grid:#1D2422;
+    --accent:#F0B21A; --accent-soft:rgba(240,178,26,.14); --accent-ink:#F5C54A;
+    --ok:#4CC38A; --ok-soft:rgba(76,195,138,.12); --warn:#F0A030; --warn-soft:rgba(240,160,48,.12); --bad:#FF6B5E; --bad-soft:rgba(255,107,94,.10);
+    --s1:#338ced; --s2:#e76624; --s3:#00a888; --s4:#d28e05; --s5:#e24d8b;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F1312; --sheet:#161B1A; --ink:#E3E8E5; --muted:#95A19C; --line:#2A3230; --grid:#1D2422;
+  --accent:#F0B21A; --accent-soft:rgba(240,178,26,.14); --accent-ink:#F5C54A;
+  --ok:#4CC38A; --ok-soft:rgba(76,195,138,.12); --warn:#F0A030; --warn-soft:rgba(240,160,48,.12); --bad:#FF6B5E; --bad-soft:rgba(255,107,94,.10);
+  --s1:#338ced; --s2:#e76624; --s3:#00a888; --s4:#d28e05; --s5:#e24d8b;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{background:var(--bg)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:calc(20px + env(safe-area-inset-top,0px)) calc(48px + env(safe-area-inset-bottom,0px))}
+.wrap{max-width:1320px;margin:0 auto}
+body.enkel .adv{display:none!important}
+
+header{display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px 18px;margin-bottom:14px}
+header .t{flex:1 1 420px;display:grid;gap:4px}
+.back{font-size:13px;color:var(--muted);text-decoration:none}
+.back:hover{color:var(--ink);text-decoration:underline}
+h1{font-family:var(--f-display);font-weight:700;font-size:clamp(30px,4.4vw,42px);letter-spacing:.01em;margin:0;text-transform:uppercase;line-height:1}
+h1 span{color:var(--accent)}
+header p{margin:0;color:var(--muted);max-width:72ch}
+.hctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+h2{font-family:var(--f-display);font-weight:600;font-size:15px;letter-spacing:.08em;text-transform:uppercase;margin:0;color:var(--muted)}
+h3{font-family:var(--f-display);font-weight:700;font-size:21px;text-transform:uppercase;letter-spacing:.01em;margin:0;line-height:1.1}
+
+.seg{display:inline-grid;grid-auto-flow:column;grid-auto-columns:1fr;border:1px solid var(--line);border-radius:4px;overflow:hidden;background:var(--sheet)}
+.seg button{all:unset;cursor:pointer;text-align:center;padding:6px 12px;font-size:13px;white-space:nowrap}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--sheet);font-weight:600}
+.seg button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.seg.full{display:grid;width:100%}
+.btn{all:unset;cursor:pointer;padding:7px 12px;border:1px solid var(--line);border-radius:4px;background:var(--sheet);color:var(--ink);font-size:13px;font-weight:500;line-height:1.2;text-align:center}
+.btn:hover{border-color:var(--muted)}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn.pri{background:var(--ink);color:var(--sheet);border-color:var(--ink)}
+.btn.pri:hover{background:var(--accent);border-color:var(--accent);color:var(--badge-ink)}
+
+nav.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin-bottom:16px;overflow-x:auto;scrollbar-width:none}
+nav.tabs button{all:unset;cursor:pointer;padding:9px 14px 8px;font-family:var(--f-display);font-weight:600;font-size:17px;letter-spacing:.03em;text-transform:uppercase;color:var(--muted);border-bottom:3px solid transparent;white-space:nowrap}
+nav.tabs button:hover{color:var(--ink)}
+nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+nav.tabs button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+@media (max-width:560px){nav.tabs button{padding:8px 9px 7px;font-size:15px}}
+
+.app{display:grid;grid-template-columns:minmax(300px,370px) minmax(0,1fr);gap:18px 22px;align-items:start}
+@media (max-width:940px){.app{grid-template-columns:minmax(0,1fr)}}
+.rail{display:grid;gap:14px;min-width:0}
+.main{display:grid;gap:12px;min-width:0}
+.box{background:var(--sheet);border:1px solid var(--line);border-radius:4px;padding:12px 14px 14px;min-width:0}
+.box > h2{margin-bottom:10px}
+.box .hd{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.box .hd h2{margin:0}
+.box .hd small{color:var(--muted);font-size:12px}
+
+.types{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.type{all:unset;cursor:pointer;display:grid;grid-template-columns:auto 1fr;align-items:center;gap:1px 10px;padding:7px 9px;border:1px solid var(--line);border-radius:4px;background:var(--bg)}
+.type:hover{border-color:var(--muted)}
+.type:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.type[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);background:var(--sheet)}
+.type .code{grid-row:span 2;font-family:var(--f-display);font-weight:700;font-size:19px;min-width:34px;text-align:center;line-height:1;padding:6px 4px;border-radius:3px;background:var(--ink);color:var(--sheet)}
+.type[aria-pressed="true"] .code{background:var(--accent);color:var(--badge-ink)}
+.type .nm{font-weight:600;font-size:13px;line-height:1.2}
+.type .sb{font-size:11.5px;color:var(--muted);line-height:1.25}
+@media (max-width:380px){.types{grid-template-columns:1fr}}
+
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:10px 12px}
+.f{display:grid;gap:3px;align-content:start;min-width:0}
+.f.wide{grid-column:1/-1}
+.f .l{font-weight:500;font-size:13px;line-height:1.25}
+.f small{color:var(--muted);font-size:11.5px;line-height:1.3}
+.in{display:flex;align-items:stretch;border:1px solid var(--line);border-radius:4px;background:var(--bg);overflow:hidden}
+.in:focus-within{outline:2px solid var(--accent);outline-offset:1px}
+.in input{all:unset;flex:1;min-width:0;padding:6px 8px;font-family:var(--f-mono);font-size:14px;font-variant-numeric:tabular-nums;color:var(--ink);text-align:right}
+.in i{font-style:normal;display:flex;align-items:center;padding:0 8px;font-size:12px;color:var(--muted);border-left:1px solid var(--line);white-space:nowrap;background:var(--sheet)}
+.in input::-webkit-outer-spin-button,.in input::-webkit-inner-spin-button{opacity:.5}
+details.more{border-top:1px solid var(--line);margin-top:12px;padding-top:10px}
+details.more summary{cursor:pointer;font-weight:600;font-size:13px;list-style:none;display:flex;align-items:center;gap:8px}
+details.more summary::-webkit-details-marker{display:none}
+details.more summary::before{content:"+";font-family:var(--f-mono);width:16px;height:16px;display:inline-grid;place-items:center;border:1px solid var(--line);border-radius:3px;font-size:12px}
+details.more[open] summary::before{content:"−"}
+details.more .fields{margin-top:10px}
+.subh{grid-column:1/-1;font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-top:6px;border-bottom:1px solid var(--line);padding-bottom:3px}
+.note{margin:0;font-size:12.5px;color:var(--muted);line-height:1.4}
+
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:4px;overflow:hidden}
+@media (max-width:720px){.kpis{grid-template-columns:1fr 1fr}}
+.kpi{background:var(--sheet);padding:10px 12px;display:grid;gap:1px;min-width:0}
+.kpi span{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.kpi b{font-family:var(--f-mono);font-weight:500;font-size:clamp(17px,2.2vw,22px);font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kpi small{font-size:12px;color:var(--muted);line-height:1.3}
+.kpi.hero b{font-size:clamp(20px,2.8vw,28px)}
+.pos{color:var(--ok)}.neg{color:var(--bad)}
+
+/* Stablet stolpe: kostnadsfordeling */
+.stack{display:flex;height:30px;gap:2px;margin:4px 0 8px}
+.stack > div{min-width:2px;height:100%;cursor:default;outline:none}
+.stack > div:first-child{border-radius:4px 0 0 4px}
+.stack > div:last-child{border-radius:0 4px 4px 0}
+.stack > div:focus-visible{box-shadow:0 0 0 2px var(--sheet),0 0 0 4px var(--ink)}
+.legend{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:12.5px;color:var(--ink)}
+.legend span{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:3px}
+.legend em{font-style:normal;font-family:var(--f-mono);color:var(--muted);font-size:12px}
+#tip{position:fixed;z-index:20;pointer-events:none;background:var(--ink);color:var(--sheet);font-size:12.5px;line-height:1.35;padding:6px 9px;border-radius:4px;max-width:260px;box-shadow:0 4px 14px rgba(0,0,0,.2)}
+#tip b{font-family:var(--f-mono);font-weight:500}
+
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:5px 8px;text-align:right;border-bottom:1px solid var(--line)}
+th:first-child,td:first-child{text-align:left}
+th{font-weight:500;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+td{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+td:first-child{font-family:var(--f-body);white-space:normal}
+td.how{color:var(--muted);font-size:12px;text-align:left}
+tr.grp td{font-family:var(--f-body);font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);padding-top:12px;border-bottom:1px solid var(--line)}
+tr.sub td{font-weight:500;border-bottom:1px solid var(--muted)}
+tr.tot td{font-weight:600;font-size:14px;border-bottom:none;border-top:2px solid var(--ink)}
+td .dot{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:7px;vertical-align:0}
+@media (max-width:560px){td.how,th.how{display:none}}
+
+.warns{display:grid;gap:6px}
+.warn{display:grid;grid-template-columns:auto 1fr;gap:8px;font-size:13px;padding:8px 10px;border-left:3px solid var(--warn);background:var(--warn-soft);border-radius:0 4px 4px 0}
+.warn.info{border-color:var(--muted);background:var(--grid)}
+.warn b.ic{font-family:var(--f-display);font-size:15px;line-height:1.2}
+
+.timeline{display:flex;height:22px;gap:2px;margin:6px 0 6px}
+.timeline > div{height:100%;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--sheet);overflow:hidden;white-space:nowrap;min-width:2px;border-radius:2px}
+.tl-k{background:var(--ink)}.tl-p{background:var(--muted)}.tl-l{background:var(--accent);color:var(--badge-ink)!important}.tl-v{background:var(--s5);color:#1a1300!important}.tl-c{background:var(--s3)}
+
+.price{display:grid;grid-template-columns:1fr 1fr;gap:10px 12px;align-items:end}
+@media (max-width:520px){.price{grid-template-columns:1fr}}
+.price .res{grid-column:1/-1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding-top:10px;border-top:1px solid var(--line)}
+.res div{display:grid;gap:1px}
+.res span{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.res b{font-family:var(--f-mono);font-weight:500;font-size:17px;font-variant-numeric:tabular-nums}
+
+/* Sammenlign */
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:720px){.cmp{grid-template-columns:1fr}}
+.cmp .box h3 .ab{display:inline-block;background:var(--ink);color:var(--sheet);border-radius:3px;padding:0 7px;margin-right:6px}
+select{width:100%;font:inherit;font-size:13.5px;padding:7px 8px;border:1px solid var(--line);border-radius:4px;background:var(--bg);color:var(--ink)}
+select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.chk{display:flex;gap:8px;align-items:center;font-size:13px;font-weight:500;cursor:pointer}
+.chk input{accent-color:var(--accent);width:16px;height:16px;margin:0}
+.verdict{font-size:14.5px;padding:10px 12px;border-left:3px solid var(--accent);background:var(--accent-soft);border-radius:0 4px 4px 0}
+.verdict p{margin:0}
+.verdict p+p{margin-top:4px}
+
+/* Årsregnskap */
+.chart{position:relative}
+.chart svg{display:block;width:100%;height:auto;overflow:visible}
+.chart .ax{font-family:var(--f-mono);font-size:11px;fill:var(--muted)}
+.chart .gl{stroke:var(--grid);stroke-width:1}
+.chart .zero{stroke:var(--muted);stroke-width:1}
+.chart .ln{fill:none;stroke:var(--s1);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.chart .be{stroke:var(--ink);stroke-width:1;stroke-dasharray:4 3}
+.chart .lbl{font-size:11.5px;fill:var(--ink);font-family:var(--f-body)}
+.chart .cur{fill:var(--s1);stroke:var(--sheet);stroke-width:2}
+.chart .xh{stroke:var(--muted);stroke-width:1}
+
+/* Oppgaver */
+#lvl{max-width:100%;overflow-x:auto}
+.filters{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;margin-bottom:12px}
+.prog{font-size:13px;color:var(--muted)}
+.tasks{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,420px),1fr));gap:12px}
+.task{display:grid;gap:10px;align-content:start}
+.task .top{display:flex;gap:10px;align-items:flex-start;justify-content:space-between}
+.tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px}
+.tag{font-size:11.5px;padding:1px 8px;border:1px solid var(--line);border-radius:999px;color:var(--muted);white-space:nowrap}
+.tag.lv{border-color:var(--accent);color:var(--ink);background:var(--accent-soft)}
+.done{flex:none;font-size:12px;font-weight:600;color:var(--ok);white-space:nowrap}
+.task .txt{font-size:14px;max-width:70ch}
+.task .txt p{margin:0 0 6px}
+.task .q{font-weight:600;font-size:14px;margin:0}
+.ans{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.ans .in{flex:1 1 160px;max-width:240px}
+.opts{display:grid;gap:6px}
+.opt{display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:start;font-size:13.5px;cursor:pointer;padding:6px 8px;border:1px solid var(--line);border-radius:4px;background:var(--bg)}
+.opt input{accent-color:var(--accent);margin:3px 0 0}
+.fb{font-size:13.5px;padding:8px 10px;border-radius:0 4px 4px 0;border-left:3px solid var(--muted);background:var(--grid)}
+.fb.ok{border-color:var(--ok);background:var(--ok-soft)}
+.fb.no{border-color:var(--bad);background:var(--bad-soft)}
+.fb p{margin:0}
+.fb p+p{margin-top:5px}
+.fb b{font-family:var(--f-mono);font-weight:500}
+
+/* Slik regner vi */
+.doc{display:grid;gap:12px;max-width:900px}
+.doc p,.doc li{max-width:72ch}
+.doc p{margin:0 0 8px}
+.doc ul{margin:0 0 8px;padding-left:20px}
+.doc code,.formula{font-family:var(--f-mono);font-size:12.5px;background:var(--grid);padding:1px 5px;border-radius:3px}
+.formula{display:block;padding:8px 10px;margin:6px 0 10px;white-space:pre-wrap;line-height:1.55}
+
+/* Liten oppsummering nederst på mobil, så resultatet syns mens man fyller inn */
+.sumbar{display:none}
+@media (max-width:940px){
+  .sumbar{position:fixed;left:0;right:0;bottom:0;z-index:10;display:flex;justify-content:space-between;gap:12px;align-items:center;
+    padding:8px max(16px,env(safe-area-inset-left,0px)) calc(8px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--sheet);font-size:13px}
+  .sumbar b{font-family:var(--f-mono);font-weight:500;font-size:15px}
+  body[data-tab="tur"]{padding-bottom:calc(80px + env(safe-area-inset-bottom,0px))}
+  body:not([data-tab="tur"]) .sumbar{display:none}
+}
+@media print{
+  nav.tabs,.hctl,.sumbar,.back,#tip,button.btn{display:none!important}
+  body{background:#fff;padding:0}
+  .box{break-inside:avoid}
+}
+</style>
+</head>
+<body class="enkel" data-tab="tur">
+<div class="wrap">
+  <header>
+    <div class="t">
+      <a class="back" href="../ysk/">← Yrkessjåfør YSK</a>
+      <h1>Lastebil<span>kalkylen</span></h1>
+      <p>Hva koster en tur, hva bør kunden betale, og når tjener firmaet penger? Regn på fem lastebiler med omtrentlige norske tall for 2026, og endre tallene selv.</p>
+    </div>
+    <div class="hctl">
+      <div class="seg" role="group" aria-label="Detaljnivå">
+        <button type="button" data-mode="enkel" aria-pressed="true">Enkel</button>
+        <button type="button" data-mode="avansert" aria-pressed="false">Avansert</button>
+      </div>
+      <button type="button" class="btn" id="reset">Tilbakestill tall</button>
+      <button type="button" class="btn" onclick="print()">Skriv ut</button>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="Deler">
+    <button role="tab" data-tab="tur" aria-selected="true">Turkalkyle</button>
+    <button role="tab" data-tab="cmp" aria-selected="false">Sammenlign</button>
+    <button role="tab" data-tab="aar" aria-selected="false">Årsregnskap</button>
+    <button role="tab" data-tab="oppg" aria-selected="false">Oppgaver</button>
+    <button role="tab" data-tab="om" aria-selected="false">Slik regner vi</button>
+  </nav>
+
+  <!-- TURKALKYLE -->
+  <section id="p-tur" role="tabpanel">
+    <div class="app">
+      <div class="rail">
+        <div class="box">
+          <h2>Kjøretøy</h2>
+          <div class="types" id="types"></div>
+          <details class="more adv" id="vehMore">
+            <summary>Tall for kjøretøyet</summary>
+            <div class="fields" id="vehFields"></div>
+          </details>
+        </div>
+        <div class="box">
+          <h2>Oppdraget</h2>
+          <div class="fields" id="oppFields"></div>
+          <div class="f wide" style="margin-top:12px">
+            <span class="l">Kjørestil</span>
+            <div class="seg full" role="group" aria-label="Kjørestil" id="stil"></div>
+            <small id="stilNote"></small>
+          </div>
+        </div>
+        <div class="box adv">
+          <h2>Firmaet</h2>
+          <p class="note">Gjelder alle kjøretøy og alle faner.</p>
+          <div class="fields" id="firmaFields" style="margin-top:10px"></div>
+        </div>
+      </div>
+
+      <div class="main">
+        <div class="kpis">
+          <div class="kpi hero"><span>Selvkost for turen</span><b id="kSelv">–</b><small id="kSelvS"></small></div>
+          <div class="kpi"><span>Per kilometer</span><b id="kKm">–</b><small id="kKmS"></small></div>
+          <div class="kpi"><span>Arbeidstid</span><b id="kTid">–</b><small id="kTidS"></small></div>
+          <div class="kpi"><span>Resultat</span><b id="kRes">–</b><small id="kResS"></small></div>
+        </div>
+
+        <div class="warns" id="warns"></div>
+
+        <div class="box">
+          <div class="hd"><h2>Hva pengene går til</h2><small>Hold over eller trykk på en del</small></div>
+          <div class="stack" id="stack" role="img" aria-label="Kostnadsfordeling"></div>
+          <div class="legend" id="legend"></div>
+        </div>
+
+        <div class="box">
+          <div class="hd"><h2>Regnestykket</h2><small id="regnS"></small></div>
+          <div class="tbl"><table>
+            <thead><tr><th>Post</th><th class="how" style="text-align:left">Slik</th><th>Kroner</th></tr></thead>
+            <tbody id="rows"></tbody>
+          </table></div>
+        </div>
+
+        <div class="box">
+          <div class="hd"><h2>Tid på turen</h2><small id="tidS"></small></div>
+          <div class="timeline" id="timeline"></div>
+          <div class="legend" id="tlLegend"></div>
+        </div>
+
+        <div class="box">
+          <div class="hd"><h2>Pris til kunden</h2><small>Eks. mva</small></div>
+          <div class="price">
+            <label class="f"><span class="l">Påslag på selvkost</span><span class="in"><input type="number" inputmode="decimal" id="paslag" min="0" step="1"><i>%</i></span>
+              <small>Fortjeneste og buffer for uforutsett</small></label>
+            <label class="f"><span class="l">Eller fast pris fra kunden</span><span class="in"><input type="number" inputmode="decimal" id="fastpris" min="0" step="100" placeholder="tom = bruk påslag"><i>kr</i></span>
+              <small>La stå tomt for å regne pris fra påslaget</small></label>
+            <div class="res">
+              <div><span>Pris</span><b id="pPris">–</b></div>
+              <div><span>Resultat</span><b id="pRes">–</b></div>
+              <div><span>Margin</span><b id="pMarg">–</b></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SAMMENLIGN -->
+  <section id="p-cmp" role="tabpanel" hidden>
+    <p class="note" style="margin-bottom:12px;font-size:13.5px">Samme oppdrag som i Turkalkylen, kjørt på to måter. Endre oppdraget i Turkalkylen.</p>
+    <div class="box" style="margin-bottom:12px">
+      <div class="price" style="grid-template-columns:minmax(0,320px)">
+        <label class="f"><span class="l">Kunden betaler for oppdraget</span><span class="in"><input type="number" inputmode="decimal" id="cmpPris" min="0" step="100"><i>kr</i></span>
+          <small id="cmpPrisS"></small></label>
+      </div>
+    </div>
+    <div class="cmp" id="cmpCols"></div>
+    <div class="box" style="margin-top:12px">
+      <div class="hd"><h2>Side om side</h2></div>
+      <div class="tbl"><table>
+        <thead><tr><th></th><th>A</th><th>B</th><th>B minus A</th></tr></thead>
+        <tbody id="cmpRows"></tbody>
+      </table></div>
+    </div>
+    <div class="verdict" id="cmpVerdict" style="margin-top:12px"></div>
+  </section>
+
+  <!-- ÅRSREGNSKAP -->
+  <section id="p-aar" role="tabpanel" hidden>
+    <div class="app">
+      <div class="rail">
+        <div class="box">
+          <h2>Ett år med <span id="aarVeh"></span></h2>
+          <p class="note" style="margin-bottom:10px">Bytt kjøretøy i Turkalkylen. Lønn, priser og faste kostnader hentes derfra.</p>
+          <div class="fields" id="aarFields"></div>
+          <div style="margin-top:12px"><button type="button" class="btn" id="aarReset">Standardtall for denne bilen</button></div>
+        </div>
+      </div>
+      <div class="main">
+        <div class="kpis">
+          <div class="kpi hero"><span>Årsresultat</span><b id="aRes">–</b><small id="aResS"></small></div>
+          <div class="kpi"><span>Inntekter</span><b id="aInn">–</b><small id="aInnS"></small></div>
+          <div class="kpi"><span>Kostnader</span><b id="aKost">–</b><small id="aKostS"></small></div>
+          <div class="kpi"><span>Nullpunkt</span><b id="aBe">–</b><small id="aBeS"></small></div>
+        </div>
+        <div class="box">
+          <div class="hd"><h2>Årsresultat etter antall driftsdager</h2><small>Hold over linja for å lese av</small></div>
+          <div class="chart" id="aarChart"></div>
+        </div>
+        <div class="box">
+          <div class="hd"><h2>Resultatregnskap</h2><small id="aarTblS"></small></div>
+          <div class="tbl"><table>
+            <thead><tr><th>Post</th><th class="how" style="text-align:left">Slik</th><th>Kroner per år</th></tr></thead>
+            <tbody id="aarRows"></tbody>
+          </table></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- OPPGAVER -->
+  <section id="p-oppg" role="tabpanel" hidden>
+    <div class="filters">
+      <div class="seg" role="group" aria-label="Nivå" id="lvl"></div>
+      <span class="prog" id="prog"></span>
+    </div>
+    <p class="note" style="margin:-4px 0 14px;font-size:13.5px">Trykk «Gjør klar kalkylen» for å nullstille og velge riktig bil. Legg så inn oppdraget fra teksten i Turkalkylen, og skriv svaret her. Tallene i oppgavene er tenkte.</p>
+    <div class="tasks" id="tasks"></div>
+  </section>
+
+  <!-- SLIK REGNER VI -->
+  <section id="p-om" role="tabpanel" hidden>
+    <div class="doc" id="doc"></div>
+  </section>
+</div>
+
+<div class="sumbar" aria-hidden="true"><span>Selvkost <b id="sbSelv">–</b></span><span>Resultat <b id="sbRes">–</b></span></div>
+<div id="tip" hidden></div>
+
+<script src="../kvalitet/kvalitet.js"></script>
+<script>
+'use strict';
+// Kvalitet: anonym logg av svar på oppgavene (se ../kvalitet/kvalitet.js). Ingen navn eller ID.
+function kv(h, d) { try { if (window.Kvalitet) Kvalitet.logg('lastebil', h, d); } catch (e) {} }
+
+// ======================= MODELL START =======================
+// Omtrentlige norske tall for 2026, eks. mva. Læreren kan endre alt i Avansert.
+const VEH = {
+  dist:   { navn: 'Distribusjonsbil', kort: 'Skapbil 19 t, diesel', kode: 'DB', energi: 'diesel',
+            pris: 1900000, stotte: 0, rest: 450000, aar: 6, tom: 22, full: 28, rekk: 0,
+            dekk: 0.45, vedl: 1.1, forsikring: 55000, avgifter: 9000, nyttelast: 9, kmDag: 180, bomDag: 250 },
+  eldist: { navn: 'El-distribusjonsbil', kort: 'Skapbil 19 t, batteri', kode: 'ED', energi: 'el',
+            pris: 3200000, stotte: 600000, rest: 700000, aar: 7, tom: 85, full: 105, rekk: 250,
+            dekk: 0.45, vedl: 0.7, forsikring: 70000, avgifter: 2000, nyttelast: 8, kmDag: 160, bomDag: 250 },
+  semi:   { navn: 'Vogntog', kort: 'Trekkvogn + semi, diesel', kode: 'VT', energi: 'diesel',
+            pris: 2400000, stotte: 0, rest: 600000, aar: 6, tom: 24, full: 34, rekk: 0,
+            dekk: 0.85, vedl: 1.5, forsikring: 85000, avgifter: 14000, nyttelast: 28, kmDag: 450, bomDag: 600 },
+  elsemi: { navn: 'El-vogntog', kort: 'Trekkvogn med batteri + semi', kode: 'EV', energi: 'el',
+            pris: 4900000, stotte: 900000, rest: 1100000, aar: 7, tom: 110, full: 140, rekk: 400,
+            dekk: 0.85, vedl: 1.0, forsikring: 115000, avgifter: 3000, nyttelast: 26, kmDag: 380, bomDag: 600 },
+  tipp:   { navn: 'Tippbil med henger', kort: 'Anlegg, masse og tømmer, diesel', kode: 'TH', energi: 'diesel',
+            pris: 3300000, stotte: 0, rest: 800000, aar: 7, tom: 32, full: 50, rekk: 0,
+            dekk: 1.2, vedl: 2.2, forsikring: 95000, avgifter: 18000, nyttelast: 32, kmDag: 220, bomDag: 300 }
+};
+const VEH_ORDER = ['dist', 'eldist', 'semi', 'elsemi', 'tipp'];
+
+const FIRMA = {
+  timelonn: 265, fp: 12, aga: 14.1, otp: 2, andreSos: 3,
+  diesel: 17.5, adbluePris: 6, adblueAndel: 5,
+  stromDepot: 1.3, stromLade: 4.5, andelLade: 30, elBomRabatt: 50,
+  rente: 6.5, admin: 160000, garasje: 30000,
+  driftsdager: 230, timerDag: 10, diett: 900
+};
+const KONST = { co2Diesel: 2.6, co2El: 0.02, tomgangDiesel: 2.5, tomgangEl: 2, pause: 0.75, ladestopp: 0.75 };
+
+const STIL = {
+  oko:    { navn: 'Økonomisk', f: 0.92, tid: 1.03, slit: 0.9,  tekst: 'Planlegger, ruller mot rødt lys, jevn fart. Ca. 8 % mindre energi, 3 % lengre kjøretid, mindre slitasje.' },
+  normal: { navn: 'Normal',    f: 1,    tid: 1,    slit: 1,    tekst: 'Vanlig kjøring. Utgangspunktet for tallene.' },
+  hissig: { navn: 'Hissig',    f: 1.12, tid: 0.97, slit: 1.2,  tekst: 'Hard akselerasjon og sene nedbremsinger. Ca. 12 % mer energi og 20 % mer slitasje, men bare 3 % kortere kjøretid.' }
+};
+
+const OPPDRAG = { lastetKm: 220, tomKm: 180, snittfart: 65, lastetid: 1.5, ventetid: 0.5, lastgrad: 80, bom: 620, ferje: 0, netter: 0, tomgang: 20 };
+const BLANK = { lastetKm: 0, tomKm: 0, snittfart: 60, lastetid: 0, ventetid: 0, lastgrad: 80, bom: 0, ferje: 0, netter: 0, tomgang: 0 };
+
+// Kostnad per time bilen er i bruk: sjåfør, bilens faste kostnader og administrasjon.
+function timekost(f, v) {
+  const sjafor = f.timelonn * (1 + f.fp / 100) * (1 + f.aga / 100) + f.timelonn * (f.otp + f.andreSos) / 100;
+  const avskr = (v.pris - v.stotte - v.rest) / v.aar;
+  const rente = f.rente / 100 * (v.pris - v.stotte + v.rest) / 2;
+  const bilAar = avskr + rente + v.forsikring + v.avgifter + f.garasje;
+  const timer = Math.max(1, f.driftsdager * f.timerDag);
+  return { sjafor, avskr, rente, bilAar, timer, bil: bilAar / timer, admin: f.admin / timer, fasteAar: bilAar + f.admin };
+}
+
+function energi(f, v, stil, lastetKm, tomKm, lastgrad, tomgangTimer) {
+  const el = v.energi === 'el';
+  const perLastet = v.tom + (v.full - v.tom) * lastgrad / 100;
+  const kjoring = ((lastetKm * perLastet + tomKm * v.tom) / 100) * stil.f;
+  const tomgang = tomgangTimer * (el ? KONST.tomgangEl : KONST.tomgangDiesel);
+  const mengde = kjoring + tomgang;
+  if (el) {
+    const a = f.andelLade / 100;
+    const snitt = f.stromDepot * (1 - a) + f.stromLade * a;
+    return { el, mengde, enhet: 'kWh', pris: snitt, kost: mengde * snitt, adblue: 0, adblueL: 0, co2: mengde * KONST.co2El, perLastet, tomgang };
+  }
+  const adblueL = mengde * f.adblueAndel / 100;
+  return { el, mengde, enhet: 'l', pris: f.diesel, kost: mengde * f.diesel, adblue: adblueL * f.adbluePris, adblueL, co2: mengde * KONST.co2Diesel, perLastet, tomgang };
+}
+
+function beregnTur(f, v, stilKey, o) {
+  const stil = STIL[stilKey] || STIL.normal;
+  const km = o.lastetKm + o.tomKm;
+  const kjoretid = o.snittfart > 0 ? km / o.snittfart * stil.tid : 0;
+  const antPauser = Math.max(0, Math.ceil(kjoretid / 4.5 - 1e-9) - 1);
+  const pauser = antPauser * KONST.pause;
+  const ladestopp = (v.energi === 'el' && v.rekk > 0) ? Math.max(0, Math.ceil(km / v.rekk - 1e-9) - 1) : 0;
+  const ladetid = ladestopp * KONST.ladestopp;
+  const arbeidstid = kjoretid + pauser + ladetid + o.lastetid + o.ventetid;
+  const tk = timekost(f, v);
+  const e = energi(f, v, stil, o.lastetKm, o.tomKm, o.lastgrad, o.tomgang / 60);
+  const dekk = km * v.dekk * stil.slit, vedl = km * v.vedl * stil.slit;
+  const bomFaktor = v.energi === 'el' ? 1 - f.elBomRabatt / 100 : 1;
+  const bom = o.bom * bomFaktor, ferje = o.ferje, diett = o.netter * f.diett;
+  const sjafor = arbeidstid * tk.sjafor, bil = arbeidstid * tk.bil, admin = arbeidstid * tk.admin;
+  const tid = sjafor + bil + admin, kmkost = e.kost + e.adblue + dekk + vedl, direkte = bom + ferje + diett;
+  const selvkost = tid + kmkost + direkte;
+  const tonn = v.nyttelast * o.lastgrad / 100;
+  return { km, kjoretid, antPauser, pauser, ladestopp, ladetid, arbeidstid, tk, e, dekk, vedl, bomFaktor, bom, ferje, diett,
+    sjafor, bil, admin, tid, kmkost, direkte, selvkost, perKm: km > 0 ? selvkost / km : 0, tonn, perTonn: tonn > 0 ? selvkost / tonn : 0, co2: e.co2, stil };
+}
+
+// Ett år for én bil. Sjåføren regnes per driftsdag; bilens faste kostnader og administrasjon per år.
+function beregnAar(f, v, a) {
+  const tk = timekost(f, v);
+  const lastetKm = a.kmDag * (1 - a.tomAndel / 100), tomKm = a.kmDag * a.tomAndel / 100;
+  const e = energi(f, v, STIL.normal, lastetKm, tomKm, a.lastgrad, 0);
+  const dag = {
+    energi: e.kost, adblue: e.adblue, dekk: a.kmDag * v.dekk, vedl: a.kmDag * v.vedl,
+    sjafor: f.timerDag * tk.sjafor, bom: a.bomDag
+  };
+  const varDag = dag.energi + dag.adblue + dag.dekk + dag.vedl + dag.sjafor + dag.bom;
+  const faste = tk.fasteAar;
+  const d = f.driftsdager;
+  const inntekt = d * a.inntektDag, kostnad = faste + d * varDag;
+  const db = a.inntektDag - varDag;
+  return { tk, e, dag, varDag, faste, inntekt, kostnad, resultat: inntekt - kostnad, db,
+    nullpunkt: db > 0 ? faste / db : Infinity, km: d * a.kmDag, co2: d * e.co2,
+    resultatVed: dager => dager * db - faste };
+}
+
+function aarStandard(key) {
+  const v = VEH[key];
+  const a = { kmDag: v.kmDag, tomAndel: 25, lastgrad: 75, bomDag: v.bomDag, inntektDag: 0 };
+  const r = beregnAar(FIRMA, v, a);
+  a.inntektDag = Math.round((r.faste / FIRMA.driftsdager + r.varDag) * 1.06 / 100) * 100;
+  return a;
+}
+
+// Oppgaver. o = oppdraget slik teksten beskriver det (lagt oppå BLANK). Fasit regnes fra standardtallene.
+const NIVA = { grunn: 'YSK grunnutdanning', etter: 'YSK etterutdanning', vg: 'Vg2/Vg3' };
+const tur = (veh, o, stil) => beregnTur(FIRMA, VEH[veh], stil || 'normal', Object.assign({}, BLANK, o));
+const OPPG = [
+  { id: 'bakeri', tittel: 'Bakeriruta', niva: ['grunn', 'vg'], tema: 'Selvkost', veh: 'dist',
+    tekst: '<p>Distribusjonsbilen kjører fra bakeriet ut på butikkrunden og tilbake. Runden er <b>95 km med last</b> og <b>40 km tom</b> tilbake til terminalen. Snittfarten er <b>45 km/t</b>.</p><p>Lossing på alle butikkene tar til sammen <b>3 timer</b>. Bompengene er <b>340 kr</b>. Normal kjørestil.</p>',
+    sp: 'Hva er selvkosten for runden?', type: 'tall', enhet: 'kr', tol: 0.03,
+    o: { lastetKm: 95, tomKm: 40, snittfart: 45, lastetid: 3, bom: 340 },
+    fasit: o => tur('dist', o).selvkost,
+    forklar: o => { const r = tur('dist', o); return `Arbeidstid ${t(r.arbeidstid)} gir tidskostnader på ${kr(r.tid)}. Kilometerkostnadene (diesel, AdBlue, dekk og vedlikehold) blir ${kr(r.kmkost)}, og bompengene ${kr(r.bom)}. Legg merke til at tiden koster mest på en distribusjonsrute med mye lossing.`; } },
+
+  { id: 'kmpris', tittel: 'Hva koster en kilometer?', niva: ['grunn', 'vg'], tema: 'Selvkost', veh: 'semi',
+    tekst: '<p>Vogntoget kjører fra terminalen til en kunde <b>250 km unna</b>, med last, og kjører <b>tomt tilbake</b>. Snittfarten er <b>68 km/t</b>.</p><p>Lasting og lossing tar <b>2 timer</b>, og sjåføren venter <b>1 time</b> hos kunden. Bompenger: <b>1 150 kr</b>.</p>',
+    sp: 'Hva koster turen per kilometer (selvkost delt på alle kilometerne)?', type: 'tall', enhet: 'kr/km', tol: 0.03,
+    o: { lastetKm: 250, tomKm: 250, snittfart: 68, lastetid: 2, ventetid: 1, bom: 1150 },
+    fasit: o => tur('semi', o).perKm,
+    forklar: o => { const r = tur('semi', o); return `Selvkost ${kr(r.selvkost)} delt på ${n0(r.km)} km = ${kr2(r.perKm)} per km. Husk at den tomme returen også må betales, og at kjøretiden på ${t(r.kjoretid)} krever ${r.antPauser} pause${r.antPauser === 1 ? '' : 'r'} på 45 minutter.`; } },
+
+  { id: 'stil', tittel: 'Hissig eller økonomisk?', niva: ['grunn', 'etter'], tema: 'Kjørestil', veh: 'semi', forhand: true,
+    tekst: '<p>Samme tur som i «Hva koster en kilometer?»: 250 km med last, 250 km tom, 68 km/t, 2 timer lasting og lossing, 1 time venting og 1 150 kr i bompenger. Oppdraget er fylt inn for deg.</p><p>Prøv kjørestilene og se hva som skjer med diesel, slitasje og tid.</p>',
+    sp: 'Hvor mange kroner sparer firmaet på turen ved å kjøre økonomisk i stedet for hissig?', type: 'tall', enhet: 'kr', tol: 0.05,
+    o: { lastetKm: 250, tomKm: 250, snittfart: 68, lastetid: 2, ventetid: 1, bom: 1150 },
+    fasit: o => tur('semi', o, 'hissig').selvkost - tur('semi', o, 'oko').selvkost,
+    forklar: o => { const h = tur('semi', o, 'hissig'), k = tur('semi', o, 'oko'); return `Hissig: ${kr(h.selvkost)}, økonomisk: ${kr(k.selvkost)}. Økokjøring bruker ${n0(h.e.mengde - k.e.mengde)} liter mindre diesel og slipper ut ${n0(h.co2 - k.co2)} kg mindre CO₂, selv om turen tar ${n0((k.kjoretid - h.kjoretid) * 60)} minutter lenger. Med 230 slike turer i året blir det ${kr((h.selvkost - k.selvkost) * 230)}.`; } },
+
+  { id: 'tilbud', tittel: 'Tilbud til anleggsfirmaet', niva: ['vg', 'grunn'], tema: 'Tilbud', veh: 'tipp',
+    tekst: '<p>Et anleggsfirma vil ha kjørt bort masse med tippbilen. Det blir <b>4 turer</b>, hver med <b>35 km med last</b> til deponiet og <b>35 km tom</b> tilbake. Snittfarten er <b>40 km/t</b>.</p><p>Lasting og tipping tar <b>20 minutter per tur</b>. Ingen bompenger. Firmaet legger <b>12 % påslag</b> på selvkost.</p>',
+    sp: 'Hvilken pris (eks. mva) skal stå i tilbudet?', type: 'tall', enhet: 'kr', tol: 0.03,
+    o: { lastetKm: 140, tomKm: 140, snittfart: 40, lastetid: 4 * 20 / 60 },
+    fasit: o => tur('tipp', o).selvkost * 1.12,
+    forklar: o => { const r = tur('tipp', o); return `Legg sammen alle turene: 140 km med last, 140 km tom og 4 × 20 min = 1 t 20 min lasting og tipping. Selvkost ${kr(r.selvkost)} × 1,12 = ${kr(r.selvkost * 1.12)}. Påslaget, ${kr(r.selvkost * 0.12)}, er fortjenesten.`; } },
+
+  { id: 'retur', tittel: 'Ta returlasten?', niva: ['vg', 'etter'], tema: 'Sammenlign', veh: 'semi',
+    tekst: '<p>Vogntoget kjører <b>220 km med last</b> og skal etter planen kjøre <b>220 km tomt</b> hjem. Snittfart <b>65 km/t</b>, <b>1,5 timer</b> lasting og lossing, ingen bompenger.</p><p>En kunde på veien hjem vil sende gods. Det gir <b>40 km omvei</b> (hele hjemturen, 260 km, blir da med last) og <b>1,5 timer</b> ekstra lasting og lossing. Kunden betaler <b>5 500 kr</b>.</p><p>Tips: Regn ut selvkosten for begge turene i Turkalkylen, eller bruk Sammenlign.</p>',
+    sp: 'Hvor mye bedre blir resultatet med returlasten? (Skriv minus hvis det blir dårligere.)', type: 'tall', enhet: 'kr', tol: 0.05, abs: 100,
+    o: { lastetKm: 220, tomKm: 220, snittfart: 65, lastetid: 1.5 },
+    fasit: o => 5500 - (tur('semi', { ...o, lastetKm: 480, tomKm: 0, lastetid: 3 }).selvkost - tur('semi', o).selvkost),
+    forklar: o => { const a = tur('semi', o), b = tur('semi', { ...o, lastetKm: 480, tomKm: 0, lastetid: 3 }); return `Uten returlast: ${kr(a.selvkost)}. Med returlast (480 km med last, 3 timer lasting): ${kr(b.selvkost)}. Returlasten koster ${kr(b.selvkost - a.selvkost)} ekstra, men gir 5 500 kr. Resultatet blir ${kr(5500 - (b.selvkost - a.selvkost))} bedre. Tomkjøring er en av de største pengesluken i transport.`; } },
+
+  { id: 'eldiesel', tittel: 'Diesel eller el?', niva: ['etter', 'vg'], tema: 'Sammenlign', veh: 'semi',
+    tekst: '<p>Firmaet vurderer å bytte et vogntog med et el-vogntog. Den faste dagsturen er <b>160 km med last</b> og <b>160 km tom</b>, snittfart <b>65 km/t</b>, <b>2 timer</b> lasting og lossing og <b>900 kr</b> i bompenger (dieselpris).</p><p>Bruk standardtallene, og regn turen med begge bilene. Se også på CO₂.</p>',
+    sp: 'Hvilken bil har lavest selvkost på denne turen?', type: 'valg',
+    valg: ['Vogntog (diesel)', 'El-vogntog', 'De koster omtrent det samme (under 2 % forskjell)'],
+    o: { lastetKm: 160, tomKm: 160, snittfart: 65, lastetid: 2, bom: 900 },
+    fasit: o => { const d = tur('semi', o).selvkost, e = tur('elsemi', o).selvkost; return Math.abs(d - e) / d < 0.02 ? 2 : (d < e ? 0 : 1); },
+    forklar: o => { const d = tur('semi', o), e = tur('elsemi', o); return `Diesel: ${kr(d.selvkost)} og ${n0(d.co2)} kg CO₂. El: ${kr(e.selvkost)} og ${n0(e.co2)} kg CO₂. El-bilen er dyrere å kjøpe og har høyere faste kostnader per time, men strøm, vedlikehold, bompenger og avgifter er billigere. Jo flere kilometer, jo bedre blir el. Prøv å endre støtten fra Enova eller andelen hurtiglading i Avansert.`; } },
+
+  { id: 'hviletid', tittel: 'Rekker sjåføren det?', niva: ['grunn', 'etter'], tema: 'Kjøre- og hviletid', veh: 'semi',
+    tekst: '<p>En sjåfør skal kjøre <b>620 km</b> i løpet av dagen. Snittfarten er <b>68 km/t</b>. Hun har ikke brukt noen dager med utvidet kjøretid denne uka.</p><p>Legg turen inn i kalkylen og se på kjøretiden.</p>',
+    sp: 'Hva sier kjøre- og hviletidsreglene?', type: 'valg',
+    valg: ['Det er greit, kjøretiden er under 9 timer', 'Lovlig, fordi dette kan være en av de to dagene i uka med inntil 10 timer kjøretid', 'Ulovlig, turen må alltid deles over to dager', 'Lovlig bare hvis hun tar én pause på 45 minutter'],
+    o: { lastetKm: 620, snittfart: 68 },
+    fasit: () => 1,
+    forklar: o => { const r = tur('semi', o); return `620 km / 68 km/t = ${t(r.kjoretid)} kjøretid. Daglig kjøretid er 9 timer, men den kan utvides til 10 timer to ganger i uka. Etter 4,5 timer kjøring må hun ta 45 minutters pause (kan deles i 15 + 30), så her trengs ${r.antPauser} pauser. Dette gir en arbeidsdag på ${t(r.arbeidstid)} før lasting og lossing.`; } },
+
+  { id: 'vente', tittel: 'Hva koster ventetid?', niva: ['etter', 'vg'], tema: 'Timekost', veh: 'semi',
+    tekst: '<p>Kunden har ikke godset klart, og vogntoget står og venter. Firmaet vurderer å fakturere ventetid.</p><p>Se på tidskostnadene i regnestykket. Bruk standardtallene for vogntoget.</p>',
+    sp: 'Hva koster én time venting for firmaet (sjåfør, bil og administrasjon)?', type: 'tall', enhet: 'kr/t', tol: 0.03,
+    o: { ventetid: 1 },
+    fasit: () => { const k = timekost(FIRMA, VEH.semi); return k.sjafor + k.bil + k.admin; },
+    forklar: () => { const k = timekost(FIRMA, VEH.semi); return `Sjåfør ${kr(k.sjafor)}/t (lønn ${FIRMA.timelonn} kr + feriepenger, arbeidsgiveravgift, pensjon og forsikring), bilens faste kostnader ${kr(k.bil)}/t og administrasjon ${kr(k.admin)}/t. Til sammen ${kr(k.sjafor + k.bil + k.admin)} per time, selv om bilen står stille. Derfor tar mange transportører betalt for ventetid etter en viss tid.`; } },
+
+  { id: 'nullpunkt', tittel: 'Nullpunktet', niva: ['vg', 'etter'], tema: 'Årsregnskap', veh: 'dist', aar: true,
+    tekst: '<p>Gå til <b>Årsregnskap</b> med distribusjonsbilen og standardtallene. Bilen kjører 180 km per driftsdag og får inntekten som står der.</p><p>De faste kostnadene må betales uansett hvor mye bilen går.</p>',
+    sp: 'Hvor mange driftsdager i året må bilen gå for at firmaet ikke skal tape penger på den?', type: 'tall', enhet: 'dager', tol: 0, abs: 3,
+    o: {},
+    fasit: () => Math.ceil(beregnAar(FIRMA, VEH.dist, aarStandard('dist')).nullpunkt),
+    forklar: () => { const a = aarStandard('dist'), r = beregnAar(FIRMA, VEH.dist, a); return `Hver driftsdag gir ${kr(a.inntektDag)} i inntekt og koster ${kr(r.varDag)} i sjåfør, diesel, slitasje og bom. Det som blir igjen, ${kr(r.db)}, er dekningsbidraget per dag. Faste kostnader ${kr(r.faste)} / ${kr(r.db)} = ${n1(r.nullpunkt)} dager, altså ${Math.ceil(r.nullpunkt)} driftsdager. Hver dag over det er overskudd.`; } },
+
+  { id: 'co2', tittel: 'Utslipp fra tippbilen', niva: ['grunn', 'vg'], tema: 'Miljø', veh: 'tipp',
+    tekst: '<p>Tippbilen kjører <b>120 km med last</b> og <b>120 km tom</b> på en dag. Snittfart <b>50 km/t</b>, normal kjørestil, ingen tomgang.</p><p>Ett liter diesel gir omtrent 2,6 kg CO₂.</p>',
+    sp: 'Hvor mange kg CO₂ slipper bilen ut på turen?', type: 'tall', enhet: 'kg', tol: 0.04,
+    o: { lastetKm: 120, tomKm: 120, snittfart: 50 },
+    fasit: o => tur('tipp', o).co2,
+    forklar: o => { const r = tur('tipp', o); return `Med last bruker bilen ${n1(r.e.perLastet)} l/100 km (80 % lastgrad), tom ${VEH.tipp.tom} l/100 km. Det blir ${n1(r.e.mengde)} liter, og ${n1(r.e.mengde)} × 2,6 = ${n0(r.co2)} kg CO₂. Prøv økonomisk kjørestil og se hvor mye du sparer.`; } },
+
+  { id: 'fastpris', tittel: 'Kunden setter prisen', niva: ['etter', 'vg'], tema: 'Tilbud', veh: 'eldist',
+    tekst: '<p>En dagligvarekjede tilbyr fast <b>6 000 kr</b> for en runde med el-distribusjonsbilen: <b>130 km med last</b>, <b>30 km tom</b>, snittfart <b>40 km/t</b>, <b>2,5 timer</b> lossing og <b>300 kr</b> i bompenger (dieselpris – el-rabatten trekkes fra av kalkylen).</p>',
+    sp: 'Hvor stort blir resultatet for firmaet? (Skriv minus hvis det blir tap.)', type: 'tall', enhet: 'kr', tol: 0.05, abs: 100,
+    o: { lastetKm: 130, tomKm: 30, snittfart: 40, lastetid: 2.5, bom: 300 },
+    fasit: o => 6000 - tur('eldist', o).selvkost,
+    forklar: o => { const r = tur('eldist', o); return `Selvkost ${kr(r.selvkost)}, så resultatet blir 6 000 − ${n0(r.selvkost)} = ${kr(6000 - r.selvkost)}. Bompengene blir ${kr(r.bom)} etter el-rabatten. Bruk «fast pris fra kunden» i Turkalkylen for å se margin.`; } }
+];
+// ======================= MODELL SLUTT =======================
+
+// ---------- Formatering ----------
+const nf0 = new Intl.NumberFormat('nb-NO', { maximumFractionDigits: 0 });
+const nf1 = new Intl.NumberFormat('nb-NO', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+const nf2 = new Intl.NumberFormat('nb-NO', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+function n0(x) { return nf0.format(Math.round(x)).replace(/^-0$/, '0'); }
+function n1(x) { return nf1.format(x); }
+function kr(x) { return n0(x) + ' kr'; }
+function kr2(x) { return nf2.format(x) + ' kr'; }
+function t(h) { const m = Math.round(h * 60); return Math.floor(m / 60) + ' t ' + String(m % 60).padStart(2, '0') + ' min'; }
+function pct(x) { return nf1.format(x * 100) + ' %'; }
+function sign(x) { return (x > 0.5 ? '+' : '') + kr(x); }
+function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+const $ = id => document.getElementById(id);
+
+// ---------- Tilstand (lagres bare i denne nettleseren) ----------
+const LAGER = 'lastebilkalkylen-v1';
+function nyTilstand() {
+  const v = {}; VEH_ORDER.forEach(k => { v[k] = { ...VEH[k] }; });
+  const a = {}; VEH_ORDER.forEach(k => { a[k] = aarStandard(k); });
+  return { mode: 'enkel', tab: 'tur', veh: 'semi', stil: 'normal', o: { ...OPPDRAG }, f: { ...FIRMA }, v, a,
+    paslag: 10, fastpris: null, cmpPris: null,
+    cmp: [{ veh: 'semi', stil: 'normal', retur: false, omvei: 40, returTid: 1.5, returInntekt: 4000 },
+          { veh: 'elsemi', stil: 'normal', retur: false, omvei: 40, returTid: 1.5, returInntekt: 4000 }],
+    niva: 'alle', loste: {} };
+}
+let S = nyTilstand();
+try {
+  const lagret = JSON.parse(localStorage.getItem(LAGER) || 'null');
+  if (lagret && typeof lagret === 'object') {
+    const base = nyTilstand();
+    S = { ...base, ...lagret, o: { ...base.o, ...lagret.o }, f: { ...base.f, ...lagret.f }, v: { ...base.v }, a: { ...base.a } };
+    VEH_ORDER.forEach(k => { S.v[k] = { ...base.v[k], ...(lagret.v || {})[k] }; S.a[k] = { ...base.a[k], ...(lagret.a || {})[k] }; });
+    if (!VEH[S.veh]) S.veh = 'semi';
+    if (!Array.isArray(S.cmp) || S.cmp.length !== 2) S.cmp = base.cmp;
+  }
+} catch (e) {}
+let lagreTid = 0;
+function lagre() { clearTimeout(lagreTid); lagreTid = setTimeout(() => { try { localStorage.setItem(LAGER, JSON.stringify(S)); } catch (e) {} }, 300); }
+
+// ---------- Felt ----------
+const OPP_FELT = [
+  { k: 'lastetKm', l: 'Kjøring med last', u: 'km', step: 1 },
+  { k: 'tomKm', l: 'Kjøring uten last', u: 'km', step: 1, h: 'For eksempel tom retur' },
+  { k: 'snittfart', l: 'Snittfart', u: 'km/t', step: 1, h: 'Med tettsteder og kø' },
+  { k: 'lastetid', l: 'Lasting og lossing', u: 'timer', step: 0.25 },
+  { k: 'ventetid', l: 'Ventetid', u: 'timer', step: 0.25 },
+  { k: 'bom', l: 'Bompenger', u: 'kr', step: 10, h: 'Pris for dieselbil' },
+  { k: 'ferje', l: 'Ferje', u: 'kr', step: 10 },
+  { k: 'netter', l: 'Overnattinger', u: 'stk', step: 1 },
+  { k: 'lastgrad', l: 'Lastgrad', u: '%', step: 5, adv: true, h: 'Hvor full bilen er med last' },
+  { k: 'tomgang', l: 'Tomgang', u: 'min', step: 5, adv: true, h: 'Motor eller varme på i stillstand' }
+];
+const VEH_FELT = [
+  { k: 'pris', l: 'Innkjøpspris', u: 'kr', step: 10000 },
+  { k: 'stotte', l: 'Støtte (Enova)', u: 'kr', step: 10000, el: true },
+  { k: 'rest', l: 'Restverdi ved salg', u: 'kr', step: 10000 },
+  { k: 'aar', l: 'Brukstid', u: 'år', step: 1 },
+  { k: 'tom', l: 'Forbruk tom', u: 'l/100 km', step: 1, elU: 'kWh/100 km' },
+  { k: 'full', l: 'Forbruk full last', u: 'l/100 km', step: 1, elU: 'kWh/100 km' },
+  { k: 'rekk', l: 'Rekkevidde', u: 'km', step: 10, el: true, h: 'Før den må lade underveis' },
+  { k: 'dekk', l: 'Dekk', u: 'kr/km', step: 0.05 },
+  { k: 'vedl', l: 'Vedlikehold og reparasjon', u: 'kr/km', step: 0.05 },
+  { k: 'forsikring', l: 'Forsikring', u: 'kr/år', step: 1000 },
+  { k: 'avgifter', l: 'Vektårsavgift m.m.', u: 'kr/år', step: 500 },
+  { k: 'nyttelast', l: 'Nyttelast', u: 'tonn', step: 0.5 }
+];
+const FIRMA_FELT = [
+  { s: 'Sjåfør' },
+  { k: 'timelonn', l: 'Timelønn', u: 'kr/t', step: 1 },
+  { k: 'fp', l: 'Feriepenger', u: '%', step: 0.1 },
+  { k: 'aga', l: 'Arbeidsgiveravgift', u: '%', step: 0.1 },
+  { k: 'otp', l: 'Pensjon (OTP)', u: '%', step: 0.5 },
+  { k: 'andreSos', l: 'Forsikring, sykelønn m.m.', u: '%', step: 0.5 },
+  { k: 'diett', l: 'Diett per overnatting', u: 'kr', step: 50 },
+  { s: 'Energi og bom' },
+  { k: 'diesel', l: 'Diesel', u: 'kr/l', step: 0.1 },
+  { k: 'adbluePris', l: 'AdBlue', u: 'kr/l', step: 0.5 },
+  { k: 'adblueAndel', l: 'AdBlue av diesel', u: '%', step: 0.5 },
+  { k: 'stromDepot', l: 'Strøm i depot', u: 'kr/kWh', step: 0.1 },
+  { k: 'stromLade', l: 'Hurtiglading', u: 'kr/kWh', step: 0.1 },
+  { k: 'andelLade', l: 'Andel hurtiglading', u: '%', step: 5 },
+  { k: 'elBomRabatt', l: 'Bomrabatt for el', u: '%', step: 5, h: 'Varierer mellom bomselskap' },
+  { s: 'Drift' },
+  { k: 'rente', l: 'Rente på kapital', u: '%', step: 0.1 },
+  { k: 'admin', l: 'Administrasjon per bil', u: 'kr/år', step: 5000, h: 'Kontor, IT, trafikkleder' },
+  { k: 'garasje', l: 'Garasje og parkering', u: 'kr/år', step: 1000 },
+  { k: 'driftsdager', l: 'Driftsdager', u: 'dager/år', step: 1 },
+  { k: 'timerDag', l: 'Timer per driftsdag', u: 'timer', step: 0.5 }
+];
+const AAR_FELT = [
+  { k: 'driftsdager', g: 'f', l: 'Driftsdager', u: 'dager/år', step: 1 },
+  { k: 'timerDag', g: 'f', l: 'Timer per dag', u: 'timer', step: 0.5 },
+  { k: 'kmDag', l: 'Kjøring per dag', u: 'km', step: 10 },
+  { k: 'inntektDag', l: 'Inntekt per dag', u: 'kr', step: 100 },
+  { k: 'tomAndel', l: 'Andel tomkjøring', u: '%', step: 5 },
+  { k: 'lastgrad', l: 'Lastgrad', u: '%', step: 5, adv: true },
+  { k: 'bomDag', l: 'Bom og ferje per dag', u: 'kr', step: 50 }
+];
+
+function feltHTML(def, g, val, enhet) {
+  if (def.s) return `<div class="subh">${esc(def.s)}</div>`;
+  const id = `f-${g}-${def.k}`;
+  return `<label class="f${def.adv ? ' adv' : ''}" for="${id}"><span class="l">${esc(def.l)}</span>
+    <span class="in"><input type="number" inputmode="decimal" id="${id}" data-g="${g}" data-k="${def.k}" min="${def.min ?? (def.k === 'tomAndel' ? 0 : 0)}" step="${def.step}" value="${fmtIn(val)}"><i>${esc(enhet || def.u)}</i></span>
+    ${def.h ? `<small>${esc(def.h)}</small>` : ''}</label>`;
+}
+function fmtIn(x) { return x == null || !isFinite(x) ? '' : String(Math.round(x * 1000) / 1000); }
+function tall(s) { if (s == null) return NaN; s = String(s).replace(/\s| /g, '').replace(',', '.').replace('−', '-'); return s === '' ? NaN : Number(s); }
+
+function tegnFelt() {
+  const v = S.v[S.veh], el = v.energi === 'el';
+  $('oppFields').innerHTML = OPP_FELT.map(d => feltHTML(d, 'o', S.o[d.k])).join('');
+  $('vehFields').innerHTML = VEH_FELT.filter(d => !d.el || el).map(d => feltHTML(d, 'v', v[d.k], el && d.elU ? d.elU : d.u)).join('') +
+    `<div class="f wide"><button type="button" class="btn" id="vehReset">Standardtall for ${esc(v.navn.toLowerCase())}</button></div>`;
+  $('firmaFields').innerHTML = FIRMA_FELT.map(d => feltHTML(d, 'f', S.f[d.k])).join('');
+  $('vehReset').onclick = () => { S.v[S.veh] = { ...VEH[S.veh] }; tegnFelt(); oppdater(); };
+}
+function tegnAarFelt() {
+  const a = S.a[S.veh];
+  $('aarFields').innerHTML = AAR_FELT.map(d => feltHTML(d, d.g === 'f' ? 'f' : 'a', d.g === 'f' ? S.f[d.k] : a[d.k])).join('');
+}
+// Ett felt kan finnes i flere faner (driftsdager); hold dem like.
+function syncFelt(g, k, kilde) {
+  const val = g === 'o' ? S.o[k] : g === 'f' ? S.f[k] : g === 'v' ? S.v[S.veh][k] : S.a[S.veh][k];
+  document.querySelectorAll(`input[data-g="${g}"][data-k="${k}"]`).forEach(i => { if (i !== kilde) i.value = fmtIn(val); });
+}
+document.addEventListener('input', e => {
+  const i = e.target;
+  if (!i.dataset || !i.dataset.g) return;
+  let x = tall(i.value);
+  if (!isFinite(x)) return;
+  if (x < 0 && i.dataset.k !== 'inntektDag') x = 0;
+  const g = i.dataset.g, k = i.dataset.k;
+  if (g === 'o') S.o[k] = x; else if (g === 'f') S.f[k] = x; else if (g === 'v') S.v[S.veh][k] = x; else if (g === 'a') S.a[S.veh][k] = x;
+  syncFelt(g, k, i);
+  oppdater();
+});
+
+// ---------- Kjøretøy og kjørestil ----------
+function tegnTyper() {
+  $('types').innerHTML = VEH_ORDER.map(k => { const v = VEH[k];
+    return `<button type="button" class="type" data-veh="${k}" aria-pressed="${k === S.veh}"><span class="code">${v.kode}</span><span class="nm">${esc(v.navn)}</span><span class="sb">${esc(v.kort)}</span></button>`; }).join('');
+  $('types').querySelectorAll('.type').forEach(b => b.onclick = () => velgVeh(b.dataset.veh));
+  $('stil').innerHTML = Object.keys(STIL).map(k => `<button type="button" data-stil="${k}" aria-pressed="${k === S.stil}">${STIL[k].navn}</button>`).join('');
+  $('stil').querySelectorAll('button').forEach(b => b.onclick = () => { S.stil = b.dataset.stil; tegnTyper(); oppdater(); });
+  $('stilNote').textContent = STIL[S.stil].tekst;
+}
+function velgVeh(k) { S.veh = k; tegnTyper(); tegnFelt(); tegnAarFelt(); oppdater(); }
+
+// ---------- Turkalkyle ----------
+const SERIER = [
+  { k: 'sjafor', n: 'Sjåfør', c: 'var(--s1)' },
+  { k: 'biladm', n: 'Bil og administrasjon', c: 'var(--s2)' },
+  { k: 'energi', n: 'Energi', c: 'var(--s3)' },
+  { k: 'slit', n: 'Dekk og vedlikehold', c: 'var(--s4)' },
+  { k: 'direkte', n: 'Bom, ferje og diett', c: 'var(--s5)' }
+];
+function prisFor(r) { return S.fastpris != null && isFinite(S.fastpris) ? S.fastpris : r.selvkost * (1 + S.paslag / 100); }
+
+function oppdaterTur() {
+  const f = S.f, v = S.v[S.veh], o = S.o, r = beregnTur(f, v, S.stil, o), e = r.e;
+  const pris = prisFor(r), res = pris - r.selvkost;
+
+  $('kSelv').textContent = kr(r.selvkost);
+  $('kSelvS').textContent = r.tonn > 0 && o.lastetKm > 0 ? `${kr(r.perTonn)} per tonn (${n1(r.tonn)} t last)` : v.navn;
+  $('kKm').textContent = r.km > 0 ? kr2(r.perKm) : '–';
+  $('kKmS').textContent = `${n0(r.km)} km, ${n0(o.tomKm / Math.max(1, r.km) * 100)} % tomt`;
+  $('kTid').textContent = t(r.arbeidstid);
+  $('kTidS').textContent = `herav ${t(r.kjoretid)} kjøring`;
+  $('kRes').textContent = sign(res);
+  $('kRes').className = res >= 0 ? 'pos' : 'neg';
+  $('kResS').textContent = `med pris ${kr(pris)}`;
+  $('sbSelv').textContent = kr(r.selvkost); $('sbRes').textContent = sign(res);
+
+  // Varsler: kjøre- og hviletid, rekkevidde
+  const w = [];
+  if (r.kjoretid > 10) w.push(['!', `Kjøretiden er ${t(r.kjoretid)}. Det er over 10 timer, som er mest du kan kjøre på én dag. Turen må deles over flere dager (sett inn overnatting) eller kjøres med to sjåfører.`]);
+  else if (r.kjoretid > 9) w.push(['!', `Kjøretiden er ${t(r.kjoretid)}, over 9 timer. Det er lov bare to dager i uka (inntil 10 timer).`]);
+  if (r.arbeidstid > 13 && o.netter === 0) w.push(['!', `Arbeidsdagen blir ${t(r.arbeidstid)}. Sjåføren skal ha minst 11 timers døgnhvile (kan reduseres til 9 timer tre ganger mellom to ukehviler), så dette går ikke uten overnatting.`]);
+  if (r.antPauser > 0) w.push(['i', `Etter 4,5 timer kjøring kreves 45 minutters pause. Kalkylen har lagt inn ${r.antPauser} pause${r.antPauser === 1 ? '' : 'r'}.`, 'info']);
+  if (r.ladestopp > 0) w.push(['i', `Turen er lengre enn rekkevidden på ${n0(v.rekk)} km. Kalkylen har lagt inn ${r.ladestopp} ladestopp på 45 minutter.`, 'info']);
+  $('warns').innerHTML = w.map(([ic, txt, cls]) => `<div class="warn ${cls || ''}"><b class="ic">${ic}</b><span>${txt}</span></div>`).join('');
+
+  // Stablet stolpe
+  const del = { sjafor: r.sjafor, biladm: r.bil + r.admin, energi: e.kost + e.adblue, slit: r.dekk + r.vedl, direkte: r.direkte };
+  const sum = Math.max(1, r.selvkost);
+  $('stack').innerHTML = SERIER.filter(s => del[s.k] > 0.5).map(s =>
+    `<div tabindex="0" style="flex:${del[s.k] / sum};background:${s.c}" data-tip="<b>${esc(s.n)}</b><br>${kr(del[s.k])} · ${pct(del[s.k] / sum)}" aria-label="${esc(s.n)} ${kr(del[s.k])}"></div>`).join('');
+  $('legend').innerHTML = SERIER.map(s => `<span><i style="background:${s.c}"></i>${esc(s.n)} <em>${pct(del[s.k] / sum)}</em></span>`).join('');
+
+  // Regnestykket
+  const dot = c => `<span class="dot" style="background:${c}"></span>`;
+  const rad = (navn, how, x, c) => `<tr><td>${c ? dot(c) : ''}${navn}</td><td class="how">${how}</td><td>${n0(x)}</td></tr>`;
+  const grp = n => `<tr class="grp"><td colspan="3">${n}</td></tr>`;
+  const sub = (n, x) => `<tr class="sub"><td>${n}</td><td class="how"></td><td>${n0(x)}</td></tr>`;
+  const tk = r.tk, at = n1(r.arbeidstid);
+  let h = grp('Tidskostnader – betales for hver time bilen er i bruk');
+  h += rad('Sjåfør', `${at} t × ${n0(tk.sjafor)} kr/t`, r.sjafor, 'var(--s1)');
+  h += rad('Bilens faste kostnader', `${at} t × ${n0(tk.bil)} kr/t`, r.bil, 'var(--s2)');
+  h += rad('Administrasjon', `${at} t × ${n0(tk.admin)} kr/t`, r.admin, 'var(--s2)');
+  h += sub('Sum tid', r.tid);
+  h += grp('Kilometerkostnader – betales for hver kilometer');
+  h += rad(e.el ? 'Strøm' : 'Diesel', `${n1(e.mengde)} ${e.enhet} × ${nf2.format(e.pris)} kr`, e.kost, 'var(--s3)');
+  if (!e.el) h += rad('AdBlue', `${n1(e.adblueL)} l × ${nf2.format(f.adbluePris)} kr`, e.adblue, 'var(--s3)');
+  h += rad('Dekk', `${n0(r.km)} km × ${nf2.format(v.dekk * r.stil.slit)} kr`, r.dekk, 'var(--s4)');
+  h += rad('Vedlikehold og reparasjon', `${n0(r.km)} km × ${nf2.format(v.vedl * r.stil.slit)} kr`, r.vedl, 'var(--s4)');
+  h += sub('Sum kilometer', r.kmkost);
+  h += grp('Direkte kostnader for oppdraget');
+  h += rad('Bompenger', e.el && o.bom > 0 ? `${n0(o.bom)} kr − ${n0(f.elBomRabatt)} % el-rabatt` : '', r.bom, 'var(--s5)');
+  h += rad('Ferje', '', r.ferje, 'var(--s5)');
+  h += rad('Diett og nattillegg', o.netter ? `${n0(o.netter)} × ${n0(f.diett)} kr` : '', r.diett, 'var(--s5)');
+  h += sub('Sum direkte', r.direkte);
+  h += `<tr class="tot"><td>Selvkost</td><td class="how"></td><td>${n0(r.selvkost)}</td></tr>`;
+  $('rows').innerHTML = h;
+  $('regnS').textContent = `${v.navn} · ${STIL[S.stil].navn.toLowerCase()} kjøring · ${n0(r.co2)} kg CO₂`;
+
+  // Tidslinje
+  const deler = [['tl-k', 'Kjøring', r.kjoretid], ['tl-p', 'Pauser', r.pauser], ['tl-c', 'Lading', r.ladetid], ['tl-l', 'Lasting og lossing', o.lastetid], ['tl-v', 'Venting', o.ventetid]].filter(d => d[2] > 0.001);
+  const tsum = Math.max(0.01, r.arbeidstid);
+  $('timeline').innerHTML = deler.map(([c, n, x]) => `<div class="${c}" style="flex:${x / tsum}" data-tip="<b>${n}</b><br>${t(x)}">${x / tsum > 0.12 ? t(x).replace(' min', '') : ''}</div>`).join('');
+  $('tlLegend').innerHTML = deler.map(([c, n, x]) => `<span><i class="${c}"></i>${n} <em>${t(x)}</em></span>`).join('');
+  $('tidS').textContent = `Arbeidstid ${t(r.arbeidstid)}`;
+
+  // Pris
+  $('pPris').textContent = kr(pris);
+  $('pRes').textContent = sign(res); $('pRes').className = res >= 0 ? 'pos' : 'neg';
+  $('pMarg').textContent = pris > 0 ? pct(res / pris) : '–';
+  return r;
+}
+
+// ---------- Sammenlign ----------
+function cmpTur(c) {
+  const v = S.v[c.veh], o = { ...S.o };
+  if (c.retur) { o.lastetKm = S.o.lastetKm + S.o.tomKm + c.omvei; o.tomKm = 0; o.lastetid = S.o.lastetid + c.returTid; }
+  return beregnTur(S.f, v, c.stil, o);
+}
+function tegnCmp() {
+  $('cmpCols').innerHTML = S.cmp.map((c, i) => `
+    <div class="box" data-i="${i}">
+      <h3 style="margin-bottom:10px"><span class="ab">${'AB'[i]}</span><span class="cmpNavn"></span></h3>
+      <div class="fields">
+        <label class="f wide"><span class="l">Kjøretøy</span><select data-c="veh">${VEH_ORDER.map(k => `<option value="${k}"${k === c.veh ? ' selected' : ''}>${esc(VEH[k].navn)}</option>`).join('')}</select></label>
+        <div class="f wide"><span class="l">Kjørestil</span><div class="seg full" role="group" aria-label="Kjørestil ${'AB'[i]}">${Object.keys(STIL).map(k => `<button type="button" data-cs="${k}" aria-pressed="${k === c.stil}">${STIL[k].navn}</button>`).join('')}</div></div>
+        <label class="chk f wide" style="display:flex"><input type="checkbox" data-c="retur"${c.retur ? ' checked' : ''}> Ta returlast i stedet for å kjøre tomt</label>
+        <div class="fields f wide" data-ret ${c.retur ? '' : 'hidden'}>
+          <label class="f"><span class="l">Omvei</span><span class="in"><input type="number" inputmode="decimal" data-cn="omvei" value="${fmtIn(c.omvei)}" min="0" step="5"><i>km</i></span></label>
+          <label class="f"><span class="l">Ekstra lasting og lossing</span><span class="in"><input type="number" inputmode="decimal" data-cn="returTid" value="${fmtIn(c.returTid)}" min="0" step="0.25"><i>timer</i></span></label>
+          <label class="f wide"><span class="l">Inntekt fra returlasten</span><span class="in"><input type="number" inputmode="decimal" data-cn="returInntekt" value="${fmtIn(c.returInntekt)}" min="0" step="100"><i>kr</i></span></label>
+        </div>
+      </div>
+    </div>`).join('');
+  $('cmpCols').querySelectorAll('.box').forEach(b => {
+    const c = S.cmp[+b.dataset.i];
+    b.querySelector('select').onchange = e => { c.veh = e.target.value; oppdater(); };
+    b.querySelectorAll('[data-cs]').forEach(x => x.onclick = () => { c.stil = x.dataset.cs; b.querySelectorAll('[data-cs]').forEach(y => y.setAttribute('aria-pressed', y === x)); oppdater(); });
+    b.querySelector('[data-c="retur"]').onchange = e => { c.retur = e.target.checked; b.querySelector('[data-ret]').hidden = !c.retur; oppdater(); };
+    b.querySelectorAll('[data-cn]').forEach(x => x.oninput = () => { const n = tall(x.value); if (isFinite(n) && n >= 0) { c[x.dataset.cn] = n; oppdater(); } });
+  });
+}
+function oppdaterCmp(rTur) {
+  const basePris = S.cmpPris != null && isFinite(S.cmpPris) ? S.cmpPris : prisFor(rTur);
+  $('cmpPrisS').textContent = S.cmpPris == null ? `Tomt felt = prisen fra Turkalkylen (${kr(prisFor(rTur))})` : 'Samme pris for A og B';
+  if (document.activeElement !== $('cmpPris')) $('cmpPris').value = S.cmpPris == null ? '' : fmtIn(S.cmpPris);
+  const R = S.cmp.map(c => { const r = cmpTur(c); const inn = basePris + (c.retur ? c.returInntekt : 0); return { c, r, inn, res: inn - r.selvkost }; });
+  $('cmpCols').querySelectorAll('.cmpNavn').forEach((s, i) => { const c = S.cmp[i]; s.textContent = `${VEH[c.veh].navn}, ${STIL[c.stil].navn.toLowerCase()}${c.retur ? ', returlast' : ''}`; });
+  const linjer = [
+    ['Selvkost', x => x.r.selvkost, kr, -1],
+    ['Inntekt', x => x.inn, kr, 1],
+    ['Resultat', x => x.res, kr, 1],
+    ['Kilometer', x => x.r.km, v => n0(v) + ' km', 0],
+    ['Arbeidstid', x => x.r.arbeidstid, t, -1],
+    ['Energi', x => x.r.e.mengde, null, 0],
+    ['Energikostnad', x => x.r.e.kost + x.r.e.adblue, kr, -1],
+    ['Bompenger', x => x.r.bom, kr, -1],
+    ['Bilens faste kostnader og adm.', x => x.r.bil + x.r.admin, kr, -1],
+    ['CO₂', x => x.r.co2, v => n0(v) + ' kg', -1],
+    ['Selvkost per km', x => x.r.perKm, kr2, -1]
+  ];
+  $('cmpRows').innerHTML = linjer.map(([n, fn, fmt, god]) => {
+    const a = fn(R[0]), b = fn(R[1]);
+    if (!fmt) return `<tr><td>${n}</td><td>${n1(a)} ${R[0].r.e.enhet}</td><td>${n1(b)} ${R[1].r.e.enhet}</td><td></td></tr>`;
+    const d = b - a, cls = god === 0 || Math.abs(d) < 0.5 ? '' : ((d > 0) === (god > 0) ? 'pos' : 'neg');
+    const ds = fmt === t ? (d < 0 ? '−' : '+') + t(Math.abs(d)) : (d > 0 ? '+' : d < 0 ? '−' : '') + fmt(Math.abs(d));
+    return `<tr${n === 'Resultat' ? ' class="tot"' : ''}><td>${n}</td><td>${fmt(a)}</td><td>${fmt(b)}</td><td class="${cls}">${ds}</td></tr>`;
+  }).join('');
+  const [A, B] = R, d = B.res - A.res;
+  const bedre = Math.abs(d) < 1 ? null : d > 0 ? 'B' : 'A';
+  $('cmpVerdict').innerHTML = (bedre ? `<p><b>${bedre}</b> gir ${kr(Math.abs(d))} bedre resultat på oppdraget.</p>` : '<p>A og B gir samme resultat.</p>') +
+    `<p>Over ${n0(S.f.driftsdager)} slike turer i året blir forskjellen ${kr(Math.abs(d) * S.f.driftsdager)}. CO₂: ${n0(A.r.co2)} kg mot ${n0(B.r.co2)} kg per tur.</p>`;
+}
+$('cmpPris').addEventListener('input', e => { const n = tall(e.target.value); S.cmpPris = isFinite(n) ? n : null; oppdater(); });
+
+// ---------- Årsregnskap ----------
+function oppdaterAar() {
+  const f = S.f, v = S.v[S.veh], a = S.a[S.veh], r = beregnAar(f, v, a), tk = r.tk;
+  $('aarVeh').textContent = v.navn.toLowerCase();
+  $('aRes').textContent = sign(r.resultat); $('aRes').className = r.resultat >= 0 ? 'pos' : 'neg';
+  $('aResS').textContent = r.inntekt > 0 ? `${pct(r.resultat / r.inntekt)} av inntektene` : '';
+  $('aInn').textContent = kr(r.inntekt); $('aInnS').textContent = `${n0(f.driftsdager)} dager × ${kr(a.inntektDag)}`;
+  $('aKost').textContent = kr(r.kostnad); $('aKostS').textContent = `${n0(r.km)} km · ${n1(r.co2 / 1000)} tonn CO₂`;
+  $('aBe').textContent = isFinite(r.nullpunkt) ? `${Math.ceil(r.nullpunkt)} dager` : 'Nås ikke';
+  $('aBeS').textContent = isFinite(r.nullpunkt) ? `dekningsbidrag ${kr(r.db)} per dag` : 'Hver dag koster mer enn den gir';
+
+  const d = f.driftsdager, dot = c => `<span class="dot" style="background:${c}"></span>`;
+  const rad = (n, how, x, c) => `<tr><td>${c ? dot(c) : ''}${n}</td><td class="how">${how}</td><td>${n0(x)}</td></tr>`;
+  const grp = n => `<tr class="grp"><td colspan="3">${n}</td></tr>`;
+  let h = grp('Inntekter');
+  h += rad('Frakt', `${n0(d)} dager × ${n0(a.inntektDag)} kr`, r.inntekt);
+  h += grp('Variable kostnader – følger driftsdagene');
+  h += rad('Sjåfør', `${n0(d)} × ${n1(f.timerDag)} t × ${n0(tk.sjafor)} kr/t`, d * r.dag.sjafor, 'var(--s1)');
+  h += rad(r.e.el ? 'Strøm' : 'Diesel og AdBlue', `${n0(r.km)} km`, d * (r.dag.energi + r.dag.adblue), 'var(--s3)');
+  h += rad('Dekk og vedlikehold', `${n0(r.km)} km × ${nf2.format(v.dekk + v.vedl)} kr`, d * (r.dag.dekk + r.dag.vedl), 'var(--s4)');
+  h += rad('Bom og ferje', `${n0(d)} × ${n0(a.bomDag)} kr`, d * r.dag.bom, 'var(--s5)');
+  h += `<tr class="sub"><td>Sum variable</td><td class="how"></td><td>${n0(d * r.varDag)}</td></tr>`;
+  h += grp('Faste kostnader – samme beløp uansett');
+  h += rad('Avskrivning', `(${n0(v.pris)}${v.stotte ? ' − ' + n0(v.stotte) : ''} − ${n0(v.rest)}) / ${n0(v.aar)} år`, tk.avskr, 'var(--s2)');
+  h += rad('Rente på kapital', `${n1(f.rente)} % av snittverdien`, tk.rente, 'var(--s2)');
+  h += rad('Forsikring', '', v.forsikring, 'var(--s2)');
+  h += rad('Vektårsavgift m.m.', '', v.avgifter, 'var(--s2)');
+  h += rad('Garasje og parkering', '', f.garasje, 'var(--s2)');
+  h += rad('Administrasjon', '', f.admin, 'var(--s2)');
+  h += `<tr class="sub"><td>Sum faste</td><td class="how"></td><td>${n0(r.faste)}</td></tr>`;
+  h += `<tr class="tot"><td>Resultat</td><td class="how"></td><td class="${r.resultat >= 0 ? 'pos' : 'neg'}">${n0(r.resultat)}</td></tr>`;
+  $('aarRows').innerHTML = h;
+  $('aarTblS').textContent = `${v.navn} · ${n0(d)} driftsdager`;
+  tegnAarGraf(r, d);
+}
+function tegnAarGraf(r, cur) {
+  // Tegnes i faktisk bredde, så teksten holder samme størrelse på mobil
+  const W = Math.max(300, Math.round($('aarChart').clientWidth) || 720), H = W < 520 ? 220 : 260, L = 58, R = 12, T = 14, B = 34;
+  const x0 = 100, x1 = 300, xs = x => L + (x - x0) / (x1 - x0) * (W - L - R);
+  const vals = []; for (let x = x0; x <= x1; x += 5) vals.push([x, r.resultatVed(x)]);
+  let lo = Math.min(0, ...vals.map(v => v[1])), hi = Math.max(0, ...vals.map(v => v[1]));
+  const span = hi - lo || 1, step = Math.pow(10, Math.floor(Math.log10(span / 4))); const m = [1, 2, 2.5, 5, 10].find(k => span / (k * step) <= 6) * step;
+  lo = Math.floor(lo / m) * m; hi = Math.ceil(hi / m) * m;
+  const ys = y => T + (hi - y) / (hi - lo) * (H - T - B);
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Årsresultat fra ${x0} til ${x1} driftsdager">`;
+  for (let y = lo; y <= hi + 1e-6; y += m) s += `<line class="${Math.abs(y) < 1e-6 ? 'zero' : 'gl'}" x1="${L}" x2="${W - R}" y1="${ys(y)}" y2="${ys(y)}"/><text class="ax" x="${L - 8}" y="${ys(y) + 4}" text-anchor="end">${Math.abs(y) >= 1e6 ? n1(y / 1e6) + ' mill' : n0(y / 1000) + 'k'}</text>`;
+  for (let x = x0; x <= x1; x += W < 520 ? 50 : 25) s += `<text class="ax" x="${xs(x)}" y="${H - B + 18}" text-anchor="middle">${x}</text>`;
+  s += `<text class="ax" x="${W - R}" y="${H - 2}" text-anchor="end">driftsdager per år</text>`;
+  const be = r.nullpunkt;
+  if (isFinite(be) && be >= x0 && be <= x1) s += `<line class="be" x1="${xs(be)}" x2="${xs(be)}" y1="${T}" y2="${H - B}"/><text class="lbl" x="${xs(be) + 6}" y="${T + 12}">Nullpunkt ${Math.ceil(be)} dager</text>`;
+  s += `<path class="ln" d="${vals.map((v, i) => (i ? 'L' : 'M') + xs(v[0]).toFixed(1) + ' ' + ys(v[1]).toFixed(1)).join(' ')}"/>`;
+  if (cur >= x0 && cur <= x1) s += `<circle class="cur" cx="${xs(cur)}" cy="${ys(r.resultatVed(cur))}" r="5"/><text class="lbl" x="${xs(cur)}" y="${ys(r.resultatVed(cur)) + (r.resultatVed(cur) >= 0 ? -12 : 20)}" text-anchor="middle">I dag: ${n0(cur)} dager</text>`;
+  s += `<g class="hov" hidden><line class="xh" y1="${T}" y2="${H - B}"/><circle class="cur" r="4"/></g>`;
+  s += `<rect x="${L}" y="${T}" width="${W - L - R}" height="${H - T - B}" fill="transparent" class="hit"/></svg>`;
+  const box = $('aarChart'); box.innerHTML = s;
+  const svg = box.querySelector('svg'), hov = svg.querySelector('.hov'), hit = svg.querySelector('.hit');
+  const vis = ev => {
+    const pt = svg.getBoundingClientRect(), px = (ev.clientX - pt.left) / pt.width * W;
+    const dager = Math.round(Math.min(x1, Math.max(x0, x0 + (px - L) / (W - L - R) * (x1 - x0))));
+    const y = r.resultatVed(dager);
+    hov.hidden = false; hov.querySelector('line').setAttribute('x1', xs(dager)); hov.querySelector('line').setAttribute('x2', xs(dager));
+    hov.querySelector('circle').setAttribute('cx', xs(dager)); hov.querySelector('circle').setAttribute('cy', ys(y));
+    visTip(`<b>${dager} driftsdager</b><br>Resultat ${sign(y)}`, ev.clientX, ev.clientY);
+  };
+  hit.addEventListener('pointermove', vis);
+  hit.addEventListener('pointerdown', vis);
+  hit.addEventListener('pointerleave', () => { hov.hidden = true; skjulTip(); });
+}
+$('aarReset').onclick = () => { S.a[S.veh] = aarStandard(S.veh); tegnAarFelt(); oppdater(); };
+
+// ---------- Verktøytips ----------
+const tip = $('tip');
+function visTip(html, x, y) { tip.innerHTML = html; tip.hidden = false; const w = tip.offsetWidth, h = tip.offsetHeight;
+  tip.style.left = Math.min(innerWidth - w - 8, Math.max(8, x + 12)) + 'px'; tip.style.top = Math.max(8, y - h - 12) + 'px'; }
+function skjulTip() { tip.hidden = true; }
+document.addEventListener('pointermove', e => { const d = e.target.closest && e.target.closest('[data-tip]'); if (d) visTip(d.dataset.tip, e.clientX, e.clientY); else if (!e.target.closest('.hit')) skjulTip(); });
+document.addEventListener('focusin', e => { const d = e.target.closest && e.target.closest('[data-tip]'); if (d) { const b = d.getBoundingClientRect(); visTip(d.dataset.tip, b.left + b.width / 2, b.top); } });
+document.addEventListener('focusout', skjulTip);
+addEventListener('scroll', skjulTip, { passive: true });
+
+// ---------- Oppgaver ----------
+const forsok = {};
+function tegnOppgaver() {
+  $('lvl').innerHTML = [['alle', 'Alle'], ...Object.entries(NIVA)].map(([k, n]) => `<button type="button" data-l="${k}" aria-pressed="${k === S.niva}">${n}</button>`).join('');
+  $('lvl').querySelectorAll('button').forEach(b => b.onclick = () => { S.niva = b.dataset.l; tegnOppgaver(); lagre(); });
+  const liste = OPPG.filter(q => S.niva === 'alle' || q.niva.includes(S.niva));
+  $('prog').textContent = `${liste.filter(q => S.loste[q.id]).length} av ${liste.length} løst`;
+  $('tasks').innerHTML = liste.map(q => `
+    <article class="box task" data-id="${q.id}">
+      <div class="top"><div><h3>${esc(q.tittel)}</h3><div class="tags">${q.niva.map(l => `<span class="tag lv">${NIVA[l]}</span>`).join('')}<span class="tag">${esc(q.tema)}</span><span class="tag">${esc(VEH[q.veh].navn)}</span></div></div>
+        ${S.loste[q.id] ? '<span class="done">✓ Løst</span>' : ''}</div>
+      <div class="txt">${q.tekst}</div>
+      <div><button type="button" class="btn" data-klar>${q.aar ? 'Gjør klar årsregnskapet' : q.forhand ? 'Fyll inn oppdraget' : 'Gjør klar kalkylen'}</button></div>
+      <p class="q">${esc(q.sp)}</p>
+      ${q.type === 'tall'
+        ? `<div class="ans"><span class="in"><input type="text" inputmode="decimal" aria-label="Svar" data-svar><i>${esc(q.enhet)}</i></span><button type="button" class="btn pri" data-sjekk>Sjekk svar</button><button type="button" class="btn" data-fasit hidden>Vis fasit</button></div>`
+        : `<div class="opts">${q.valg.map((v, i) => `<label class="opt"><input type="radio" name="v-${q.id}" value="${i}"><span>${esc(v)}</span></label>`).join('')}</div><div class="ans"><button type="button" class="btn pri" data-sjekk>Sjekk svar</button><button type="button" class="btn" data-fasit hidden>Vis fasit</button></div>`}
+      <div class="fb" data-fb hidden></div>
+    </article>`).join('');
+  $('tasks').querySelectorAll('.task').forEach(el => {
+    const q = OPPG.find(x => x.id === el.dataset.id);
+    el.querySelector('[data-klar]').onclick = () => gjorKlar(q);
+    el.querySelector('[data-sjekk]').onclick = () => sjekk(q, el);
+    el.querySelector('[data-fasit]').onclick = () => visFasit(q, el, false);
+    const inp = el.querySelector('[data-svar]'); if (inp) inp.addEventListener('keydown', e => { if (e.key === 'Enter') sjekk(q, el); });
+  });
+}
+function gjorKlar(q) {
+  S.f = { ...FIRMA }; S.v[q.veh] = { ...VEH[q.veh] }; S.veh = q.veh; S.stil = 'normal'; S.fastpris = null; S.paslag = 10;
+  S.o = q.forhand ? { ...BLANK, ...q.o } : { ...BLANK };
+  if (q.aar) { S.a[q.veh] = aarStandard(q.veh); }
+  $('paslag').value = S.paslag; $('fastpris').value = '';
+  tegnTyper(); tegnFelt(); tegnAarFelt(); oppdater();
+  visTab(q.aar ? 'aar' : 'tur');
+  scrollTo({ top: 0, behavior: 'smooth' });
+}
+function sjekk(q, el) {
+  const fb = el.querySelector('[data-fb]'), fasit = q.fasit(q.o);
+  let riktig, svarTxt;
+  if (q.type === 'tall') {
+    const x = tall(el.querySelector('[data-svar]').value);
+    if (!isFinite(x)) { fb.hidden = false; fb.className = 'fb'; fb.innerHTML = '<p>Skriv inn et tall først.</p>'; return; }
+    riktig = Math.abs(x - fasit) <= Math.max(q.tol * Math.abs(fasit), q.abs || 0, 0.005);
+    svarTxt = String(x);
+  } else {
+    const v = el.querySelector('input[type=radio]:checked');
+    if (!v) { fb.hidden = false; fb.className = 'fb'; fb.innerHTML = '<p>Velg et svar først.</p>'; return; }
+    riktig = +v.value === fasit; svarTxt = q.valg[+v.value];
+  }
+  forsok[q.id] = (forsok[q.id] || 0) + 1;
+  kv('svar', { k: q.id, t: q.tittel, a: (riktig ? 'riktig' : 'feil') + ' (' + forsok[q.id] + '. forsøk): ' + svarTxt, m: q.niva.join(',') });
+  if (riktig) { S.loste[q.id] = true; lagre(); visFasit(q, el, true); $('prog').textContent = $('prog').textContent.replace(/^\d+/, OPPG.filter(x => (S.niva === 'alle' || x.niva.includes(S.niva)) && S.loste[x.id]).length); return; }
+  fb.hidden = false; fb.className = 'fb no';
+  let hint = 'Sjekk at alle tallene fra teksten er lagt inn, og at kjøretøyet og standardtallene er riktige (trykk «Gjør klar kalkylen» på nytt).';
+  if (q.type === 'tall' && isFinite(fasit)) {
+    const x = tall(el.querySelector('[data-svar]').value);
+    if (Math.abs(x - fasit) <= 0.15 * Math.abs(fasit)) hint = 'Du er nær. Sjekk et av tallene en gang til – kanskje lasting/lossing, bom eller kjørestil.';
+  }
+  fb.innerHTML = `<p><b>Ikke riktig ennå.</b> ${hint}</p>`;
+  if (forsok[q.id] >= 2) el.querySelector('[data-fasit]').hidden = false;
+}
+function visFasit(q, el, riktig) {
+  const fb = el.querySelector('[data-fb]'), fasit = q.fasit(q.o);
+  const fasitTxt = q.type === 'tall' ? (q.enhet === 'kr/km' ? nf2.format(fasit) : n0(fasit)) + ' ' + q.enhet : q.valg[fasit];
+  if (!riktig) kv('fasit', { k: q.id, t: q.tittel, a: 'viste fasit', m: q.niva.join(',') });
+  fb.hidden = false; fb.className = 'fb ' + (riktig ? 'ok' : '');
+  fb.innerHTML = `<p>${riktig ? '<b>Riktig!</b> ' : ''}Fasit: <b>${esc(fasitTxt)}</b></p><p>${q.forklar(q.o)}</p>`;
+  el.querySelector('[data-fasit]').hidden = true;
+}
+
+// ---------- Slik regner vi ----------
+function oppdaterDoc() {
+  const f = S.f, v = S.v[S.veh], tk = timekost(f, v);
+  $('doc').innerHTML = `
+  <div class="box"><h3>Selvkost = tid + kilometer + direkte kostnader</h3>
+    <p style="margin-top:8px">Et lastebilfirma tjener penger når kunden betaler mer enn det turen koster. Det turen koster, kaller vi <b>selvkost</b>. Kalkylen deler kostnadene i tre:</p>
+    <ul>
+      <li><b>Tidskostnader</b> betales for hver time bilen er i bruk: sjåføren, bilens faste kostnader og administrasjon. Står bilen i kø eller venter hos kunden, går disse kostnadene likevel.</li>
+      <li><b>Kilometerkostnader</b> betales for hver kilometer: diesel eller strøm, AdBlue, dekk og vedlikehold.</li>
+      <li><b>Direkte kostnader</b> hører til akkurat dette oppdraget: bompenger, ferje og diett.</li>
+    </ul>
+    <p><b>Pris til kunden</b> = selvkost + påslag. Det som blir igjen er <b>resultatet</b>. <b>Margin</b> er resultatet delt på prisen.</p>
+  </div>
+  <div class="box"><h3>Faste og variable kostnader</h3>
+    <p style="margin-top:8px"><b>Faste kostnader</b> må betales selv om bilen står stille: avskrivning (verditap), rente, forsikring, avgifter, garasje og administrasjon. <b>Variable kostnader</b> følger kjøringen: drivstoff, dekk, vedlikehold, bom og sjåførens timer.</p>
+    <p>Jo flere timer bilen er i bruk i året, jo mindre blir de faste kostnadene per time. Derfor er det viktig å holde bilen i arbeid. Se Årsregnskap og nullpunktet.</p>
+  </div>
+  <div class="box adv"><h3>Formlene, med tallene for ${esc(v.navn.toLowerCase())}</h3>
+    <span class="formula">Sjåfør per time = timelønn × (1 + feriepenger) × (1 + arbeidsgiveravgift) + timelønn × (pensjon + andre)
+  = ${f.timelonn} × ${nf2.format(1 + f.fp / 100)} × ${nf2.format(1 + f.aga / 100)} + ${f.timelonn} × ${nf2.format((f.otp + f.andreSos) / 100)} = ${n0(tk.sjafor)} kr/t
+
+Avskrivning per år = (pris − støtte − restverdi) / brukstid = ${n0(tk.avskr)} kr
+Rente per år = rentesats × (pris − støtte + restverdi) / 2 = ${n0(tk.rente)} kr
+Bilens faste per time = (avskrivning + rente + forsikring + avgifter + garasje) / (driftsdager × timer per dag)
+  = ${n0(tk.bilAar)} / ${n0(tk.timer)} = ${n0(tk.bil)} kr/t
+Administrasjon per time = ${n0(f.admin)} / ${n0(tk.timer)} = ${n0(tk.admin)} kr/t
+
+Forbruk med last = forbruk tom + (forbruk full − forbruk tom) × lastgrad
+Kjøretid = km / snittfart. Etter hver 4,5 t kjøring legges inn 45 min pause.
+Kjørestil: økonomisk −8 % energi, +3 % kjøretid, −10 % slitasje. Hissig +12 % energi, −3 % kjøretid, +20 % slitasje.
+CO₂: diesel ${n1(KONST.co2Diesel)} kg/l, strøm ${nf2.format(KONST.co2El)} kg/kWh (norsk strømmiks, omtrentlig).
+Tomgang: diesel ${n1(KONST.tomgangDiesel)} l/t, el ${n1(KONST.tomgangEl)} kWh/t (varme).</span>
+    <p>Årsregnskapet regner sjåføren som en kostnad per driftsdag. Er sjåføren fast ansatt hele året, er lønnen egentlig en fast kostnad, og nullpunktet blir høyere.</p>
+  </div>
+  <div class="box"><h3>Om tallene</h3>
+    <p style="margin-top:8px">Standardtallene er omtrentlige anslag for 2026, uten merverdiavgift, og er laget for undervisning. Dieselpris, strømpris, lønn etter Godssjåføroverenskomsten, støtte fra Enova og bomsatser endrer seg. Læreren bør sjekke dagens tall og kan endre alt under <b>Avansert</b>. Endringene lagres bare i denne nettleseren.</p>
+    <p>Kalkylen er forenklet: den tar ikke med skatt, kapasitet i bilen utover lastgrad, overtidstillegg, kjøretøy i reserve eller verdien av tid utenfor arbeidstiden.</p>
+    <p>Svar på oppgavene sendes anonymt til læreren for å se hvilke oppgaver som er vanskelige, uten navn eller andre personopplysninger.</p>
+  </div>`;
+}
+
+// ---------- Faner, modus, start ----------
+function visTab(k) {
+  S.tab = k; document.body.dataset.tab = k;
+  document.querySelectorAll('nav.tabs button').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === k));
+  ['tur', 'cmp', 'aar', 'oppg', 'om'].forEach(x => { $('p-' + x).hidden = x !== k; });
+  if (k === 'oppg') tegnOppgaver();
+  oppdater(); lagre();
+}
+document.querySelectorAll('nav.tabs button').forEach(b => b.onclick = () => visTab(b.dataset.tab));
+let rTid = 0; addEventListener('resize', () => { clearTimeout(rTid); rTid = setTimeout(() => { if (S.tab === 'aar') oppdaterAar(); }, 150); });
+function settModus(m) {
+  S.mode = m; document.body.classList.toggle('enkel', m === 'enkel');
+  document.querySelectorAll('[data-mode]').forEach(b => b.setAttribute('aria-pressed', b.dataset.mode === m)); lagre();
+}
+document.querySelectorAll('[data-mode]').forEach(b => b.onclick = () => settModus(b.dataset.mode));
+$('paslag').addEventListener('input', e => { const n = tall(e.target.value); if (isFinite(n)) { S.paslag = n; oppdater(); } });
+$('fastpris').addEventListener('input', e => { const n = tall(e.target.value); S.fastpris = isFinite(n) ? n : null; oppdater(); });
+$('reset').onclick = () => {
+  if (!confirm('Sette alle tall tilbake til standard? Løste oppgaver beholdes.')) return;
+  const loste = S.loste, mode = S.mode, tab = S.tab; S = nyTilstand(); S.loste = loste; S.mode = mode; S.tab = tab;
+  start();
+};
+
+function oppdater() {
+  const r = oppdaterTur();
+  if (S.tab === 'cmp') oppdaterCmp(r);
+  if (S.tab === 'aar') oppdaterAar();
+  if (S.tab === 'om') oppdaterDoc();
+  lagre();
+}
+function start() {
+  $('paslag').value = fmtIn(S.paslag); $('fastpris').value = S.fastpris == null ? '' : fmtIn(S.fastpris);
+  settModus(S.mode); tegnTyper(); tegnFelt(); tegnAarFelt(); tegnCmp(); visTab(S.tab || 'tur');
+}
+start();
+</script>
+</body>
+</html>
