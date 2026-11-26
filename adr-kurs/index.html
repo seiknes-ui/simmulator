@@ -38,7 +38,19 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);fo
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
   padding-block:calc(20px + env(safe-area-inset-top,0px)) calc(40px + env(safe-area-inset-bottom,0px))}
 .wrap{max-width:1100px;margin:0 auto}
-header{display:grid;gap:4px;margin-bottom:18px}
+header{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 16px;margin-bottom:18px;align-items:start}
+header>.hd-txt{display:grid;gap:4px}
+/* QR-kode: liten i toppen, stor over hele skjermen ved klikk så klassen kan skanne fra tavla */
+.qr{all:unset;cursor:zoom-in;display:grid;justify-items:center;gap:4px;font-size:12px;color:var(--muted);text-align:center}
+.qr img{display:block;width:104px;height:104px;border-radius:4px;border:1px solid var(--line)}
+.qr:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:4px}
+dialog.qrbig{border:0;padding:24px;border-radius:8px;background:#fff;color:#17201D;text-align:center;max-width:none}
+dialog.qrbig::backdrop{background:rgba(0,0,0,.75)}
+dialog.qrbig img{display:block;width:min(80vmin,720px);height:auto;margin:0 auto 12px}
+dialog.qrbig p{margin:0;font-family:var(--f-display);font-weight:700;font-size:clamp(20px,3vmin,32px)}
+dialog.qrbig small{display:block;margin-top:4px;font-size:15px;color:#56625D}
+@media (max-width:640px){header{grid-template-columns:minmax(0,1fr)}.qr{display:none}}
+body.simple .qr{display:none}
 h1{font-family:var(--f-display);font-weight:700;font-size:clamp(30px,4vw,40px);letter-spacing:.01em;margin:0;text-transform:uppercase;line-height:1}
 h1 span{color:var(--accent)}
 header p{margin:0;color:var(--muted);max-width:75ch}
@@ -295,16 +307,27 @@ body.simple .opt{min-height:52px;font-size:17px}
   .qbar{font-size:13px}
   .pair svg{width:96px;height:96px}
 }
-@media print{body{background:#fff}.noprint,a.back{display:none!important}.review li{break-inside:avoid}}
+@media print{body{background:#fff}.noprint,a.back,.qr{display:none!important}.review li{break-inside:avoid}}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
+    <div class="hd-txt">
     <a class="back" href="../index.html">← Transport og logistikk</a>
     <h1>ADR <span>grunnkurs</span></h1>
     <p>Kunnskapsstien følger emnene grunnkurset skal dekke etter ADR 8.2.2.3.2. Gå stasjonene i rekkefølge gjennom kurset: les fagstoffet, øv til du kan det, prøv laben, og ta prøven til slutt. Hver dag og hver stasjon viser hvilke kapitler i ADR-boka du skal ha oppe.</p>
+    </div>
+    <button class="qr noprint" id="qrBtn" aria-haspopup="dialog" aria-label="Vis QR-koden stort">
+      <img src="../qr/qr-adr.svg" alt="QR-kode til seiknes-ui.github.io/simmulator/adr-kurs">
+      <span>Skann for å åpne<br>på mobilen</span>
+    </button>
   </header>
+  <dialog class="qrbig" id="qrBig" aria-label="QR-kode">
+    <img src="../qr/qr-adr.svg" alt="QR-kode til seiknes-ui.github.io/simmulator/adr-kurs">
+    <p>ADR grunnkurs: skann for å åpne på mobilen</p>
+    <small>seiknes-ui.github.io/simmulator/adr-kurs · trykk hvor som helst for å lukke</small>
+  </dialog>
 
   <main id="home">
     <section style="margin-top:0">
@@ -349,6 +372,11 @@ body.simple .opt{min-height:52px;font-size:17px}
 
 <script src="../kvalitet/kvalitet.js"></script>
 <script>
+// QR-koden vises stort ved klikk; klikk eller Esc lukker
+const qrBig = document.getElementById('qrBig');
+document.getElementById('qrBtn').addEventListener('click', () => qrBig.showModal());
+qrBig.addEventListener('click', () => qrBig.close());
+
 // ---------- Kurset ----------
 // Emnene grunnkurset minst skal omfatte, ADR 8.2.2.3.2
 const EMNER = {
