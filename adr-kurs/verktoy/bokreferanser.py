@@ -19,7 +19,7 @@ FIX = {'Alminnelig bestemmelser': 'Alminnelige bestemmelser'}
 # Avsnitt der overskriften i teksten ikke begynner med nummeret
 ALIAS = {'3.2.2': r'Tabell B: Alfabetisk'}
 SEC = re.compile(r'\b\d{1,2}\.\d{1,2}(?:\.\d{1,2}){0,4}\b')
-PAR = re.compile(r'§\s*(\d+a?)')
+PAR = re.compile(r'§\s*(\d+)(?:\s?(a)\b)?')
 
 
 def main(txt_path, html_path):
@@ -30,6 +30,9 @@ def main(txt_path, html_path):
     srcs = set(re.findall(r"^\s*\['\w+', '[a-o]', '([^']*)'", html, re.M))
     srcs |= set(re.findall(r"src: '([^']*)'", html))
     srcs |= set(re.findall(r"kildeHTML\('([^']*)'", html))
+    # Avsnitt i fagstoffet, skrevet {3.2.1}, og paragrafer skrevet {§3} eller {p:§3}
+    srcs |= set(re.findall(r"\{(\d{1,2}\.\d{1,2}(?:\.\d{1,2})*)\}", html))
+    srcs |= {'§ ' + m for m in re.findall(r"\{(?:p:)?§(\d+a?)\}", html)}
 
     # Kapitler fra innholdsfortegnelsen: «Kapittel 8.3. Tittel......1614»
     chapters = {}
@@ -65,6 +68,14 @@ def main(txt_path, html_path):
         return fallback
 
     bok, kap, defs = {}, {}, {}
+    # Kapitlene i forskriften, som står foran del 1: «Kapittel 2» med tittelen på neste linje
+    forskrift = {}
+    for i in range(14, parts['1'][1] - 1):
+        lines = [l.strip() for l in pages[i].split('\n')]
+        for j, line in enumerate(lines[:-1]):
+            m = re.fullmatch(r'Kapittel (\d+)', line)
+            if m and lines[j + 1]:
+                forskrift.setdefault(m.group(1), [lines[j + 1], i + 1])
     # Definisjoner i 1.2.1, skrevet «Ord» i kilden: siden der definisjonen står
     for src in srcs:
         for term in re.findall(r'1\.2\.1 «([^»]+)»', src):
@@ -86,8 +97,10 @@ def main(txt_path, html_path):
                 bok[sec] = p
             else:
                 print('fant ikke', sec, 'i', src, file=sys.stderr)
-        for par in PAR.findall(src):
-            p = first_page(r'§ ' + re.escape(par) + r'\. ', 15, 46)
+        for num, suf in PAR.findall(src):
+            par = num + suf
+            # I boka står både «§ 11a.» og «§ 18 a.»
+            p = first_page(r'§ ' + num + (r' ?' + suf if suf else '') + r'\. ', 15, 46)
             if p:
                 bok['§' + par] = p
             else:
@@ -97,6 +110,8 @@ def main(txt_path, html_path):
              'const BOK = ' + json.dumps(dict(sorted(bok.items())), ensure_ascii=False) + ';\n'
              'const KAP = ' + json.dumps(dict(sorted(kap.items())), ensure_ascii=False) + ';\n'
              'const DEF = ' + json.dumps(dict(sorted(defs.items())), ensure_ascii=False) + ';\n'
+             '// Kapitlene i forskriften, foran del 1\n'
+             'const FORSKRIFT = ' + json.dumps(forskrift, ensure_ascii=False) + ';\n'
              '// Alle delene og kapitlene i boka med tittel og startside\n'
              'const DELER = ' + json.dumps(parts, ensure_ascii=False) + ';\n'
              'const KAPITLER = ' + json.dumps({k: [t, p] for k, (t, p) in sorted(chapters.items(), key=lambda kv: [int(x) for x in kv[0].split('.')])}, ensure_ascii=False) + ';\n'
