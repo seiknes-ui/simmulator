@@ -1,7 +1,7 @@
 """Lager sidetallene som ADR-siden viser når eleven svarer feil («Slå opp i boka»).
 
 Leser teksten fra DSBs ADR/RID 2025 og finner siden der hvert avsnitt og hver paragraf
-som brukes som kilde i index.html, begynner. Den lager også oversikten over alle delene og
+som brukes som kilde i index.html, begynner, og siden der definisjonene i 1.2.1 står. Den lager også oversikten over alle delene og
 kapitlene i boka med startside, som stasjonen «Gjennomgang av boka» og stien bruker.
 Resultatet skrives inn mellom // BOK-START og // BOK-SLUTT i index.html.
 
@@ -64,7 +64,15 @@ def main(txt_path, html_path):
                     return i + 1
         return fallback
 
-    bok, kap = {}, {}
+    bok, kap, defs = {}, {}, {}
+    # Definisjoner i 1.2.1, skrevet «Ord» i kilden: siden der definisjonen står
+    for src in srcs:
+        for term in re.findall(r'1\.2\.1 «([^»]+)»', src):
+            p = first_page('«' + re.escape(term) + '»', chapters['1.2'][1], chapters['1.3'][1])
+            if p:
+                defs[term] = p
+            else:
+                print('fant ikke definisjonen', term, file=sys.stderr)
     for src in srcs:
         for sec in SEC.findall(src):
             ch = '.'.join(sec.split('.')[:2])
@@ -88,6 +96,7 @@ def main(txt_path, html_path):
     block = ('// BOK-START (lages av verktoy/bokreferanser.py – ikke rediger for hånd)\n'
              'const BOK = ' + json.dumps(dict(sorted(bok.items())), ensure_ascii=False) + ';\n'
              'const KAP = ' + json.dumps(dict(sorted(kap.items())), ensure_ascii=False) + ';\n'
+             'const DEF = ' + json.dumps(dict(sorted(defs.items())), ensure_ascii=False) + ';\n'
              '// Alle delene og kapitlene i boka med tittel og startside\n'
              'const DELER = ' + json.dumps(parts, ensure_ascii=False) + ';\n'
              'const KAPITLER = ' + json.dumps({k: [t, p] for k, (t, p) in sorted(chapters.items(), key=lambda kv: [int(x) for x in kv[0].split('.')])}, ensure_ascii=False) + ';\n'
