@@ -65,6 +65,14 @@ def main(txt_path, html_path):
         return fallback
 
     bok, kap, defs = {}, {}, {}
+    # Kapitlene i forskriften, som står foran del 1: «Kapittel 2» med tittelen på neste linje
+    forskrift = {}
+    for i in range(14, parts['1'][1] - 1):
+        lines = [l.strip() for l in pages[i].split('\n')]
+        for j, line in enumerate(lines[:-1]):
+            m = re.fullmatch(r'Kapittel (\d+)', line)
+            if m and lines[j + 1]:
+                forskrift.setdefault(m.group(1), [lines[j + 1], i + 1])
     # Definisjoner i 1.2.1, skrevet «Ord» i kilden: siden der definisjonen står
     for src in srcs:
         for term in re.findall(r'1\.2\.1 «([^»]+)»', src):
@@ -97,6 +105,8 @@ def main(txt_path, html_path):
              'const BOK = ' + json.dumps(dict(sorted(bok.items())), ensure_ascii=False) + ';\n'
              'const KAP = ' + json.dumps(dict(sorted(kap.items())), ensure_ascii=False) + ';\n'
              'const DEF = ' + json.dumps(dict(sorted(defs.items())), ensure_ascii=False) + ';\n'
+             '// Kapitlene i forskriften, foran del 1\n'
+             'const FORSKRIFT = ' + json.dumps(forskrift, ensure_ascii=False) + ';\n'
              '// Alle delene og kapitlene i boka med tittel og startside\n'
              'const DELER = ' + json.dumps(parts, ensure_ascii=False) + ';\n'
              'const KAPITLER = ' + json.dumps({k: [t, p] for k, (t, p) in sorted(chapters.items(), key=lambda kv: [int(x) for x in kv[0].split('.')])}, ensure_ascii=False) + ';\n'
