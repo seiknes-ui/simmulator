@@ -226,6 +226,8 @@ body.simple .opt{min-height:52px;font-size:17px}
 .big svg{width:min(260px,80vw);height:auto;display:block;margin:0 auto}
 .scene{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:center}
 .scene > svg{width:min(220px,70vw);height:auto}
+.digits{display:grid;grid-template-columns:repeat(auto-fill,minmax(52px,1fr));gap:6px;width:100%;max-width:460px;min-width:0}
+.digits .btn{font-family:var(--f-display);font-size:22px;padding:10px 0;text-align:center}
 .eqs{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:8px}
 .eq{all:unset;cursor:pointer;display:flex;gap:10px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:4px;background:var(--bg);font-size:14.5px}
 .eq::before{content:"";flex:none;width:16px;height:16px;border:2px solid var(--muted);border-radius:3px}
@@ -402,7 +404,7 @@ const STATIONS = [
   { id: 'kapitler', day: 1, title: 'Gjennomgang av boka', emner: ['a'], desc: 'Del for del og kapittel for kapittel: hva som står hvor, hvilke kapitler sjåføren bruker mest, og hvordan Tabell A viser vei til resten av boka.', labs: ['kapittel', 'veiviser'], match: 'deler', kap: ['forskrift', 'del'] },
   { id: 'farer', day: 1, title: 'Fareklassene og farene', emner: ['b', 'c'], desc: 'De ni hovedklassene, 13 med underklassene, faresedlene, emballasjegruppene og miljøfarlig gods og avfall.', labs: ['sedler'], match: 'klasser', kap: ['2.1', '2.2', '5.2'] },
   { id: 'forebygg', day: 1, title: 'Forebygging og sikkerhet', emner: ['d'], desc: 'Tennkilder, røykeforbud, verneutstyr og trygg drift av kjøretøyet.', labs: ['brann'], kap: ['7.5', '8.1', '8.3'] },
-  { id: 'merking', day: 2, title: 'Merking og oransje skilt', emner: ['f'], desc: 'Oransje skilt, farenummer, store faresedler og LQ-merket.', labs: ['merk', 'skilt'], match: 'farenr', kap: ['5.2', '5.3', '3.4'] },
+  { id: 'merking', day: 2, title: 'Merking og oransje skilt', emner: ['f'], desc: 'Oransje skilt, farenummer, store faresedler og LQ-merket.', labs: ['bygg', 'merk', 'skilt'], match: 'farenr', kap: ['5.2', '5.3', '3.4'] },
   { id: 'unntak', day: 2, title: 'Unntak og 1000 poeng', emner: ['a'], desc: 'Mengdeunntaket i 1.1.3.6, begrensede og unntatte mengder, og de andre unntakene.', labs: ['trapp', 'maaler', 'poeng'], kap: ['1.1', '3.4', '3.5'] },
   { id: 'forer', day: 2, title: 'Dokumenter og utstyr', emner: ['g', 'h'], desc: 'Hva som skal være i førerhuset, skriftlige instruksjoner, brannslukkere og utstyr.', labs: ['si', 'utstyr'], kap: ['5.4', '8.1', '8.4'], si: true },
   { id: 'lasting', day: 3, title: 'Lasting, samlasting og stuing', emner: ['i', 'j', 'm'], desc: 'Hva som kan lastes sammen, kontroll før lasting, matvarer og lastsikring.', labs: ['lasteplan', 'samlast'], kap: ['7.5'] },
@@ -423,6 +425,7 @@ const LABS = {
   utstyr: { name: 'Pakk utstyret', desc: 'Kryss av utstyret transportenheten skal ha for lasten.' },
   samlast: { name: 'Kan de lastes sammen?', desc: 'Avgjør om kolliene kan samlastes etter tabellen i 7.5.2.1.' },
   tunnel: { name: 'Tunnelkontroll', desc: 'Kan bilen kjøre gjennom tunnelen med denne lasten?' },
+  bygg: { name: 'Bygg farenummeret', desc: 'Sett sammen farenummeret siffer for siffer ut fra beskrivelsen av faren.', run: () => startBygg() },
   merk: { name: 'Merk bilen', desc: 'Sett oransje skilt, store faresedler og merker på riktig sted på bilen.', run: () => startMerk() },
   maaler: { name: 'Poengmåler', desc: 'Legg kolli på bilen og se måleren fylles opp mot 1000 poeng.', run: () => startMaaler() },
   brann: { name: 'Branntrekanten', desc: 'Fjern én side av trekanten og se brannen slukne, og finn brannklassen.', run: () => startBrann() },
@@ -2107,6 +2110,57 @@ function labDone(key, right, n, again) {
   kv('lab', { k: key, a: String(pct), m: String(n) });
   goPlay(`<div class="quiz"><h3>${esc(LABS[key].name)}: ${right} av ${n} riktige</h3><div class="row"><button class="btn primary" id="again">Prøv igjen</button><button class="btn" id="home2">Til stien</button></div></div>`);
   $('#again').onclick = again; $('#home2').onclick = goHome;
+}
+
+// ---------- Lab: Bygg farenummeret (5.3.2.3) ----------
+// Beskrivelse og farenummer, ordrett fra listen i 5.3.2.3.2
+const BYGG = [
+  ['Kvelende gass, eller gass uten tilleggsfare', '20'], ['Brannfarlig gass', '23'], ['Oksiderende (brannfremmende) gass', '25'],
+  ['Giftig gass', '26'], ['Giftig gass, etsende', '268'], ['Etsende gass', '28'], ['Brannfarlig gass, etsende', '238'],
+  ['Brannfarlig væske (flammepunkt 23–60 °C)', '30'], ['Meget brannfarlig væske (flammepunkt under 23 °C)', '33'],
+  ['Meget brannfarlig væske, giftig', '336'], ['Meget brannfarlig væske, etsende', '338'], ['Brannfarlig fast stoff', '40'],
+  ['Oksiderende (brannfremmende) stoff', '50'], ['Sterkt oksiderende (brannfremmende) stoff', '55'], ['Giftig eller svakt giftig stoff', '60'],
+  ['Meget giftig stoff', '66'], ['Giftig stoff, etsende', '68'], ['Radioaktivt materiale', '70'], ['Etsende eller svakt etsende stoff', '80'],
+  ['Sterkt etsende stoff', '88'], ['Etsende stoff, giftig', '86'], ['Etsende stoff, brannfarlig (flammepunkt 23–60 °C)', '83'],
+  ['Brannfarlig fast stoff som reagerer farlig med vann og utvikler brannfarlige gasser', 'X423'], ['Sterkt etsende stoff som reagerer farlig med vann', 'X88']
+];
+const SIFFER = { 2: 'gass (trykk eller kjemisk reaksjon)', 3: 'brannfarlig væske eller gass', 4: 'brannfarlig fast stoff', 5: 'oksiderende', 6: 'giftig', 7: 'radioaktiv', 8: 'etsende', 9: 'voldsom reaksjon' };
+function forklarHz(hz) {
+  const x = hz[0] === 'X', d = (x ? hz.slice(1) : hz).split('');
+  const parts = d.map((c, i) => c === '0' ? '0: ett siffer er nok' : i > 0 && c === d[i - 1] ? `${c}: forsterket ${SIFFER[c]}` : `${c}: ${SIFFER[c]}`);
+  return (x ? 'X: reagerer farlig med vann · ' : '') + parts.join(' · ');
+}
+const BYGG_N = 6;
+function startBygg() { runBygg({ i: 0, right: 0, tasks: shuffle(BYGG).slice(0, BYGG_N), cur: '' }); }
+function runBygg(run) {
+  if (run.i === BYGG_N) return labDone('bygg', run.right, BYGG_N, startBygg);
+  const [desc, ans] = run.tasks[run.i], done = run.res != null;
+  const keys = ['X', '2', '3', '4', '5', '6', '7', '8', '9', '0'];
+  const p = goPlay(`<div class="quiz">
+    <div class="qbar"><span>${esc(LABS.bygg.name)} · oppgave <b>${run.i + 1}</b> av <b>${BYGG_N}</b></span><span>Riktig <b>${run.right}</b></span><button class="btn" id="quit">Avslutt</button></div>
+    <p class="qtext">Hvilket farenummer har: ${esc(desc[0].toLowerCase() + desc.slice(1))}?</p>
+    <div class="big" style="max-width:260px">${plateSVG(run.cur || ' ', '')}</div>
+    <div class="digits">${keys.map(k => `<button class="btn" data-k="${k}" ${done ? 'disabled' : ''}>${k}</button>`).join('')}<button class="btn" data-k="del" ${done ? 'disabled' : ''}>Slett</button></div>
+    <p class="muted" style="margin:0;font-size:13px">2 gass · 3 brannfarlig væske · 4 brannfarlig fast stoff · 5 oksiderende · 6 giftig · 7 radioaktiv · 8 etsende · 9 voldsom reaksjon · 0 ett siffer er nok · doblet siffer forsterker · X foran: farlig med vann</p>
+    <div class="row"><button class="btn primary" id="check" ${done || !run.cur ? 'disabled' : ''}>Sjekk</button></div><div id="fb">${done ? run.fb : ''}</div></div>`, true);
+  $('#quit').onclick = goHome;
+  p.querySelector('.digits').addEventListener('click', e => {
+    const b = e.target.closest('[data-k]'); if (!b || b.disabled) return;
+    const k = b.dataset.k;
+    if (k === 'del') run.cur = run.cur.slice(0, -1);
+    else if (k === 'X') { if (!run.cur) run.cur = 'X'; }
+    else if (run.cur.replace('X', '').length < 3) run.cur += k;
+    runBygg(run);
+  });
+  $('#check').onclick = () => {
+    const ok = run.cur === ans; if (ok) run.right++;
+    run.res = ok;
+    run.fb = `<div class="fb ${ok ? 'ok' : 'no'}"><b>${ok ? 'Riktig: ' + ans : `Feil. Riktig farenummer er ${ans}`}</b><span>${esc(forklarHz(ans))}</span>${kildeHTML('ADR 5.3.2.3.2', !ok)}</div>
+      <div class="row" style="margin-top:10px"><button class="btn primary" id="next">${run.i < BYGG_N - 1 ? 'Neste' : 'Se resultat'}</button></div>`;
+    kv('lab', { k: 'bygg', a: ok ? 'riktig' : 'feil', m: ans + ':' + run.cur });
+    runBygg(run);
+  };
+  if (done) $('#next').onclick = () => { run.i++; run.cur = ''; run.res = null; runBygg(run); };
 }
 
 // ---------- Lab: Ulykke på vegen (skriftlige instruksjoner, 5.4.3.4) ----------
