@@ -365,7 +365,7 @@ body.simple .opt{min-height:52px;font-size:17px}
     <section>
       <h2>Til læreren</h2>
       <p class="note">Innholdet bygger på ADR/RID 2025 og forskrift om landtransport av farlig gods slik DSB gir dem ut. Stasjonene dekker emnene a–o i 8.2.2.3.2, og hvert spørsmål viser hvilket emne det hører til og hvor i regelverket svaret står. Spørsmålene er skrevet med egne ord og er ikke hentet fra oppgavesamlingene.</p>
-      <p class="note">Signalordene må, skal, alltid, aldri, påbudt og forbudt er markert med farge i spørsmål, svar og fagstoff. Står to av dem i samme setning, får de en sterkere markering, så elevene stopper opp og leser nøye.</p>
+      <p class="note">Signalordene må, skal, alltid, aldri, påbudt og forbudt er markert med farge i fagstoffet. I spørsmålene markeres de først når svaret vises, så markeringen ikke røper svaret. Står to av dem i samme setning, får de en sterkere markering.</p>
       <p class="note">Spørsmålene er valgt ut etter hva sjåføren og bedriften har bruk for i jobben. De som mest gjelder avsender, transportør eller sikkerhetsrådgiver, er merket «For bedriften» eller «For sjåfør og bedrift».</p>
       <p class="note">Når eleven svarer feil, viser siden hvor i boka svaret står: avsnitt, side og kapittel. Sidetallene gjelder ADR/RID 2025 fra DSB (1. opplag), og lages på nytt med <code>verktoy/bokreferanser.py</code> når det kommer en ny utgave.</p>
       <p class="note">Stasjon 2, Gjennomgang av boka, går gjennom delene og kapitlene i ADR/RID en for en, med startsiden til hvert kapittel. Den passer som felles gjennomgang med boka oppe første kursdag. På resten av stien står kapitlene som hører til hver dag og hver stasjon, så elevene vet hva de skal slå opp i.</p>
@@ -1066,7 +1066,7 @@ function hash(s) { let h = 0; for (const c of s) h = (h * 31 + c.charCodeAt(0)) 
 
 // ---------- Fagstoff ----------
 const FACTS = [
-  { st: 'bok', em: 'a', title: 'Les nøye: signalord', pts: ['Noen ord skal få deg til å stoppe opp når du leser regler, spørsmål og svar: må, skal, alltid, aldri, påbudt og forbudt', 'De er markert med farge på hele siden', 'Står to av dem i samme setning, er de markert ekstra, for eksempel «Du skal aldri slukke brann i lasterommet». Da er det ekstra viktig å lese hele setningen', 'Svaralternativer med «alltid» eller «aldri» er ofte gale, fordi det nesten alltid finnes unntak i ADR. Men ikke alltid: sjekk unntakene i 1.1.3 og grensene i Tabell A', 'Spør deg selv: gjelder dette uansett mengde, eller bare over 1000 poeng, i tank eller i kolli?'] },
+  { st: 'bok', em: 'a', title: 'Les nøye: signalord', pts: ['Noen ord skal få deg til å stoppe opp når du leser regler, spørsmål og svar: må, skal, alltid, aldri, påbudt og forbudt', 'I fagstoffet er de markert med farge. I spørsmålene blir de markert når svaret vises, så du ser hva du burde ha lagt merke til', 'Står to av dem i samme setning, er de markert ekstra, for eksempel «Du skal aldri slukke brann i lasterommet». Da er det ekstra viktig å lese hele setningen', 'Svaralternativer med «alltid» eller «aldri» er ofte gale, fordi det nesten alltid finnes unntak i ADR. Men ikke alltid: sjekk unntakene i 1.1.3 og grensene i Tabell A', 'Spør deg selv: gjelder dette uansett mengde, eller bare over 1000 poeng, i tank eller i kolli?'] },
   { st: 'bok', em: 'a', title: 'Regelverket', pts: ['ADR og RID er norsk rett gjennom forskrift om landtransport av farlig gods (2009 nr. 384)', 'DSB forvalter regelverket og gir ut ADR/RID på norsk', 'Ny utgave gjelder fra 1. januar hvert oddetallsår'] },
   { st: 'bok', em: 'a', title: 'Slik er boka bygd opp', pts: ['Del 1 Alminnelige bestemmelser: unntak, definisjoner, ansvar, sikring', 'Del 2 Klassifisering', 'Del 3 Tabell A og B, begrensede og unntatte mengder', 'Del 4 Emballering og tanker', 'Del 5 Merking, faresedler, oransje skilt og dokumenter', 'Del 6 Konstruksjon og prøving av emballasje og tanker', 'Del 7 Transport, lasting, lossing og samlasting', 'Del 8 Mannskap, utstyr, drift, opplæring og tunneler', 'Del 9 Bygging og godkjenning av kjøretøyer'] },
   { st: 'bok', em: 'a', title: 'Tabell A – kolonnene du bruker mest', pts: ['(1) UN-nummer · (2) navn og beskrivelse', '(3a) klasse · (4) emballasjegruppe', '(5) faresedler', '(7a) begrensede mengder · (7b) unntatte mengder', '(15) transportkategori, med tunnelkode i parentes under', '(20) farenummer til det oransje skiltet', 'Tabell B er alfabetisk og gir deg UN-nummeret når du bare vet navnet', 'Raden øverst i tabellhodet viser hvor i boka hver kolonne er forklart'] },
@@ -1168,6 +1168,7 @@ const SETS = {
 // ---------- Hjelpere og lagring ----------
 const $ = s => document.querySelector(s);
 // Signalord som skal få eleven til å stoppe opp. To i samme setning får sterkere markering.
+// I spørsmål markeres de først når svaret er avslørt (flaggSignal), så de ikke røper noe på forhånd.
 const SIGNAL = /(?<!\p{L})(må|skal|alltid|aldri|påbudt|forbudt)(?!\p{L})/giu;
 function sig(html) {
   return String(html).split(/(?<=[.?!])\s+/).map(setn => {
@@ -1175,6 +1176,9 @@ function sig(html) {
     if (!n) return setn;
     return setn.split(/(<[^>]*>)/).map(part => part.startsWith('<') ? part : part.replace(SIGNAL, m => `<mark class="sig${n > 1 ? ' sig2' : ''}">${m}</mark>`)).join('');
   }).join(' ');
+}
+function flaggSignal(p) {
+  p.querySelectorAll('.qtext, .opt > span:last-child').forEach(el => { if (!el.querySelector('mark.sig, svg, img')) el.innerHTML = sig(el.innerHTML); });
 }
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
@@ -1430,7 +1434,7 @@ const AUD = { b: 'For bedriften', sb: 'For sjåfør og bedrift' };
 const tagsHTML = q => `<div class="tags"><span class="tag">${ST[q.st].n}. ${esc(ST[q.st].title)}</span><span class="tag">Emne ${q.em}: ${esc(EMNER[q.em])}</span>${q.aud ? `<span class="tag aud">${AUD[q.aud]}</span>` : ''}</div>`;
 function optsHTML(q) {
   if (!q._order) q._order = shuffle(q.o.map((x, i) => ({ x, i })));
-  return `<div class="opts${q.pics ? ' pics' : ''}">` + q._order.map((o, n) => `<button class="opt" data-i="${o.i}"><span class="k">${LETTERS[n]}</span><span>${q.html ? q.html[o.i] : sig(esc(o.x))}</span></button>`).join('') + '</div>';
+  return `<div class="opts${q.pics ? ' pics' : ''}">` + q._order.map((o, n) => `<button class="opt" data-i="${o.i}"><span class="k">${LETTERS[n]}</span><span>${q.html ? q.html[o.i] : esc(o.x)}</span></button>`).join('') + '</div>';
 }
 // BOK-START (lages av verktoy/bokreferanser.py – ikke rediger for hånd)
 const BOK = {"1.1": 47, "1.1.3.1": 48, "1.1.3.2": 50, "1.1.3.3": 51, "1.1.3.5": 52, "1.1.3.6": 52, "1.1.3.6.1": 52, "1.1.3.6.2": 52, "1.1.3.6.3": 52, "1.1.3.6.4": 54, "1.1.3.7": 54, "1.1.4.2": 56, "1.10": 154, "1.10.1.2": 154, "1.10.1.3": 154, "1.10.1.4": 154, "1.10.2.2": 154, "1.10.2.3": 154, "1.10.2.4": 154, "1.10.3.1": 155, "1.10.3.1.1": 155, "1.10.3.1.2": 155, "1.10.3.2.1": 157, "1.10.3.2.2": 157, "1.10.3.3": 157, "1.10.4": 157, "1.2": 60, "1.2.1": 60, "1.3": 86, "1.3.2.3": 87, "1.3.3": 88, "1.4": 89, "1.4.1.1": 89, "1.4.1.2": 89, "1.4.2.1.1": 89, "1.4.2.2.1": 90, "1.4.2.2.2": 91, "1.4.2.2.3": 91, "1.4.2.2.4": 91, "1.4.2.3.1": 92, "1.4.3.1.1": 92, "1.4.3.2": 92, "1.4.3.3": 92, "1.4.3.7.1": 94, "1.8": 123, "1.8.3.1": 124, "1.8.3.3": 124, "1.8.3.7": 125, "1.8.5.1": 129, "1.9.5.1": 150, "2.1": 162, "2.1.1.1": 162, "2.1.1.3": 163, "2.2": 172, "2.2.2": 197, "2.2.2.1.2": 197, "2.2.2.1.3": 198, "2.2.3": 206, "2.2.3.1.1": 206, "2.2.3.1.3": 207, "2.2.41": 212, "2.2.43": 227, "2.2.51": 231, "2.2.52": 236, "2.2.62": 269, "2.2.8": 301, "2.2.9": 311, "2.2.9.1.10": 313, "3.1.2": 338, "3.2": 342, "3.2.1": 342, "3.2.2": 812, "3.3": 890, "3.4": 946, "3.4.1": 946, "3.4.11": 948, "3.4.12": 948, "3.4.13": 948, "3.4.14": 949, "3.4.15": 949, "3.4.2": 946, "3.4.7": 946, "3.5": 950, "3.5.1.1": 950, "3.5.1.2": 950, "3.5.4": 952, "3.5.4.2": 952, "3.5.5": 953, "3.5.6": 953, "4.1": 957, "4.1.10": 1114, "4.1.4": 993, "4.2.5.2": 1130, "4.3": 1145, "4.3.5": 1172, "5.1": 1182, "5.1.2.1": 1182, "5.1.2.4": 1182, "5.2": 1189, "5.2.1.1": 1189, "5.2.1.10.1": 1193, "5.2.1.8": 1192, "5.2.1.8.1": 1192, "5.2.1.8.3": 1192, "5.2.2": 1194, "5.2.2.1": 1194, "5.2.2.1.6": 1194, "5.2.2.2": 1196, "5.2.2.2.1.1": 1197, "5.3": 1204, "5.3.1": 1204, "5.3.1.4.1": 1206, "5.3.1.5": 1206, "5.3.1.7.1": 1207, "5.3.2": 1208, "5.3.2.1": 1208, "5.3.2.1.1": 1209, "5.3.2.1.2": 1209, "5.3.2.1.3": 1209, "5.3.2.1.8": 1210, "5.3.2.2.1": 1210, "5.3.2.2.2": 1211, "5.3.2.3": 1212, "5.3.2.3.1": 1212, "5.3.2.3.2": 1212, "5.3.6": 1216, "5.4": 1217, "5.4.0.2": 1217, "5.4.1.1.1": 1217, "5.4.1.1.3.1": 1219, "5.4.1.1.6.2": 1221, "5.4.3.1": 1231, "5.4.3.2": 1231, "5.4.3.3": 1231, "5.4.3.4": 1231, "5.5": 1246, "6.1": 1257, "6.1.2.6": 1258, "6.1.3.1": 1261, "7.1": 1566, "7.2.4": 1570, "7.3.3": 1575, "7.4": 1582, "7.5": 1583, "7.5.1.2": 1583, "7.5.1.5": 1584, "7.5.10": 1590, "7.5.11": 1590, "7.5.2.1": 1584, "7.5.4": 1587, "7.5.7.1": 1588, "7.5.8.1": 1589, "8.1": 1604, "8.1.1": 1604, "8.1.2.1": 1604, "8.1.2.2": 1604, "8.1.4.1": 1604, "8.1.4.2": 1605, "8.1.4.4": 1605, "8.1.5": 1605, "8.1.5.2": 1605, "8.1.5.3": 1606, "8.2": 1607, "8.2.1.3": 1607, "8.2.2.3.8": 1609, "8.2.2.5": 1609, "8.2.2.7.1.6": 1610, "8.2.2.8.2": 1611, "8.2.3": 1613, "8.3": 1614, "8.3.1": 1614, "8.3.2": 1614, "8.3.3": 1614, "8.3.4": 1614, "8.3.5": 1614, "8.3.6": 1614, "8.3.7": 1614, "8.3.8": 1614, "8.4": 1615, "8.4.1": 1615, "8.5": 1616, "8.6": 1620, "8.6.2": 1620, "8.6.3": 1620, "8.6.3.2": 1620, "8.6.3.3": 1620, "8.6.4": 1620, "9.1": 1625, "9.1.1.2": 1625, "9.1.2.1": 1626, "9.1.3": 1627, "9.1.3.4": 1627, "9.2": 1630, "9.2.6": 1632, "9.3": 1641, "9.8": 1650, "§1": 16, "§10": 22, "§11a": 23, "§12": 24, "§15": 27, "§17": 28, "§18": 28, "§18a": 28, "§19": 30, "§2": 16, "§3": 17, "§30": 33, "§31": 33, "§33": 43, "§34": 43, "§35": 43, "§37": 44, "§4": 19, "§5": 19, "§6": 19, "§7": 20, "§8": 21, "§9": 22};
@@ -1509,6 +1513,7 @@ const srcHTML = (q, wrong) => kildeHTML(q.src, wrong);
 // Marker svaret og vis forklaring. Riktig svar har alltid indeks 0.
 function answer(p, q, i, fbHTML, nextLbl, onNext, src) {
   p.querySelectorAll('.opt').forEach(x => { x.disabled = true; const j = +x.dataset.i; x.classList.add(j === 0 ? 'right' : j === i ? 'wrong' : 'dim'); });
+  flaggSignal(p);
   const ok = i === 0;
   $('#fb').innerHTML = `<div class="fb ${ok ? 'ok' : 'no'}"><b>${ok ? 'Riktig' : 'Feil, riktig svar: ' + (q.html ? q.html[0] : esc(q.o[0]))}</b>${fbHTML}${kildeHTML(src, !ok)}</div>
     <div class="row" style="margin-top:10px"><button class="btn primary" id="next">${nextLbl}</button></div>`;
@@ -1549,7 +1554,7 @@ function nextPractice(run, keepScroll) {
   const p = goPlay(`<div class="quiz">
     <div class="qbar"><span>Øving · igjen <b>${run.queue.length}</b></span><span>Riktig <b>${run.right}</b> · Feil <b>${run.wrong}</b></span><button class="btn" id="quit">Avslutt</button></div>
     <div class="track"><i style="width:${100 * done / run.total}%"></i></div>
-    ${tagsHTML(q)}<p class="qtext">${sig(esc(q.q))}</p>${optsHTML(q)}<div id="fb"></div></div>`, keepScroll);
+    ${tagsHTML(q)}<p class="qtext">${esc(q.q)}</p>${optsHTML(q)}<div id="fb"></div></div>`, keepScroll);
   $('#quit').onclick = goHome;
   p.querySelector('.opts').addEventListener('click', e => {
     const b = e.target.closest('.opt'); if (!b || b.disabled) return;
@@ -1596,7 +1601,7 @@ function showExam(run, keepScroll) {
   const p = goPlay(`<div class="quiz">
     <div class="qbar"><span>Spørsmål <b>${run.i + 1}</b> av <b>${run.qs.length}</b></span><span>Besvart <b>${answered}</b> · Tid igjen <b id="clock">${clock(EXAM_MS - (Date.now() - run.t0))}</b></span></div>
     <div class="track"><i style="width:${100 * answered / run.qs.length}%"></i></div>
-    <p class="qtext">${sig(esc(q.q))}</p>${optsHTML(q)}
+    <p class="qtext">${esc(q.q)}</p>${optsHTML(q)}
     <div class="row navrow"><button class="btn" id="prev" ${run.i ? '' : 'disabled'}>Forrige</button><button class="btn primary" id="nxt">${run.i < run.qs.length - 1 ? 'Neste' : 'Lever'}</button><button class="btn" id="hand">Lever nå</button></div></div>`, keepScroll);
   const mark = () => p.querySelectorAll('.opt').forEach(x => x.classList.toggle('sel', run.ans[q.id] === +x.dataset.i));
   mark();
@@ -1694,7 +1699,7 @@ function runLab(run, keepScroll) {
   if (tk.multi) return runMulti(run, keepScroll);
   const p = goPlay(`<div class="quiz">
     <div class="qbar"><span>${esc(L.name)} · oppgave <b>${run.i + 1}</b> av <b>${LAB_N}</b></span><span>Riktig <b>${run.right}</b></span><button class="btn" id="quit">Avslutt</button></div>
-    ${tk.show || ''}<p class="qtext">${tk.qHTML || sig(esc(tk.q))}</p>${optsHTML(tk)}<div id="fb"></div>${tk.after || ''}</div>`, keepScroll);
+    ${tk.show || ''}<p class="qtext">${tk.qHTML || esc(tk.q)}</p>${optsHTML(tk)}<div id="fb"></div>${tk.after || ''}</div>`, keepScroll);
   $('#quit').onclick = goHome;
   p.querySelector('.opts').addEventListener('click', e => {
     const b = e.target.closest('.opt'); if (!b || b.disabled) return;
@@ -2319,7 +2324,7 @@ function runUlykke(run) {
     <div class="steps">${sc.steps.map((_, k) => `<i class="${run.marks[k] === true ? 'ok' : run.marks[k] === false ? 'no' : k === run.i ? 'cur' : ''}"></i>`).join('')}</div>
     <div class="load"><span><b>${sc.event === 'brann' ? 'Det brenner i et bakdekk.' : esc(sc.leak)}</b> Du kjører ${sc.veh === 'tank' ? 'tankbil' : 'lastebil med kolli'} med UN ${sc.un} ${esc(sc.what)} (fareseddel ${sc.lab}) og har stoppet i vegkanten.</span></div>
     <div class="acc" id="acc">${ulykkeScene(sc, run.i)}</div>
-    <p class="qtext">${sig(esc(st.q))}</p>${optsHTML(st)}<div id="fb"></div></div>`, run.i > 0);
+    <p class="qtext">${esc(st.q)}</p>${optsHTML(st)}<div id="fb"></div></div>`, run.i > 0);
   $('#quit').onclick = goHome;
   p.querySelector('.opts').addEventListener('click', e => {
     const b = e.target.closest('.opt'); if (!b || b.disabled) return;
