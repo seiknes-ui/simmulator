@@ -406,7 +406,7 @@ const STATIONS = [
   { id: 'forebygg', day: 1, title: 'Forebygging og sikkerhet', emner: ['d'], desc: 'Tennkilder, røykeforbud, verneutstyr og trygg drift av kjøretøyet.', labs: ['brann'], kap: ['7.5', '8.1', '8.3'] },
   { id: 'merking', day: 2, title: 'Merking og oransje skilt', emner: ['f'], desc: 'Oransje skilt, farenummer, store faresedler og LQ-merket.', labs: ['bygg', 'merk', 'skilt'], match: 'farenr', kap: ['5.2', '5.3', '3.4'] },
   { id: 'unntak', day: 2, title: 'Unntak og 1000 poeng', emner: ['a'], desc: 'Mengdeunntaket i 1.1.3.6, begrensede og unntatte mengder, og de andre unntakene.', labs: ['trapp', 'maaler', 'poeng'], kap: ['1.1', '3.4', '3.5'] },
-  { id: 'forer', day: 2, title: 'Dokumenter og utstyr', emner: ['g', 'h'], desc: 'Hva som skal være i førerhuset, skriftlige instruksjoner, brannslukkere og utstyr.', labs: ['si', 'utstyr'], kap: ['5.4', '8.1', '8.4'], si: true },
+  { id: 'forer', day: 2, title: 'Dokumenter og utstyr', emner: ['g', 'h'], desc: 'Hva som skal være i førerhuset, skriftlige instruksjoner, brannslukkere og utstyr.', labs: ['tilsyn', 'si', 'utstyr'], kap: ['5.4', '8.1', '8.4'], si: true },
   { id: 'lasting', day: 3, title: 'Lasting, samlasting og stuing', emner: ['i', 'j', 'm'], desc: 'Hva som kan lastes sammen, kontroll før lasting, matvarer og lastsikring.', labs: ['lasteplan', 'samlast'], kap: ['7.5'] },
   { id: 'ansvar', day: 3, title: 'Ansvar og sikring', emner: ['k', 'o'], desc: 'Pliktene til avsender, transportør, laster og sjåfør, og sikring mot misbruk.', match: 'aktor', kap: ['forskrift', '1.4', '1.8', '1.10'] },
   { id: 'ulykke', day: 3, title: 'Ulykke, brann og tunnel', emner: ['e', 'n'], desc: 'De skriftlige instruksjonene, brann og førstehjelp, og tunnelkategoriene.', labs: ['si', 'ulykke', 'rute', 'tunnel'], kap: ['5.4', '8.6'], si: true }
@@ -417,6 +417,7 @@ const LABS = {
   veiviser: { name: 'Tabell A som veiviser', desc: 'Tabellhodet i Tabell A viser hvor i boka hver kolonne er forklart. Finn avsnittet for kodene i bensinraden.' },
   si: { name: 'Bruk de skriftlige instruksjonene', desc: 'Slå opp i de skriftlige instruksjonene og finn hva du skal gjøre for lasten på bilen.' },
   trapp: { name: 'Hvor i hierarkiet?', desc: 'Plasser lasten på riktig trinn: forbrukeremballasje, unntatte mengder, begrensede mengder, 1000 poeng eller full ADR.' },
+  tilsyn: { name: 'Tilsyn og parkering', desc: 'Krever lasten tilsyn etter 8.4, og hvor kan du parkere når du ikke er hos bilen?' },
   kapittel: { name: 'Finn kapittelet', desc: 'Hvilket kapittel eller hvilken del av boka står det i? Svaret viser siden du slår opp på.' },
   tabA: { name: 'Slå opp i Tabell A', desc: 'Finn klasse, transportkategori, tunnelkode og farenummer i et utdrag av tabellen.' },
   sedler: { name: 'Kjenn igjen faresedlene', desc: 'Hvilken klasse viser faresedlen?' },
@@ -705,6 +706,9 @@ const QS = [
   ['ulykke', 'e', 'Skriftlige instruksjoner (5.4.3.4)', 'Du kjører asfalt med merket for oppvarmede stoffer, og det lekker. Hva sier de skriftlige instruksjonene?', ['Unngå kontakt med varme deler av transportenheten og utlekket stoff', 'Kjøl ned stoffet med vann', 'Ta dekning og hold deg vekk fra vinduer', 'Bruk fluktmaske'], 'Faren er forbrenninger.'],
   ['ulykke', 'e', 'Skriftlige instruksjoner (5.4.3.4)', 'Lasten har fareseddel 4.3, og det har lekket ut. Hva sier tilleggsveiledningen i de skriftlige instruksjonene?', ['Utlekkede stoffer bør holdes tørre ved tildekking', 'Spyl stoffet bort med mye vann', 'Ta dekning og hold deg vekk fra vinduer', 'Begrens eksponeringstiden'], 'Stoffene i 4.3 utvikler brannfarlige gasser i kontakt med vann.'],
   ['forer', 'g', 'Skriftlige instruksjoner (5.4.3.4)', 'Bedriften trenger de skriftlige instruksjonene på polsk til en sjåfør. Hvor finnes de på andre språk?', ['På nettsidene til UNECE, som ADR-boka viser til', 'Bare hos DSB, på norsk', 'Sjåføren må oversette dem selv', 'Hos Statens vegvesen'], 'Instruksjonene skal være på et språk mannskapet kan lese og forstå (5.4.3.2).', 'b'],
+  ['forer', 'g', 'ADR 8.4.1, 8.5', 'Når krever ADR tilsyn med kjøretøyet etter 8.4?', ['Når kolonne (19) har en tilsynskode, S1 (6) eller S14–S24, og lasten er over grensen i koden', 'Alltid når bilen har farlig gods', 'Bare når lasten er over 1000 poeng', 'Bare om natta'], 'Tilsyn gjelder også innenfor 1000 poeng når koden krever det.'],
+  ['forer', 'g', 'ADR 8.4.1', 'Du finner verken sikret område eller bevoktet plass. Hvilken plass velger du først?', ['En plass der bilen neppe blir skadet av andre kjøretøyer', 'Et avsides sted borte fra hovedveg og boliger', 'Gata utenfor et boligfelt', 'Hvilken som helst plass'], 'Rekkefølgen er a) bevoktet plass, b) plass der bilen neppe blir skadet, c) avsides sted.'],
+  ['forer', 'g', 'ADR 8.5 S20', 'Bensin har S20 i kolonne (19). Når krever det tilsyn?', ['Over 10 000 kg i kolli eller over 3000 liter i tank', 'Alltid', 'Over 1000 poeng', 'Over 333 liter'], ''],
 
   // 8 Lasting, samlasting og stuing
   ['lasting', 'i', 'ADR 7.5.2.1', 'Kan kolli med fareseddel 3 og kolli med fareseddel 8 lastes på samme bil?', ['Ja', 'Nei', 'Bare med skillevegg', 'Bare under 1000 poeng'], ''],
@@ -1110,6 +1114,7 @@ const FACTS = [
   { st: 'forer', em: 'g', title: 'Slik er de skriftlige instruksjonene bygd opp', pts: ['Side 1: tiltakene mannskapet skal gjøre ved en ulykke eller nødsituasjon', 'Side 2 og 3: en tabell med én rad per fareseddel: (1) faresedler, (2) farlige egenskaper og (3) tilleggsveiledning', 'Side 4: miljømerket og merket for oppvarmede stoffer, og utstyret transportenheten skal ha', 'Finn radene for faresedlene på lasten din før du kjører. Har lasten flere farer, gjelder alle tiltakene', 'Se eksempelet: knappen «Eksempel: skriftlige instruksjoner»'] },
   { st: 'forer', em: 'g', title: 'Skriftlige instruksjoner (5.4.3)', pts: ['Fire sider etter en fast mal', 'Transportøren gir dem til mannskapet før avreise', 'På et språk mannskapet kan lese og forstå', 'Les dem før du kjører, og ha dem lett tilgjengelig'] },
   { st: 'forer', em: 'h', title: 'Brannslukkingsapparater (8.1.4)', pts: ['Inntil 3,5 t: minst 2 apparater, til sammen 4 kg', '3,5–7,5 t: minst 2 apparater, til sammen 8 kg, ett på minst 6 kg', 'Over 7,5 t: minst 2 apparater, til sammen 12 kg, ett på minst 6 kg', 'Ett apparat skal kunne slukke brann i motor eller førerhus og ha minst 2 kg', 'Plombe og dato for neste inspeksjon', 'Innenfor 1000 poeng: ett apparat på minst 2 kg'] },
+  { st: 'forer', em: 'g', title: 'Tilsyn med kjøretøy (8.4): når og hvordan', pts: ['Tilsyn kreves bare når kolonne (19) i Tabell A har en tilsynskode, S1 (6) eller S14–S24, og lasten er over grensen i koden (8.4.1)', 'Eksempler: bensin, propan og LPG har S20: tilsyn over 10 000 kg i kolli eller over 3000 liter i tank · kaliumcyanid har S14: tilsyn uansett mengde · S24: over 100 kg · S16: over 500 kg', 'Diesel og svovelsyre har ingen tilsynskode, og krever aldri tilsyn etter 8.4', 'Under tilsyn betyr at du er hos bilen. Uten tilsyn kan den stå på en sikret lagerplass eller et sikret fabrikkområde', 'Finnes ikke det, velger du i denne rekkefølgen: a) en bevoktet plass der vakta kjenner lasten og vet hvor du er · b) en plass der bilen neppe blir skadet av andre kjøretøyer, bare hvis a ikke finnes · c) et annet egnet sted borte fra hovedveg og boliger, der folk ikke ferdes, bare hvis a og b ikke finnes', 'Kapittel 8.4 og tilsynskodene gjelder også innenfor 1000 poeng (1.1.3.6.2)', 'Er godset også høy risiko (1.10.3), krever S16 og S21 at det hele tiden er under tilsyn etter sikringsplanen'] },
   { st: 'forer', em: 'g', title: 'Parkering og tilsyn (8.4)', pts: ['Store mengder skal være under tilsyn, eller stå på sikret lager- eller fabrikkområde', 'Ellers: bevoktet plass der vakta kjenner lasten, en plass der bilen neppe blir skadet, eller et avsides sted borte fra hovedveg og boliger'] },
   { st: 'lasting', em: 'i', title: 'Samlasting (7.5.2.1)', pts: ['Faresedlene på kolliene avgjør', 'Klasse 1 kan som hovedregel ikke lastes sammen med andre klasser – unntatt 1.4S', 'Klassene 2–9 kan i stor grad lastes sammen', 'Unntak: 4.1 og 5.2 med tilleggsfare 1', 'Gods som ikke kan samlastes, skal ha separate transportdokumenter'] },
   { st: 'lasting', em: 'j', title: 'Matvarer og fôr (7.5.4)', pts: ['Kolli med 6.1, 6.2 og enkelte stoffer i klasse 9 skal ikke stables på eller stå inntil matvarer', 'De holdes atskilt med hele skillevegger, kolli uten slike faresedler, eller avstand'] },
@@ -1718,6 +1723,29 @@ const KAPOPPG = [
   ['Tunnelkategorier og tunnelkoder', '8.6'], ['Godkjenning av kjøretøyer (FL, AT og EX)', '9.1']
 ];
 const LABGEN = {
+  // Tilsyn og parkering (8.4.1 og tilsynskodene i 8.5)
+  tilsyn() {
+    if (Math.random() < .6) {
+      const C = [
+        [true, 'Tankbil med 30 000 liter bensin (UN 1203).', 'Bensin har S20: tilsyn over 3000 liter i tank.'],
+        [false, '20 kanner à 20 liter bensin (UN 1203), til sammen rundt 300 kg.', 'S20 gjelder over 10 000 kg i kolli. Her er det langt under.'],
+        [false, 'Tankbil med 30 000 liter diesel (UN 1202).', 'Diesel har ingen tilsynskode i kolonne (19).'],
+        [true, 'Varebil med en boks på 25 gram kaliumcyanid (UN 1680).', 'Kaliumcyanid har S14: tilsyn uansett mengde, også innenfor 1000 poeng.'],
+        [false, '40 propanflasker à 11 kg (UN 1978), 440 kg.', 'Propan har S20: tilsyn over 10 000 kg i kolli.'],
+        [true, 'Tankbil med 20 000 liter propan (UN 1978).', 'S20: tilsyn over 3000 liter i tank.'],
+        [false, 'En IBC med 1000 liter svovelsyre (UN 1830).', 'Svovelsyre har ingen tilsynskode i kolonne (19).'],
+        [true, 'Tankbil med 25 000 liter LPG (UN 1965).', 'LPG har S20: tilsyn over 3000 liter i tank.']
+      ];
+      const [krav, last, ex] = pick(C);
+      const ja = 'Ja, bilen skal være under tilsyn eller stå på et sikret område', nei = 'Nei, lasten krever ikke tilsyn etter 8.4';
+      return { kind: 'krav', tag: last.slice(0, 30), q: `${last} Du skal ta en lang pause og forlate bilen. Krever lasten tilsyn etter 8.4?`, o: krav ? [ja, nei] : [nei, ja], ex, src: 'ADR 8.4.1, 8.5' };
+    }
+    const P = { s: 'Et sikret fabrikkområde hos kunden', a: 'En bevoktet parkeringsplass der vakta får vite hva du har med og hvor du er', b: 'En stor parkeringsplass der bilen neppe blir skadet av andre kjøretøyer', c: 'En grusplass borte fra hovedveg og boliger, der folk ikke ferdes', x: 'Gata utenfor et boligfelt' };
+    const sets = [['s', 'a', 'b', 'c'], ['a', 'b', 'c'], ['b', 'c', 'x'], ['c', 'x'], ['a', 'c', 'x'], ['s', 'b', 'x']];
+    const set = pick(sets), best = set.find(k => k !== 'x');
+    const why = { s: 'Et sikret lager- eller fabrikkområde kan brukes uten tilsyn.', a: 'Finnes ikke sikret område, er en bevoktet plass (a) førstevalget.', b: 'Plass (b) kan bare brukes når det ikke finnes en bevoktet plass (a).', c: 'Et avsides sted (c) kan bare brukes når verken (a) eller (b) finnes.' };
+    return { kind: 'plass', tag: set.join(''), q: 'Tankbilen med bensin skal stå over natta, og du kan ikke være hos den. Hvor skal du parkere?', o: [P[best], ...set.filter(k => k !== best).map(k => P[k])], ex: why[best] + ' Gata i et boligfelt er aldri et godt valg.', src: 'ADR 8.4.1' };
+  },
   // Hvor i hierarkiet? Riktig trinn for en last
   trapp() {
     const L = TRAPP.map(t => `${t.n}. ${t.kort} (${t.ref})`);
