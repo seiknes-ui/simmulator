@@ -143,6 +143,26 @@ body.simple .opt{min-height:52px;font-size:17px}
 .fact .pg{font-weight:600;white-space:nowrap}
 .tag.aud{border-color:var(--accent);color:var(--ink)}
 .tabA td.hl{background:var(--accent-soft);outline:2px solid var(--accent);font-weight:700}
+.si{display:grid;gap:14px}
+.si-pg{background:#fff;color:#111;border:1px solid var(--line);border-radius:4px;padding:16px 18px;display:grid;gap:8px;align-content:start}
+.si-pg h3{margin:4px 0 0;font-size:17px}
+.si-pg p,.si-pg li{font-size:14px;margin:0}
+.si-pg ul{margin:0;padding-left:20px;display:grid;gap:3px}
+.si-hd{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 12px;border-bottom:2px solid #111;padding-bottom:6px;font-size:13px}
+.si-sub{font-weight:600}
+.si-anm{font-size:12.5px!important;color:#444}
+.si{min-width:0}
+.si-pg{min-width:0;overflow-wrap:anywhere;hyphens:auto}
+.si-tab{border-collapse:collapse;width:100%;font-size:13.5px;table-layout:fixed}
+.si-tab th,.si-tab td{border:1px solid #999;padding:6px 8px;vertical-align:top;text-align:left}
+.si-tab th{background:#eee;font-size:12.5px}
+.si-tab th:first-child,.si-tab td.si-lab{width:110px}
+.si-tab td:last-child{width:32%}
+.si-lab div{display:flex;flex-wrap:wrap;gap:4px}
+.si-lab svg{width:46px;height:46px}
+.si-lab span{display:block;font-size:12px;font-weight:600;margin-top:2px}
+@media (max-width:560px){.si-tab{font-size:12.5px}.si-tab th,.si-tab td{padding:4px 5px}.si-tab th:first-child,.si-tab td.si-lab{width:52px}.si-lab svg{width:36px;height:36px}.si-tab td:last-child{width:30%}.si-pg{padding:12px}}
+@media print{.si-pg{break-after:page;border:none;padding:0}}
 .toc{display:grid;gap:6px}
 .toc details{border:1px solid var(--line);border-radius:4px;background:var(--sheet)}
 .toc summary{cursor:pointer;padding:10px 14px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 12px;font-weight:600}
@@ -340,10 +360,10 @@ const STATIONS = [
   { id: 'forebygg', day: 1, title: 'Forebygging og sikkerhet', emner: ['d'], desc: 'Tennkilder, røykeforbud, verneutstyr og trygg drift av kjøretøyet.', labs: ['brann'], kap: ['7.5', '8.1', '8.3'] },
   { id: 'merking', day: 2, title: 'Merking og oransje skilt', emner: ['f'], desc: 'Oransje skilt, farenummer, store faresedler og LQ-merket.', labs: ['merk', 'skilt'], match: 'farenr', kap: ['5.2', '5.3', '3.4'] },
   { id: 'unntak', day: 2, title: 'Unntak og 1000 poeng', emner: ['a'], desc: 'Mengdeunntaket i 1.1.3.6, begrensede og unntatte mengder, og de andre unntakene.', labs: ['maaler', 'poeng'], kap: ['1.1', '3.4', '3.5'] },
-  { id: 'forer', day: 2, title: 'Dokumenter og utstyr', emner: ['g', 'h'], desc: 'Hva som skal være i førerhuset, skriftlige instruksjoner, brannslukkere og utstyr.', labs: ['utstyr'], kap: ['5.4', '8.1', '8.4'] },
+  { id: 'forer', day: 2, title: 'Dokumenter og utstyr', emner: ['g', 'h'], desc: 'Hva som skal være i førerhuset, skriftlige instruksjoner, brannslukkere og utstyr.', labs: ['utstyr'], kap: ['5.4', '8.1', '8.4'], si: true },
   { id: 'lasting', day: 3, title: 'Lasting, samlasting og stuing', emner: ['i', 'j', 'm'], desc: 'Hva som kan lastes sammen, kontroll før lasting, matvarer og lastsikring.', labs: ['lasteplan', 'samlast'], kap: ['7.5'] },
   { id: 'ansvar', day: 3, title: 'Ansvar og sikring', emner: ['k', 'o'], desc: 'Pliktene til avsender, transportør, laster og sjåfør, og sikring mot misbruk.', match: 'aktor', kap: ['1.4', '1.8', '1.10'] },
-  { id: 'ulykke', day: 3, title: 'Ulykke, brann og tunnel', emner: ['e', 'n'], desc: 'De skriftlige instruksjonene, brann og førstehjelp, og tunnelkategoriene.', labs: ['ulykke', 'rute', 'tunnel'], kap: ['5.4', '8.6'] }
+  { id: 'ulykke', day: 3, title: 'Ulykke, brann og tunnel', emner: ['e', 'n'], desc: 'De skriftlige instruksjonene, brann og førstehjelp, og tunnelkategoriene.', labs: ['ulykke', 'rute', 'tunnel'], kap: ['5.4', '8.6'], si: true }
 ];
 const ST = Object.fromEntries(STATIONS.map((s, i) => [s.id, { ...s, n: i + 1 }]));
 const DAYS = { 1: 'Dag 1', 2: 'Dag 2', 3: 'Dag 3' };
@@ -573,6 +593,13 @@ const QS = [
   ['forer', 'h', 'ADR 8.1.5.2', 'Hvor mange frittstående varselsignaler skal være med?', ['2', '1', '3', '4'], ''],
   ['forer', 'h', 'Skriftlige instruksjoner (5.4.3.4)', 'Hva bruker du hovedstrømbryteren til ved en ulykke?', ['Å bryte strømmen fra batteriet så du unngår gnister', 'Å starte motoren raskere hvis bilen må flyttes', 'Å slå på varsellysene og arbeidslysene', 'Å låse dørene så ingen kommer inn i bilen'], ''],
   ['forer', 'h', 'ADR 9.1.3 og 8.1.2.2', 'Hvilket dokument viser at en tankbil (FL eller AT) er godkjent for farlig gods?', ['Godkjenningsattesten', 'Vognkortet', 'Kompetansebeviset', 'Transportdokumentet'], ''],
+  ['forer', 'g', 'Skriftlige instruksjoner (5.4.3.4)', 'Et kolli med fareseddel 8 lekker. Hvor i de skriftlige instruksjonene finner du hva du skal passe på for dette stoffet?', ['I tabellen med faresedlene, på raden for fareseddel 8', 'På første side, blant de generelle tiltakene', 'På siste side, under utstyret', 'I transportdokumentet, ikke i instruksjonene'], 'Raden for 8 sier: fare for etseskader, kan reagere kraftig med vann, og utlekket stoff kan gi etsende damper.'],
+  ['forer', 'g', 'Skriftlige instruksjoner (5.4.3.4)', 'Hvilke tre kolonner har tabellen over faresedlene i de skriftlige instruksjonene?', ['Faresedler, farlige egenskaper og tilleggsveiledning', 'UN-nummer, navn og mengde', 'Klasse, emballasjegruppe og tunnelkode', 'Farenummer, UN-nummer og fareseddel'], ''],
+  ['forer', 'g', 'Skriftlige instruksjoner (5.4.3.4)', 'Du kjører metanol, som har faresedlene 3 og 6.1. Hvilke tiltak i de skriftlige instruksjonene gjelder?', ['Tiltakene for begge faresedlene', 'Bare tiltakene for 3, den første fareseddelen', 'Bare tiltakene for 6.1, den farligste', 'Bare de generelle tiltakene på første side'], 'ANM 1 i instruksjonene: for stoffer med flere farer og ved samlasting skal alle relevante tiltak følges. Altså fluktmaske, ta dekning og unngå lavtliggende områder.'],
+  ['forer', 'g', 'Skriftlige instruksjoner (5.4.3.4)', 'Hvor i de skriftlige instruksjonene står utstyret transportenheten skal ha med?', ['På siste side', 'På første side, før tiltakene', 'I tabellen, på raden for hver fareseddel', 'Det står ikke i instruksjonene, bare i ADR 8.1.5'], 'Siste side lister utstyret for alle transportenheter, for hver i mannskapet, og tilleggsutstyret for enkelte klasser.'],
+  ['ulykke', 'e', 'Skriftlige instruksjoner (5.4.3.4)', 'Du kjører asfalt med merket for oppvarmede stoffer, og det lekker. Hva sier de skriftlige instruksjonene?', ['Unngå kontakt med varme deler av transportenheten og utlekket stoff', 'Kjøl ned stoffet med vann', 'Ta dekning og hold deg vekk fra vinduer', 'Bruk fluktmaske'], 'Faren er forbrenninger.'],
+  ['ulykke', 'e', 'Skriftlige instruksjoner (5.4.3.4)', 'Lasten har fareseddel 4.3, og det har lekket ut. Hva sier tilleggsveiledningen i de skriftlige instruksjonene?', ['Utlekkede stoffer bør holdes tørre ved tildekking', 'Spyl stoffet bort med mye vann', 'Ta dekning og hold deg vekk fra vinduer', 'Begrens eksponeringstiden'], 'Stoffene i 4.3 utvikler brannfarlige gasser i kontakt med vann.'],
+  ['forer', 'g', 'Skriftlige instruksjoner (5.4.3.4)', 'Bedriften trenger de skriftlige instruksjonene på polsk til en sjåfør. Hvor finnes de på andre språk?', ['På nettsidene til UNECE, som ADR-boka viser til', 'Bare hos DSB, på norsk', 'Sjåføren må oversette dem selv', 'Hos Statens vegvesen'], 'Instruksjonene skal være på et språk mannskapet kan lese og forstå (5.4.3.2).', 'b'],
 
   // 8 Lasting, samlasting og stuing
   ['lasting', 'i', 'ADR 7.5.2.1', 'Kan kolli med fareseddel 3 og kolli med fareseddel 8 lastes på samme bil?', ['Ja', 'Nei', 'Bare med skillevegg', 'Bare under 1000 poeng'], ''],
@@ -859,7 +886,7 @@ const QS = [
   ['farer', 'c', 'Forskriften § 6', 'Hvem skal varsles om uhell med radioaktivt materiale (klasse 7)?', ['Direktoratet for strålevern og atomsikkerhet', 'Bare kommunelegen i kommunen der det skjedde', 'Miljødirektoratet, som har ansvaret for avfall', 'Ingen, så lenge ingen personer ble skadet'], '', 'b'],
   ['farer', 'c', 'Forskriften § 12', 'Hvordan kan farlig avfall fra husholdninger samles inn?', ['I spesielle kasser med sikret lokk, merket «Farlig avfall»', 'I vanlige søppelsekker, sammen med restavfallet', 'Bare i tankbil med godkjenningsattest og oransje skilt', 'Det kan ikke samles inn, folk må levere det selv'], '', 'b'],
 
-  ['ulykke', 'e', 'Skriftlige instruksjoner (5.4.3.4)', 'Ved hvilke faresedler sier instruksjonene «ta dekning og unngå lavtliggende områder»?', ['2.1, 2.2 og 3 – gasser og brannfarlige væsker', '6.1 og 6.2 – giftige og smittefarlige stoffer', '4.3 – stoffer som er farlige med vann', '8 – etsende stoffer'], 'Ved 2.3 skal du i tillegg bruke fluktmaske.'],
+  ['ulykke', 'e', 'Skriftlige instruksjoner (5.4.3.4)', 'Ved hvilke faresedler sier instruksjonene «ta dekning og unngå lavtliggende områder»?', ['2.1, 2.2, 2.3 og 3 – gassene og de brannfarlige væskene', '6.1 og 6.2 – giftige og smittefarlige stoffer', '4.3 – stoffer som er farlige med vann', '8 – etsende stoffer'], 'Ved 2.3 skal du i tillegg bruke fluktmaske.'],
   ['ulykke', 'e', 'Skriftlige instruksjoner (5.4.3.4)', 'Hva er faren ved infeksjonsfremmende stoffer (6.2)?', ['Smitte som kan gi alvorlig sykdom hos mennesker og dyr', 'Brann og eksplosjon når stoffet kommer i kontakt med luft', 'Etseskader på hud og øyne ved den minste berøring', 'Stråling som går gjennom emballasjen og skader cellene'], ''],
   ['ulykke', 'n', 'ADR 8.6.3.2 og 8.6.4', 'Kolli over 1000 poeng med kodene (D/E) og (C/D). Hvilke tunnelkategorier er forbudt?', ['D og E', 'Bare E', 'C, D og E', 'Ingen'], 'Den strengeste koden gjelder hele lasten. (C/D) i kolli er forbudt i D og E.'],
   ['ulykke', 'n', 'ADR 8.6.2', 'Tankbil med bensin (D/E) skal gjennom en tunnel uten skilt for farlig gods. Er det lov?', ['Ja, tunneler uten skilt er kategori A', 'Nei, tankbiler er forbudt i alle tunneler', 'Bare om natten', 'Bare med eskorte fra politiet'], ''],
@@ -927,6 +954,7 @@ const FACTS = [
   { st: 'unntak', em: 'a', title: 'Begrensede og unntatte mengder', pts: ['LQ: største mengde per innerbeholder står i kolonne (7a). «0» betyr ikke tillatt', 'LQ teller ikke med i 1000 poeng', 'EQ: enda mindre mengder, E-kode i kolonne (7b) og eget merke'] },
   { st: 'forer', em: 'g', title: 'I førerhuset (8.1.2)', pts: ['Transportdokument for alt det farlige godset', 'Skriftlige instruksjoner, lett å finne', 'ID med bilde for hele mannskapet', 'ADR-kompetansebevis', 'Godkjenningsattest når kjøretøyet krever det (tankbiler, FL, AT)'] },
   { st: 'forer', em: 'g', title: 'Transportdokumentet (5.4.1)', pts: ['UN-nummer, navn, fareseddel, emballasjegruppe og tunnelkode i denne rekkefølgen: «UN 1203 BENSIN, 3, II, (D/E)»', 'Antall og type kolli, og samlet mengde', 'Avsender og mottaker', 'Gods som ikke kan samlastes, skal ha separate dokumenter'] },
+  { st: 'forer', em: 'g', title: 'Slik er de skriftlige instruksjonene bygd opp', pts: ['Side 1: tiltakene mannskapet skal gjøre ved en ulykke eller nødsituasjon', 'Side 2 og 3: en tabell med én rad per fareseddel: (1) faresedler, (2) farlige egenskaper og (3) tilleggsveiledning', 'Side 4: miljømerket og merket for oppvarmede stoffer, og utstyret transportenheten skal ha', 'Finn radene for faresedlene på lasten din før du kjører. Har lasten flere farer, gjelder alle tiltakene', 'Se eksempelet: knappen «Eksempel: skriftlige instruksjoner»'] },
   { st: 'forer', em: 'g', title: 'Skriftlige instruksjoner (5.4.3)', pts: ['Fire sider etter en fast mal', 'Transportøren gir dem til mannskapet før avreise', 'På et språk mannskapet kan lese og forstå', 'Les dem før du kjører, og ha dem lett tilgjengelig'] },
   { st: 'forer', em: 'h', title: 'Brannslukkingsapparater (8.1.4)', pts: ['Inntil 3,5 t: minst 2 apparater, til sammen 4 kg', '3,5–7,5 t: minst 2 apparater, til sammen 8 kg, ett på minst 6 kg', 'Over 7,5 t: minst 2 apparater, til sammen 12 kg, ett på minst 6 kg', 'Ett apparat skal kunne slukke brann i motor eller førerhus og ha minst 2 kg', 'Plombe og dato for neste inspeksjon', 'Innenfor 1000 poeng: ett apparat på minst 2 kg'] },
   { st: 'forer', em: 'g', title: 'Parkering og tilsyn (8.4)', pts: ['Store mengder skal være under tilsyn, eller stå på sikret lager- eller fabrikkområde', 'Ellers: bevoktet plass der vakta kjenner lasten, en plass der bilen neppe blir skadet, eller et avsides sted borte fra hovedveg og boliger'] },
@@ -1032,6 +1060,82 @@ function tunnelSVG(cat) {
     <rect x="45" y="200" width="110" height="64" rx="6" fill="#fff" stroke="#000" stroke-width="4"/><text x="100" y="249" text-anchor="middle" font-family="Barlow Condensed,Arial Narrow,sans-serif" font-weight="700" font-size="52" fill="#000">${cat}</text>`}</svg>`;
 }
 
+// ---------- Skriftlige instruksjoner (5.4.3.4) ----------
+// Teksten er gjengitt fra malen i ADR/RID 2025, side 1232–1237
+const SI_TILTAK = [
+  'Sett på bremsene, stopp motoren og slå av strømmen fra batteriet ved hjelp av hovedstrømbryteren hvis en slik finnes;',
+  'Unngå tennkilder, og spesielt røyking og bruk av elektroniske sigaretter eller lignende innretninger. Ikke slå på elektrisk utstyr;',
+  'Varsle relevante nødetater, gi dem så mye informasjon om hendelsen eller ulykken og de involverte stoffene som mulig;',
+  'Ta på varselvest og sett ut frittstående varselsignaler på en hensiktsmessig måte;',
+  'Ha transportdokumentene lett tilgjengelig for utrykningspersonell når disse ankommer;',
+  'Ikke gå i eller berør utlekkede stoffer og unngå å puste inn gass, røyk, støv og damp ved å oppholde deg i den retningen vinden blåser fra;',
+  'Bruk brannslukkerne til å slukke mindre branner i dekk, bremser og motorrom hvis det er hensiktsmessig og trygt;',
+  'Kjøretøyets mannskap skal ikke forsøke å slukke brann i lasterommet;',
+  'Dersom det er hensiktsmessig og trygt, bruk utstyret på kjøretøyet til å forhindre lekkasjer til vannmiljøer eller avløp, og til å samle opp søl;',
+  'Gå vekk fra ulykkesstedet, råd andre til å gjøre det samme og følg rådene fra redningstjenesten;',
+  'Fjern alle tilsølte klær og brukt tilsølt beskyttelsesutstyr og avhend det på en trygg måte;'
+];
+const VANN = 'Farlig for vannmiljøer eller avløpssystemer.';
+// [faresedler som tegnes, tekst under, navn, farlige egenskaper, tilleggsveiledning, side i malen]
+const SI_KLASSER = [
+  [['1'], '1 · 1.5 · 1.6', 'Eksplosive stoffer og gjenstander', 'Kan ha mange egenskaper og effekter slik som: Massedetonasjoner, utkast av splinter og annet materiale, intens brann/varme, kraftige lysglimt, kraftig støy eller røyk. Følsomme for sjokk eller støt eller varme.', 'Ta dekning, og hold deg vekk fra vinduer.', 2],
+  [['1.4S'], '1.4', 'Eksplosive stoffer og gjenstander', 'En viss fare for eksplosjon og brann.', 'Ta dekning.', 2],
+  [['2.1'], '2.1', 'Brannfarlige gasser', 'Fare for brann. Fare for eksplosjon. Kan være under trykk. Fare for kvelning. Kan forårsake forbrenninger eller frostskader. Beholdere kan eksplodere ved oppvarming.', 'Ta dekning. Unngå lavtliggende områder.', 2],
+  [['2.2'], '2.2', 'Ikke-brannfarlige, ikke-giftige gasser', 'Fare for kvelning. Kan være under trykk. Kan forårsake frostskader. Beholdere kan eksplodere ved oppvarming.', 'Ta dekning. Unngå lavtliggende områder.', 2],
+  [['2.3'], '2.3', 'Giftige gasser', 'Fare for forgiftning. Kan være under trykk. Kan forårsake forbrenninger eller frostskader. Beholdere kan eksplodere ved oppvarming.', 'Bruk fluktmaske. Ta dekning. Unngå lavtliggende områder.', 2],
+  [['3'], '3', 'Brannfarlige væsker', 'Fare for brann. Fare for eksplosjon. Beholdere kan eksplodere ved oppvarming.', 'Ta dekning. Unngå lavtliggende områder.', 3],
+  [['4.1'], '4.1', 'Brannfarlige faste stoffer, selvreaktive stoffer, polymeriserende stoffer og faste desensiterte eksplosiver', 'Fare for brann. Brannfarlige eller brennbare, kan antennes av varme, gnister eller flammer. Kan inneholde selvreaktive stoffer som er tilbøyelige til eksoterm dekomponering dersom de utsettes for tilførsel av varme, kontakt med andre stoffer (som syrer, tungmetallforbindelser eller aminer), friksjon eller støt. Dette kan medføre utvikling av skadelig og brannfarlig gass eller damp eller selvantennelse. Beholdere kan eksplodere ved oppvarming. Risiko for eksplosjon av desensiterte eksplosiver etter tap av desensiterer.', '', 3],
+  [['4.2'], '4.2', 'Selvantennende stoffer', 'Fare for brann ved selvantennelse dersom emballasjen er skadd, eller ved lekkasje. Kan reagere voldsomt med vann.', '', 3],
+  [['4.3'], '4.3', 'Stoffer som utvikler brannfarlige gasser i kontakt med vann', 'Fare for brann eller eksplosjon ved kontakt med vann.', 'Utlekkede stoffer bør holdes tørre ved tildekking.', 3],
+  [['5.1'], '5.1', 'Oksiderende stoffer', 'Fare for voldsom reaksjon, antennelse og eksplosjon ved kontakt med brennbare eller brannfarlige stoffer.', 'Unngå blanding med brannfarlige eller brennbare stoffer (f.eks. sagflis).', 3],
+  [['5.2'], '5.2', 'Organiske peroksider', 'Fare for eksotermisk (varmeutviklende) dekomponering ved høye temperaturer, kontakt med andre stoffer (som syrer, tungmetallforbindelser eller aminer), friksjon eller støt. Dette kan medføre utvikling av skadelige og brannfarlige gasser eller damper eller selvantennelse.', 'Unngå blanding med brannfarlige eller brennbare stoffer (f.eks. sagflis).', 3],
+  [['6.1'], '6.1', 'Giftige stoffer', 'Fare for forgiftning ved innånding, hudkontakt eller svelging. ' + VANN, 'Bruk fluktmaske.', 3],
+  [['6.2'], '6.2', 'Infeksjonsfremmende stoffer', 'Fare for infeksjon. Kan forårsake alvorlige sykdommer hos mennesker eller dyr. ' + VANN, '', 3],
+  [['7'], '7A · 7B · 7C · 7D', 'Radioaktivt materiale', 'Fare for å bli tatt opp i organismen og ytre stråling.', 'Begrens eksponeringstiden.', 3],
+  [[], '7E', 'Spaltbart materiale', 'Fare for nukleær kjedereaksjon.', '', 3],
+  [['8'], '8', 'Etsende stoffer', 'Fare for etseskader. Kan reagere kraftig med hverandre, med vann og andre stoffer. Utlekket stoff kan utvikle etsende damper. ' + VANN, '', 3],
+  [['9', '9A'], '9 · 9A', 'Forskjellige farlige stoffer og gjenstander', 'Fare for forbrenninger. Fare for brann. Fare for eksplosjon. ' + VANN, '', 3]
+];
+// Merket for oppvarmede stoffer: rød trekant med termometer
+const hotMark = () => `<path d="M0,-86 L96,80 L-96,80Z" fill="#fff" stroke="#D7262B" stroke-width="12" stroke-linejoin="round"/>
+  <rect x="-7" y="-36" width="14" height="70" rx="7" fill="#D7262B"/><circle cx="0" cy="46" r="17" fill="#D7262B"/>
+  ${[-22, -6, 10].map(y => `<line x1="10" y1="${y}" x2="22" y2="${y}" stroke="#D7262B" stroke-width="5"/>`).join('')}`;
+const SI_MERKER = [
+  [() => markSVG(envMark()), 'Miljøfarlige stoffer', VANN, ''],
+  [() => markSVG(hotMark()), 'Oppvarmede stoffer', 'Fare for forbrenninger.', 'Unngå kontakt med varme deler av transportenheten og utlekket stoff.']
+];
+function siHTML() {
+  const head = n => `<div class="si-hd"><b>SKRIFTLIGE INSTRUKSJONER I HENHOLD TIL ADR</b><span>Side ${n} av 4</span></div>`;
+  const rows = pg => SI_KLASSER.filter(r => r[5] === pg).map(([labs, cap, name, risk, act]) => `<tr><td class="si-lab"><div>${labs.map(l => labelSVG(l)).join('')}</div><span>${cap}</span></td><td><b>${esc(name)}</b><br>${esc(risk)}</td><td>${esc(act)}</td></tr>`).join('');
+  const tab = (pg, extra = '') => `<p class="si-sub">Tilleggsveiledning for kjøretøyets mannskap om egenskapene til farlig gods etter klasse og tiltak avhengig av rådende omstendigheter.</p>
+    <table class="si-tab"><tr><th>Faresedler<br>(1)</th><th>Farlige egenskaper<br>(2)</th><th>Tilleggsveiledning<br>(3)</th></tr>${rows(pg)}</table>${extra}`;
+  return `<div class="si">
+    <section class="si-pg">${head(1)}<h3>Tiltak ved ulykker eller nødssituasjoner</h3>
+      <p>Hvis en ulykke eller nødsituasjon oppstår eller er nært forestående under transport, skal kjøretøyets mannskap gjennomføre følgende tiltak dersom det er trygt og praktisk gjennomførbart:</p>
+      <ul>${SI_TILTAK.map(t => `<li>${esc(t)}</li>`).join('')}</ul></section>
+    <section class="si-pg">${head(2)}${tab(2)}</section>
+    <section class="si-pg">${head(3)}${tab(3, `<p class="si-anm">ANM 1: For farlige stoffer med flere farer og ved samlasting skal alle relevante tiltak følges.<br>ANM 2: Tiltakene som er listet i kolonne (3) i tabellen må tilpasses slik at de tilsvarer de klassene med farlig gods som transporteres og den aktuelle transportmåten.</p>`)}</section>
+    <section class="si-pg">${head(4)}<p class="si-sub">Tilleggsveiledning for kjøretøyets mannskap om egenskaper til farlig gods som er angitt med merker, og tiltak avhengig av rådende omstendigheter</p>
+      <table class="si-tab"><tr><th>Merke<br>(1)</th><th>Farlige egenskaper<br>(2)</th><th>Tilleggsveiledning<br>(3)</th></tr>${SI_MERKER.map(([svg, name, risk, act]) => `<tr><td class="si-lab"><div>${svg()}</div></td><td><b>${esc(name)}</b><br>${esc(risk)}</td><td>${esc(act)}</td></tr>`).join('')}</table>
+      <h3>Utstyr for personlig og alminnelig beskyttelse</h3>
+      <p>Utstyr som skal medbringes på transportenheten i henhold til ADR 8.1.5 for å utføre generelle og farespesifikke nødtiltak.</p>
+      <p><b>Følgende utstyr skal medbringes i alle transportenheter:</b></p>
+      <ul><li>minst en stoppekloss per kjøretøy, av egnet størrelse for kjøretøyets vekt og hjuldiameter;</li><li>to frittstående varselsignaler;</li><li>øyeskyllevæske<sup>a</sup>, og</li></ul>
+      <p><b>for hvert medlem av kjøretøyets mannskap</b></p>
+      <ul><li>varselvest;</li><li>en lommelykt;</li><li>et par beskyttelseshansker; og</li><li>øyebeskyttelse.</li></ul>
+      <p><b>Tilleggsutstyr som kreves for enkelte klasser:</b></p>
+      <ul><li>en fluktmaske til hver enkelt av kjøretøyets mannskaper skal medbringes på transportenheten ved transport av gods med fareseddelnummer 2.3 eller 6.1;</li><li>en spade<sup>b</sup>;</li><li>tetning for sluk<sup>b</sup>;</li><li>oppsamlingsbeholder<sup>b</sup>.</li></ul>
+      <p class="si-anm"><sup>a</sup> Ikke nødvendig for faresedlene 1, 1.4, 1.5, 1.6, 2.1, 2.2 og 2.3.<br><sup>b</sup> Bare nødvendig for faste stoffer og væsker med faresedlene 3, 4.1, 4.3, 8 eller 9.</p></section></div>`;
+}
+function showSI() {
+  goPlay(`<div class="quiz">
+    <div class="qbar"><span>Eksempel · <b>Skriftlige instruksjoner</b></span><div class="row"><button class="btn" onclick="window.print()">Skriv ut</button><button class="btn" id="quit">Tilbake</button></div></div>
+    <p class="muted" style="margin:0;font-size:14px">Slik ser de skriftlige instruksjonene ut. Malen står i ADR 5.4.3.4 (boka side 1232–1237). Transportøren gir dem til mannskapet før avreise, og de skal ligge i førerhuset, lett tilgjengelig. Les dem før du kjører, og finn raden for faresedlene på lasten din.</p>
+    ${siHTML()}
+    <p class="muted noprint" style="margin:0;font-size:13px">Teksten er gjengitt fra ADR/RID 2025 fra DSB. Den offisielle versjonen i farger, på norsk og andre språk, kan skrives ut fra nettsidene til UNECE. Faresedlene her er tegnet for kurset, og 1.4-sedlen vises med samhørighetsgruppe S.</p></div>`);
+  $('#quit').onclick = goHome;
+}
+
 // ---------- Startsiden: kunnskapsstien ----------
 function nextStation() { return STATIONS.find(s => !stDone(s.id)) || null; }
 function renderHome() {
@@ -1054,7 +1158,7 @@ function renderHome() {
         <p>${esc(s.desc)}</p>
         ${bokLine(s.kap || [], 'I boka:')}
         <div class="prog"><div class="bar"><i style="width:${p.pct}%"></i></div><span>${p.m}/${p.n} mestret</span></div>
-        <div class="row"><button class="btn" data-go="facts" data-st="${s.id}">Fagstoff</button><button class="btn primary" data-go="ov" data-st="${s.id}">Øv</button>${labBtns(s, 'data-go="lab" data-st="' + s.id + '"', true)}${s.match ? `<button class="btn" data-go="match" data-st="${s.id}">Koble: ${esc(SETS[s.match].name)}</button>` : ''}</div></article></li>`;
+        <div class="row"><button class="btn" data-go="facts" data-st="${s.id}">Fagstoff</button><button class="btn primary" data-go="ov" data-st="${s.id}">Øv</button>${labBtns(s, 'data-go="lab" data-st="' + s.id + '"', true)}${s.match ? `<button class="btn" data-go="match" data-st="${s.id}">Koble: ${esc(SETS[s.match].name)}</button>` : ''}${s.si ? `<button class="btn" data-go="si">Eksempel: skriftlige instruksjoner</button>` : ''}</div></article></li>`;
     }
     if (d === 3) {
       html += `<li class="stn ${prak === PRACTICAL.length ? 'done' : prak ? 'started' : ''}"><span class="dot">${prak === PRACTICAL.length ? '✓' : 'P'}</span>
@@ -1075,7 +1179,7 @@ $('#path').addEventListener('click', e => {
   const b = e.target.closest('[data-go]'); if (!b) return;
   const st = b.dataset.st;
   if (st) { store.last = st; save(); }
-  ({ facts: () => showFacts(st), ov: () => startPractice(st), lab: () => startLab(b.dataset.lab), match: () => startMatch(ST[st].match), prove: startExam, ovall: () => startPractice(null) })[b.dataset.go]();
+  ({ si: showSI, facts: () => showFacts(st), ov: () => startPractice(st), lab: () => startLab(b.dataset.lab), match: () => startMatch(ST[st].match), prove: startExam, ovall: () => startPractice(null) })[b.dataset.go]();
 });
 $('#path').addEventListener('change', e => {
   const c = e.target.closest('[data-prak]'); if (!c) return;
@@ -1206,9 +1310,10 @@ function showFacts(st) {
     ${bokLine(s.kap || [], 'Ha boka oppe på:')}
     <div class="facts">${list.map(f => `<article class="fact"><span class="em">Emne ${f.em}: ${esc(EMNER[f.em])}</span><h4>${fillBok(f.title)}</h4><ul>${f.pts.map(p => `<li>${fillBok(p)}</li>`).join('')}</ul></article>`).join('')}</div>
     ${st === 'kapitler' ? `<h2 style="margin:6px 0 0">Alle kapitlene</h2><p class="muted" style="margin:0;font-size:14px">Innholdsfortegnelsen i ADR/RID 2025. Kapitlene som brukes på kurset, er merket.</p>${tocHTML()}` : ''}
-    <div class="row noprint"><button class="btn primary" id="ovNow">Øv på denne stasjonen</button>${labBtns(s, 'data-lab-go')}</div></div>`);
+    <div class="row noprint"><button class="btn primary" id="ovNow">Øv på denne stasjonen</button>${labBtns(s, 'data-lab-go')}${s.si ? '<button class="btn" id="siNow">Eksempel: skriftlige instruksjoner</button>' : ''}</div></div>`);
   $('#quit').onclick = goHome;
   $('#ovNow').onclick = () => startPractice(st);
+  if (s.si) $('#siNow').onclick = showSI;
   bindLabBtns();
 }
 
