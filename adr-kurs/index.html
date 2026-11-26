@@ -49,7 +49,9 @@ dialog.qrbig::backdrop{background:rgba(0,0,0,.75)}
 dialog.qrbig img{display:block;width:min(80vmin,720px);height:auto;margin:0 auto 12px}
 dialog.qrbig p{margin:0;font-family:var(--f-display);font-weight:700;font-size:clamp(20px,3vmin,32px)}
 dialog.qrbig small{display:block;margin-top:4px;font-size:15px;color:#56625D}
-@media (max-width:640px){header{grid-template-columns:minmax(0,1fr)}.qr{display:none}}
+.qr .qr-m{display:none}
+/* Mobil: en liten knapp som åpner QR-koden stort, så den kan vises fra telefonen */
+@media (max-width:640px){header{grid-template-columns:minmax(0,1fr)}.qr{cursor:pointer;justify-self:start;padding:6px 12px;border:1px solid var(--line);border-radius:999px;background:var(--sheet);color:var(--ink);font-size:14px;font-weight:600}.qr img,.qr .qr-d{display:none}.qr .qr-m{display:inline}}
 body.simple .qr{display:none}
 h1{font-family:var(--f-display);font-weight:700;font-size:clamp(30px,4vw,40px);letter-spacing:.01em;margin:0;text-transform:uppercase;line-height:1}
 h1 span{color:var(--accent)}
@@ -329,7 +331,7 @@ body.simple .opt{min-height:52px;font-size:17px}
     </div>
     <button class="qr noprint" id="qrBtn" aria-haspopup="dialog" aria-label="Vis QR-koden stort">
       <img src="../qr/qr-adr.svg" alt="QR-kode til seiknes-ui.github.io/simmulator/adr-kurs">
-      <span>Skann for å åpne<br>på mobilen</span>
+      <span class="qr-d">Skann for å åpne<br>på mobilen</span><span class="qr-m">Vis QR-kode</span>
     </button>
   </header>
   <dialog class="qrbig" id="qrBig" aria-label="QR-kode">
