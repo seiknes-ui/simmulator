@@ -31,3 +31,6 @@ Når noe nytt legges inn, skal du alltid se etter hvordan det henger sammen med 
 - **Kurset:** finnes det fagstoff, spørsmål eller laber om det samme fra før? Oppdater dem, så de ikke sier noe annet.
 
 Skriv sammenhengene inn i fagstoffet («Henger sammen med …»), og lag gjerne spørsmål som krever at eleven bruker to kapitler.
+
+## Signalord
+Signalordene må, skal, alltid, aldri, påbudt og forbudt markeres automatisk med farge (funksjonen `sig()`), og sterkere når to står i samme setning. Bruk dem bevisst i spørsmål og svar, og la ikke alternativer med «alltid» eller «aldri» alltid være de gale, så elevene må lese og tenke.
