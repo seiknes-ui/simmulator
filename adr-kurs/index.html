@@ -82,6 +82,10 @@ button{font:inherit;color:inherit}
 .bar{height:8px;border-radius:4px;background:var(--line);overflow:hidden}
 .bar i{display:block;height:100%;background:var(--ok);border-radius:4px}
 .prog{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;font-size:13px;color:var(--muted)}
+.bokline{display:flex;flex-wrap:wrap;gap:4px 6px;align-items:baseline;font-size:13px;color:var(--muted)}
+.bokline b{color:var(--ink);font-weight:600}
+.bokline .kp{padding:1px 7px;border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:3px;background:var(--bg)}
+.day .bokline{margin:-2px 0 10px}
 .chk{display:grid;gap:6px}
 .chk label{display:flex;gap:10px;align-items:flex-start;font-size:14.5px;cursor:pointer}
 .chk input{width:18px;height:18px;margin-top:2px;accent-color:var(--ok)}
@@ -136,6 +140,17 @@ body.simple .opt{min-height:52px;font-size:17px}
 .fact h4{margin:0;font-family:var(--f-display);font-size:20px;text-transform:uppercase;line-height:1.1}
 .fact ul{margin:0;padding-left:18px;display:grid;gap:4px;font-size:14.5px}
 .fact .em{justify-self:start}
+.fact .pg{font-weight:600;white-space:nowrap}
+.toc{display:grid;gap:6px}
+.toc details{border:1px solid var(--line);border-radius:4px;background:var(--sheet)}
+.toc summary{cursor:pointer;padding:10px 14px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 12px;font-weight:600}
+.toc summary span{font-weight:400;color:var(--muted);font-size:14px}
+.toc ol{list-style:none;margin:0;padding:0 14px 10px;display:grid;gap:2px;font-size:14.5px}
+.toc li{display:grid;grid-template-columns:4.5ch minmax(0,1fr) auto;gap:10px;padding:3px 0;border-top:1px solid var(--line)}
+.toc li.kurs b{color:var(--accent)}
+.toc li .p{color:var(--muted);white-space:nowrap}
+.toc li.kurs .p::before{content:"Kurset · ";color:var(--accent)}
+@media print{.toc details>*:not(summary){display:block}}
 
 /* Koble sammen */
 .match{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:10px}
@@ -262,7 +277,7 @@ body.simple .opt{min-height:52px;font-size:17px}
   <header>
     <a class="back" href="../index.html">← Transport og logistikk</a>
     <h1>ADR <span>grunnkurs</span></h1>
-    <p>Kunnskapsstien følger emnene grunnkurset skal dekke etter ADR 8.2.2.3.2. Gå stasjonene i rekkefølge gjennom kurset: les fagstoffet, øv til du kan det, prøv laben, og ta prøven til slutt.</p>
+    <p>Kunnskapsstien følger emnene grunnkurset skal dekke etter ADR 8.2.2.3.2. Gå stasjonene i rekkefølge gjennom kurset: les fagstoffet, øv til du kan det, prøv laben, og ta prøven til slutt. Hver dag og hver stasjon viser hvilke kapitler i ADR-boka du skal ha oppe.</p>
   </header>
 
   <main id="home">
@@ -287,13 +302,14 @@ body.simple .opt{min-height:52px;font-size:17px}
       <h2>Til læreren</h2>
       <p class="note">Innholdet bygger på ADR/RID 2025 og forskrift om landtransport av farlig gods slik DSB gir dem ut. Stasjonene dekker emnene a–o i 8.2.2.3.2, og hvert spørsmål viser hvilket emne det hører til og hvor i regelverket svaret står. Spørsmålene er skrevet med egne ord og er ikke hentet fra oppgavesamlingene.</p>
       <p class="note">Når eleven svarer feil, viser siden hvor i boka svaret står: avsnitt, side og kapittel. Sidetallene gjelder ADR/RID 2025 fra DSB (1. opplag), og lages på nytt med <code>verktoy/bokreferanser.py</code> når det kommer en ny utgave.</p>
+      <p class="note">Stasjon 2, Gjennomgang av boka, går gjennom delene og kapitlene i ADR/RID en for en, med startsiden til hvert kapittel. Den passer som felles gjennomgang med boka oppe første kursdag. På resten av stien står kapitlene som hører til hver dag og hver stasjon, så elevene vet hva de skal slå opp i.</p>
       <p class="note">Prøven har 25 spørsmål og 45 minutter, som er minstekravet til den avsluttende prøven i 8.2.2.7.1.6. Den er en øvingsprøve, ikke eksamen hos Statens vegvesen. Grunnkurset skal ha minst 18 undervisningstimer på 45 minutter og høyst 8 timer per dag (8.2.2.4), og kursdagene på stien følger det.</p>
       <p class="note">Ekstra stoff på NDLA til tavla eller som oppvarming. Det meste er skrevet 2018–2022, så bruk boka som fasit der de er uenige.</p>
       <ul class="note">
-        <li>Stasjon 1 og 8: <a href="https://ndla.no/r/bransjeteknikk-tp-tol-vg2---ressurssamling/hva-ma-til-for-a-transportere-farlig-gods/6f0ae0ae1b">Hva må til for å transportere farlig gods?</a> og <a href="https://ndla.no/r/bransjeteknikk-tp-tol-vg2---ressurssamling/sikkerhetsradgiver/3680b2ecb2">Sikkerhetsrådgiver</a></li>
-        <li>Stasjon 2: <a href="https://ndla.no/r/bransjeteknikk-tp-tol-vg2---ressurssamling/adr-fareklasser---hva-er-det/5d82db6ea6">ADR-fareklasser – hva er det?</a>, med en interaktiv oppgave om faresedlene</li>
-        <li>Stasjon 4: <a href="https://ndla.no/r/bransjeteknikk-tp-tol-vg2---ressurssamling/krav-til-kjoretoy-med-farlig-gods/fde9f7c1a6">Krav til kjøretøy med farlig gods</a> og <a href="https://ndla.no/r/bransjeteknikk-tp-tol-vg2---ressurssamling/hvordan-merkes-farlig-gods/642bcf46bf">Hvordan merkes farlig gods?</a></li>
-        <li>Stasjon 6: <a href="https://ndla.no/r/transport-logistikk-og-lofteoperasjonar-tp-tol-vg2---ressurssamling/adr-dokumenter-ved-vegtransport/425315357f">ADR-dokumenter ved vegtransport</a> (oppdatert 2025)</li>
+        <li>Stasjon 1 og 9: <a href="https://ndla.no/r/bransjeteknikk-tp-tol-vg2---ressurssamling/hva-ma-til-for-a-transportere-farlig-gods/6f0ae0ae1b">Hva må til for å transportere farlig gods?</a> og <a href="https://ndla.no/r/bransjeteknikk-tp-tol-vg2---ressurssamling/sikkerhetsradgiver/3680b2ecb2">Sikkerhetsrådgiver</a></li>
+        <li>Stasjon 3: <a href="https://ndla.no/r/bransjeteknikk-tp-tol-vg2---ressurssamling/adr-fareklasser---hva-er-det/5d82db6ea6">ADR-fareklasser – hva er det?</a>, med en interaktiv oppgave om faresedlene</li>
+        <li>Stasjon 5: <a href="https://ndla.no/r/bransjeteknikk-tp-tol-vg2---ressurssamling/krav-til-kjoretoy-med-farlig-gods/fde9f7c1a6">Krav til kjøretøy med farlig gods</a> og <a href="https://ndla.no/r/bransjeteknikk-tp-tol-vg2---ressurssamling/hvordan-merkes-farlig-gods/642bcf46bf">Hvordan merkes farlig gods?</a></li>
+        <li>Stasjon 7: <a href="https://ndla.no/r/transport-logistikk-og-lofteoperasjonar-tp-tol-vg2---ressurssamling/adr-dokumenter-ved-vegtransport/425315357f">ADR-dokumenter ved vegtransport</a> (oppdatert 2025)</li>
         <li>Repetisjon: <a href="https://ndla.no/r/bransjeteknikk-tp-tol-vg2---ressurssamling/kurs-i-adr/d9c748b74a">Kurs i ADR</a>, med en test, og <a href="https://ndla.no/r/bransjeteknikk-tp-tol-vg2---ressurssamling/transportorhandbok/f49fccbfae">Transportørhåndbok</a> (PDF)</li>
       </ul>
       <p class="note">Faresedlene er laget av <a href="https://www.dsb.no/">DSB</a> og hentet fra <a href="https://ndla.no/">NDLA</a> under lisensen <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.no">CC BY-SA 4.0</a>. De er beskåret, og 1.4 er endret fra samhørighetsgruppe G til S. Fareseddel 9A, de oransje skiltene, LQ-merket og miljømerket er tegnet for denne siden.</p>
@@ -315,19 +331,21 @@ const EMNER = {
   m: 'Håndtering og stuing av kolli', n: 'Tunneler', o: 'Sikring (security)'
 };
 const STATIONS = [
-  { id: 'bok', day: 1, title: 'Regelverket og ADR-boka', emner: ['a', 'l'], desc: 'Hvem lager reglene, hvordan boka er bygd opp, og hvordan du slår opp i Tabell A.', labs: ['tabA'], match: 'kolonner' },
-  { id: 'farer', day: 1, title: 'Fareklassene og farene', emner: ['b', 'c'], desc: 'De ni fareklassene, faresedlene, emballasjegruppene og miljøfarlig gods og avfall.', labs: ['sedler'], match: 'klasser' },
-  { id: 'forebygg', day: 1, title: 'Forebygging og sikkerhet', emner: ['d'], desc: 'Tennkilder, røykeforbud, verneutstyr og trygg drift av kjøretøyet.', labs: ['brann'] },
-  { id: 'merking', day: 2, title: 'Merking og oransje skilt', emner: ['f'], desc: 'Oransje skilt, farenummer, store faresedler og LQ-merket.', labs: ['merk', 'skilt'], match: 'farenr' },
-  { id: 'unntak', day: 2, title: 'Unntak og 1000 poeng', emner: ['a'], desc: 'Mengdeunntaket i 1.1.3.6, begrensede og unntatte mengder, og de andre unntakene.', labs: ['maaler', 'poeng'] },
-  { id: 'forer', day: 2, title: 'Dokumenter og utstyr', emner: ['g', 'h'], desc: 'Hva som skal være i førerhuset, skriftlige instruksjoner, brannslukkere og utstyr.', labs: ['utstyr'] },
-  { id: 'lasting', day: 3, title: 'Lasting, samlasting og stuing', emner: ['i', 'j', 'm'], desc: 'Hva som kan lastes sammen, kontroll før lasting, matvarer og lastsikring.', labs: ['lasteplan', 'samlast'] },
-  { id: 'ansvar', day: 3, title: 'Ansvar og sikring', emner: ['k', 'o'], desc: 'Pliktene til avsender, transportør, laster og sjåfør, og sikring mot misbruk.', match: 'aktor' },
-  { id: 'ulykke', day: 3, title: 'Ulykke, brann og tunnel', emner: ['e', 'n'], desc: 'De skriftlige instruksjonene, brann og førstehjelp, og tunnelkategoriene.', labs: ['ulykke', 'rute', 'tunnel'] }
+  { id: 'bok', day: 1, title: 'Regelverket og ADR-boka', emner: ['a', 'l'], desc: 'Hvem lager reglene, hvordan boka er bygd opp, og hvordan du slår opp i Tabell A.', labs: ['tabA'], match: 'kolonner', kap: ['forord', 'forskrift', '3.2', '8.2'] },
+  { id: 'kapitler', day: 1, title: 'Gjennomgang av boka', emner: ['a'], desc: 'Del for del og kapittel for kapittel: hva som står hvor, hvilke kapitler sjåføren bruker mest, og hvordan du leser avsnittsnumrene.', labs: ['kapittel'], match: 'deler', kap: ['del'] },
+  { id: 'farer', day: 1, title: 'Fareklassene og farene', emner: ['b', 'c'], desc: 'De ni fareklassene, faresedlene, emballasjegruppene og miljøfarlig gods og avfall.', labs: ['sedler'], match: 'klasser', kap: ['2.1', '2.2', '5.2'] },
+  { id: 'forebygg', day: 1, title: 'Forebygging og sikkerhet', emner: ['d'], desc: 'Tennkilder, røykeforbud, verneutstyr og trygg drift av kjøretøyet.', labs: ['brann'], kap: ['7.5', '8.1', '8.3'] },
+  { id: 'merking', day: 2, title: 'Merking og oransje skilt', emner: ['f'], desc: 'Oransje skilt, farenummer, store faresedler og LQ-merket.', labs: ['merk', 'skilt'], match: 'farenr', kap: ['5.2', '5.3', '3.4'] },
+  { id: 'unntak', day: 2, title: 'Unntak og 1000 poeng', emner: ['a'], desc: 'Mengdeunntaket i 1.1.3.6, begrensede og unntatte mengder, og de andre unntakene.', labs: ['maaler', 'poeng'], kap: ['1.1', '3.4', '3.5'] },
+  { id: 'forer', day: 2, title: 'Dokumenter og utstyr', emner: ['g', 'h'], desc: 'Hva som skal være i førerhuset, skriftlige instruksjoner, brannslukkere og utstyr.', labs: ['utstyr'], kap: ['5.4', '8.1', '8.4'] },
+  { id: 'lasting', day: 3, title: 'Lasting, samlasting og stuing', emner: ['i', 'j', 'm'], desc: 'Hva som kan lastes sammen, kontroll før lasting, matvarer og lastsikring.', labs: ['lasteplan', 'samlast'], kap: ['7.5'] },
+  { id: 'ansvar', day: 3, title: 'Ansvar og sikring', emner: ['k', 'o'], desc: 'Pliktene til avsender, transportør, laster og sjåfør, og sikring mot misbruk.', match: 'aktor', kap: ['1.4', '1.8', '1.10'] },
+  { id: 'ulykke', day: 3, title: 'Ulykke, brann og tunnel', emner: ['e', 'n'], desc: 'De skriftlige instruksjonene, brann og førstehjelp, og tunnelkategoriene.', labs: ['ulykke', 'rute', 'tunnel'], kap: ['5.4', '8.6'] }
 ];
 const ST = Object.fromEntries(STATIONS.map((s, i) => [s.id, { ...s, n: i + 1 }]));
 const DAYS = { 1: 'Dag 1', 2: 'Dag 2', 3: 'Dag 3' };
 const LABS = {
+  kapittel: { name: 'Finn kapittelet', desc: 'Hvilket kapittel eller hvilken del av boka står det i? Svaret viser siden du slår opp på.' },
   tabA: { name: 'Slå opp i Tabell A', desc: 'Finn klasse, transportkategori, tunnelkode og farenummer i et utdrag av tabellen.' },
   sedler: { name: 'Kjenn igjen faresedlene', desc: 'Hvilken klasse viser faresedlen?' },
   skilt: { name: 'Les det oransje skiltet', desc: 'Farenummer og UN-nummer: hva betyr skiltet, og hvilket skilt skal bilen ha?' },
@@ -419,7 +437,30 @@ const QS = [
   ['bok', 'a', 'ADR 8.2.2.7.1.6', 'Hvor mange spørsmål skal den avsluttende prøven etter grunnkurset minst ha?', ['25', '15', '40', '57'], 'Prøven skal vare minst 45 minutter. Etter oppfriskningskurs er kravet minst 15 spørsmål og 30 minutter.'],
   ['bok', 'l', 'ADR 1.1.4.2', 'Kolliene skal videre med skip og er merket etter IMDG-koden. Kan de kjøres på vegen til havna?', ['Ja, når transporten er del av en kjede med sjøtransport', 'Nei, alle kolli må merkes om etter ADR før de kjøres', 'Bare med politieskorte og egen tillatelse fra DSB', 'Bare når lasten er innenfor 1000 poeng'], 'Gods merket etter IMDG-koden eller ICAO-TI godtas på vegen når transporten inngår i en kjede med sjø- eller lufttransport.'],
 
-  // 2 Fareklassene og farene
+  // 2 Gjennomgang av boka
+  ['kapitler', 'a', 'ADR 1.2', 'Hvor i boka finner du hva ord som «kolli», «transportenhet» og «avsender» betyr?', ['Kapittel 1.2 Definisjoner', 'Kapittel 8.1 om transportenheter', 'Tabell B i kapittel 3.2', 'Kapittel 5.4 Dokumentasjon'], 'Kapittel 1.2 er bokas ordliste, alfabetisk fra A til Å.'],
+  ['kapitler', 'a', 'ADR 1.1', 'Hvilket kapittel har unntakene, blant annet regelen om 1000 poeng?', ['Kapittel 1.1 Omfang og anvendelse', 'Kapittel 1.4 Aktørenes plikter', 'Kapittel 3.2 Liste over farlig gods', 'Kapittel 8.6 om tunneler'], 'Mengdeunntaket står i 1.1.3.6.'],
+  ['kapitler', 'a', 'ADR 1.4', 'Hvor står pliktene til avsender, transportør, laster og mottaker?', ['Kapittel 1.4 Aktørenes plikter', 'Kapittel 1.8 Kontroller', 'Kapittel 8.3, som mannskapet må følge', 'Kapittel 5.1 Alminnelige bestemmelser'], ''],
+  ['kapitler', 'a', 'ADR 1.3', 'En lagerarbeider skal laste farlig gods, men ikke kjøre. Hvilket kapittel sier hvilken opplæring lagerarbeideren skal ha?', ['Kapittel 1.3 Opplæring av personale', 'Kapittel 8.2 Opplæring av kjøretøymannskaper', 'Kapittel 1.4 Aktørenes plikter', 'Kapittel 7.5 om lasting og lossing'], '8.2 gjelder bare kjøretøymannskapet. Alle andre som har med farlig gods å gjøre, skal ha opplæring etter 1.3.'],
+  ['kapitler', 'a', 'ADR 1.10', 'Hvilket kapittel handler om sikring (security), altså å hindre tyveri og misbruk?', ['Kapittel 1.10', 'Kapittel 8.4', 'Kapittel 1.8', 'Kapittel 7.5'], ''],
+  ['kapitler', 'a', 'ADR 2.2', 'Hvordan er kapittel 2.2 delt opp?', ['Etter fareklassene, fra 2.2.1 for klasse 1 til 2.2.9 for klasse 9', 'Etter UN-nummer, fra lavest til høyest', 'Alfabetisk etter stoffnavn', 'Etter transportform: veg, bane, sjø og luft'], 'Avsnittsnummeret viser klassen: 2.2.3 er klasse 3, 2.2.61 er klasse 6.1.'],
+  ['kapitler', 'a', 'ADR 3.2', 'Hvilken del av boka har Tabell A og Tabell B?', ['Del 3', 'Del 1', 'Del 5', 'Del 8'], 'Tabell A begynner i kapittel 3.2, og Tabell B, den alfabetiske listen, kommer etter den.'],
+  ['kapitler', 'a', 'ADR 3.3', 'Kolonne (6) i Tabell A viser et nummer for spesielle bestemmelser. Hvor slår du det opp?', ['I kapittel 3.3', 'I kapittel 8.5', 'I kapittel 1.2', 'I Tabell B'], 'Kapittel 3.3 har de spesielle bestemmelsene i nummerrekkefølge.'],
+  ['kapitler', 'a', 'ADR 8.5', 'Kolonne (19) i Tabell A viser koder som S1 og S20. Hvor står det hva de betyr?', ['I kapittel 8.5', 'I kapittel 3.3', 'I kapittel 5.3', 'I kapittel 9.2'], 'S-kodene er tilleggsbestemmelser for drift av kjøretøyet, for eksempel om tilsyn.'],
+  ['kapitler', 'a', 'ADR 5.2', 'Hvilket kapittel sier hvilke faresedler og merker kolliene skal ha?', ['Kapittel 5.2 Merking og faresedler', 'Kapittel 5.3 om store faresedler', 'Kapittel 6.1 om emballasje', 'Kapittel 3.1 Generelt'], '5.2 gjelder kolliene, 5.3 gjelder kjøretøy og containere.'],
+  ['kapitler', 'a', 'ADR 5.3', 'Hvor står reglene om oransje skilt og store faresedler på bilen?', ['Kapittel 5.3', 'Kapittel 5.2', 'Kapittel 8.6', 'Kapittel 9.2'], ''],
+  ['kapitler', 'a', 'ADR 5.4', 'Hvilket kapittel har reglene om transportdokumentet og de skriftlige instruksjonene?', ['Kapittel 5.4 Dokumentasjon', 'Kapittel 8.1 om utstyr', 'Kapittel 1.3 Opplæring', 'Kapittel 3.4 Begrensede mengder'], 'De skriftlige instruksjonene står i 5.4.3.'],
+  ['kapitler', 'a', 'ADR 7.5', 'Hvor står samlastingsforbudene og kravet til lastsikring?', ['Kapittel 7.5 Lasting, lossing og håndtering', 'Kapittel 4.1 Bruk av emballasje', 'Kapittel 5.1 Alminnelige bestemmelser', 'Kapittel 2.1 Alminnelige bestemmelser'], 'Tabellen over samlasting står i 7.5.2.1, og lastsikring i 7.5.7.'],
+  ['kapitler', 'a', 'ADR 8.1', 'Hvor står kravene til brannslukkere og utstyr på transportenheten?', ['Kapittel 8.1', 'Kapittel 9.2', 'Kapittel 5.4', 'Kapittel 6.2'], 'Brannslukkere i 8.1.4, annet utstyr i 8.1.5.'],
+  ['kapitler', 'a', 'ADR 8.2', 'Hvilket kapittel handler om ADR-kompetansebeviset, kurset og eksamen?', ['Kapittel 8.2', 'Kapittel 1.3', 'Kapittel 1.8', 'Kapittel 8.4'], ''],
+  ['kapitler', 'a', 'ADR 8.6', 'Hvor står tunnelkategoriene og hvilke tunnelkoder som er forbudt i dem?', ['Kapittel 8.6', 'Kapittel 1.9', 'Kapittel 9.2', 'Kapittel 7.5'], ''],
+  ['kapitler', 'a', 'ADR 4.1, 6.1', 'Del 4 handler om bruk av emballasje og tanker, og del 6 om hvordan de lages og prøves. Hvem bruker disse delene mest?', ['Avsendere, pakkere og de som lager emballasje og tanker', 'Sjåføren, under kjøringen', 'Politiet, ved kontroll på vegen', 'Nødetatene, ved ulykker'], 'Sjåføren trenger sjelden del 4 og 6, men skal kjenne igjen UN-merket på godkjent emballasje.'],
+  ['kapitler', 'a', 'ADR 9.1', 'Hva handler del 9 om?', ['Bygging og godkjenning av kjøretøyer', 'Opplæring av sjåfører', 'Merking av kolli', 'Unntak for små mengder'], 'Her står kravene til kjøretøy som skal ha godkjenningsattest, som FL, AT og EX.'],
+  ['kapitler', 'a', 'ADR 8.1.4.2', 'Hva forteller avsnittsnummeret 8.1.4.2?', ['Del 8, kapittel 8.1, avsnitt 8.1.4, punkt 2', 'Side 814, linje 2', 'Klasse 8, emballasjegruppe 1, kategori 4', 'Kapittel 8, side 142'], 'Første tall er delen, de to første er kapittelet, og hvert nytt tall går et nivå ned.'],
+  ['kapitler', 'a', 'Forordet i ADR/RID, forskriften § 12, § 33', 'Hvor i boka står de norske særreglene, for eksempel om farlig avfall og om eksamen?', ['I forskriften med veiledning, foran del 1', 'I del 9, bakerst i boka', 'I Tabell A, kolonne (20)', 'I kapittel 1.6 Overgangsbestemmelser'], 'Forskrift om landtransport av farlig gods står først i boka, fra side 15. ADR og RID følger etter.'],
+  ['kapitler', 'a', 'Hvordan finne fram i boka', 'Del 8 og del 9 er merket «ADR:». Hva betyr det?', ['Reglene gjelder bare vegtransport, ikke jernbane', 'Reglene er nye i denne utgaven', 'Reglene gjelder bare sjåfører med tankbevis', 'Reglene er norske særregler'], 'Boka fletter sammen ADR (veg) og RID (bane) i del 1–7. Del 8 og 9 gjelder bare ADR, og tekst merket «ADR:» eller «RID:» gjelder bare den ene.'],
+
+  // 3 Fareklassene og farene
   ['farer', 'b', 'ADR 2.2.3', 'Hvilken fareklasse er brannfarlige væsker?', ['Klasse 3', 'Klasse 2', 'Klasse 4.1', 'Klasse 5.1'], ''],
   ['farer', 'b', 'ADR 2.2.2', 'Hva er klasse 2?', ['Gasser', 'Etsende stoffer', 'Oksiderende stoffer', 'Eksplosive stoffer'], 'Klasse 2 deles i 2.1 brannfarlig, 2.2 ikke-brannfarlig og ikke-giftig, og 2.3 giftig gass.'],
   ['farer', 'b', 'ADR 2.2.43', 'Hva kjennetegner stoffer i klasse 4.3?', ['De utvikler brannfarlig gass med vann', 'De tar fyr av seg selv i kontakt med luft', 'De sender ut stråling når emballasjen skades', 'De er giftige å puste inn eller få på huden'], ''],
@@ -440,7 +481,7 @@ const QS = [
   ['farer', 'c', 'Forskriften § 12', 'Hva sier den norske særregelen om farlig avfall?', ['Inntil 500 kg netto kan fraktes med færre krav, når sjåføren har 6 timers opplæring', 'Farlig avfall er aldri farlig gods, uansett hvilket stoff det er', 'Farlig avfall skal alltid fraktes i tankbil med godkjenningsattest', 'Inntil 1000 kg er unntatt alle krav, så lenge det er merket «AVFALL»'], 'Særregelen gjelder ikke klasse 1, 6.2 og 7.'],
   ['farer', 'c', 'Forskriften § 12', 'Hva kan brukes som transportdokument for farlig avfall etter forskriften § 12?', ['Deklarasjonsskjemaet etter avfallsforskriften', 'En kvittering fra mottaket', 'Ingenting, avfall trenger ikke dokument', 'Vognkortet'], 'Deklarasjonen følger avfallet, så det blir sporbart fra den som leverer til godkjent mottak.'],
 
-  // 3 Forebygging og sikkerhet
+  // 4 Forebygging og sikkerhet
   ['forebygg', 'd', 'ADR 8.3.5', 'Hvor er røyking forbudt?', ['I og nær kjøretøyet under lasting og lossing, også e-sigaretter', 'Bare inne i førerhuset, men det er lov rett utenfor', 'Bare ved tankbiler, ikke ved biler med kolli', 'Ingen steder, så lenge du står ti meter unna'], ''],
   ['forebygg', 'd', 'ADR 8.3.4', 'Hvilken lommelykt skal du bruke?', ['En uten metalloverflater som kan lage gnister', 'En hvilken som helst lommelykt med nye batterier', 'En parafinlykt, siden den ikke har strøm', 'Lommelykten på mobiltelefonen, den er godkjent'], ''],
   ['forebygg', 'd', 'ADR 8.3.6', 'Hva er regelen for motoren under lasting og lossing?', ['Den skal være av, med mindre den driver pumper til lastingen', 'Den skal gå, så bilen kan flyttes raskt hvis noe skjer', 'Den skal gå på tomgang for å holde batteriet ladet', 'Den kan gå så lenge sjåføren sitter i førerhuset'], ''],
@@ -456,7 +497,7 @@ const QS = [
   ['forebygg', 'd', 'ADR 8.3.1', 'Kan du ta med en venn som passasjer på en bil med farlig gods (over 1000 poeng)?', ['Nei, bare kjøretøyets mannskap', 'Ja, én passasjer', 'Ja, hvis vennen har ADR-bevis', 'Ja, hvis vennen sitter i førerhuset'], ''],
   ['forebygg', 'd', 'ADR 8.3.8', 'Hva gjelder for ABS-kabelen til en tilhenger over 3,5 tonn?', ['Den skal alltid være tilkoblet under transport', 'Den kan kobles fra når det er glatt føre', 'Den trengs bare når bilen kjører i tunnel', 'Den er ikke påkrevd for biler med farlig gods'], ''],
 
-  // 4 Merking og oransje skilt
+  // 5 Merking og oransje skilt
   ['merking', 'f', 'ADR 5.3.2.1.1', 'Hvor skal de oransje skiltene sitte?', ['Ett foran og ett bak på transportenheten', 'Ett bak på bilen og ett bak på tilhengeren', 'Ett på hver side av lasterommet', 'Ett på taket av førerhuset og ett bak'], ''],
   ['merking', 'f', 'ADR 5.3.2.2.1', 'Hvor store er de oransje skiltene normalt?', ['40 cm brede og 30 cm høye', '30 cm brede og 30 cm høye', '25 cm brede og 25 cm høye', '60 cm brede og 40 cm høye'], 'Skiltene er reflekterende og har en svart ramme på 15 mm.'],
   ['merking', 'f', 'ADR 5.3.2.1', 'Hvilket nummer står øverst på et oransje skilt med tall?', ['Farenummeret', 'UN-nummeret', 'Fareklassen', 'Emballasjegruppen'], 'UN-nummeret står nederst.'],
@@ -473,7 +514,7 @@ const QS = [
   ['merking', 'f', 'ADR 5.3.2.1.1', 'En tilhenger med farlig gods kobles fra trekkvogna. Hva gjelder for de oransje skiltene?', ['Tilhengeren skal fortsatt ha oransje skilt bak', 'Skiltene kan tas av', 'Tilhengeren skal ha skilt foran', 'Trekkvogna beholder begge skiltene'], ''],
   ['merking', 'f', 'ADR 5.3.2.1.8', 'Alt det farlige godset er losset og bilen er rengjort. Hva gjør du med de oransje skiltene?', ['Fjerner eller dekker dem til', 'Lar dem sitte til neste tur', 'Snur dem opp ned', 'Ingenting, de skal alltid sitte på'], ''],
 
-  // 5 Unntak og 1000 poeng
+  // 6 Unntak og 1000 poeng
   ['unntak', 'a', 'ADR 1.1.3.6.3', 'Hva er grensen for samlet beregnet verdi i 1.1.3.6?', ['1000', '333', '500', '20'], ''],
   ['unntak', 'a', 'ADR 1.1.3.6.4', 'Hva ganges mengden i transportkategori 2 med?', ['3', '50', '1', '0'], ''],
   ['unntak', 'a', 'ADR 1.1.3.6.4', 'Hva ganges mengden i transportkategori 1 med?', ['50', '20', '3', '10'], 'For noen få stoffer, blant annet UN 1005 og 1017, er grensen 50 kg og faktoren 20.'],
@@ -495,7 +536,7 @@ const QS = [
   ['unntak', 'a', 'ADR 1.1.3.3', 'Gjelder ADR for drivstoffet i bilens egen tank?', ['Nei, drivstoff til egen framdrift er unntatt', 'Ja, når tanken har mer enn 200 liter drivstoff', 'Ja, alltid – drivstoff er farlig gods i klasse 3', 'Bare for tankbiler, ikke for vanlige lastebiler'], ''],
   ['unntak', 'a', 'ADR 3.5', 'Hva er unntatte mengder (EQ)?', ['Svært små mengder med enda færre krav enn begrensede mengder', 'Avfall som er unntatt fordi det skal til gjenvinning', 'Gods i tank som er unntatt fordi tanken er tom', 'Gods som er unntatt fordi det fraktes innenfor 1000 poeng'], 'E-koden står i kolonne (7b) i Tabell A.'],
 
-  // 6 Dokumenter og utstyr
+  // 7 Dokumenter og utstyr
   ['forer', 'g', 'ADR 8.1.2.1', 'Hvilke dokumenter skal være i førerhuset ved transport over 1000 poeng?', ['Transportdokument, skriftlige instruksjoner og ID med bilde', 'Fraktbrev, vognkort og forsikringsbevis for bilen', 'Sikkerhetsdatablad for alle stoffene på bilen', 'Kjøreseddel, timeliste og kopi av førerkortet'], 'Kompetansebeviset og eventuell godkjenningsattest kommer i tillegg (8.1.2.2).'],
   ['forer', 'g', 'ADR 5.4.1.1.1', 'Hva skal stå i transportdokumentet for hvert farlig stoff?', ['UN-nummer, navn, fareseddel, emballasjegruppe, tunnelkode og mengde', 'Bare UN-nummeret, resten finner nødetatene i Tabell A', 'Navnet på stoffet og hvem som har pakket det', 'Sjåførens navn, fødselsdato og nummeret på beviset'], 'For eksempel: «UN 1203 BENSIN, 3, II, (D/E)».'],
   ['forer', 'g', 'ADR 5.4.1.1.1 k)', 'Hvorfor står tunnelkoden i transportdokumentet?', ['Så sjåføren vet hvilke tunneler lasten ikke får kjøre i', 'Fordi tollen krever den ved grensepasseringer', 'For at bomstasjonene skal kunne beregne prisen', 'Den skal ikke stå der, den står bare på bilen'], ''],
@@ -512,7 +553,7 @@ const QS = [
   ['forer', 'h', 'Skriftlige instruksjoner (5.4.3.4)', 'Hva bruker du hovedstrømbryteren til ved en ulykke?', ['Å bryte strømmen fra batteriet så du unngår gnister', 'Å starte motoren raskere hvis bilen må flyttes', 'Å slå på varsellysene og arbeidslysene', 'Å låse dørene så ingen kommer inn i bilen'], ''],
   ['forer', 'h', 'ADR 9.1.3 og 8.1.2.2', 'Hvilket dokument viser at en tankbil (FL eller AT) er godkjent for farlig gods?', ['Godkjenningsattesten', 'Vognkortet', 'Kompetansebeviset', 'Transportdokumentet'], ''],
 
-  // 7 Lasting, samlasting og stuing
+  // 8 Lasting, samlasting og stuing
   ['lasting', 'i', 'ADR 7.5.2.1', 'Kan kolli med fareseddel 3 og kolli med fareseddel 8 lastes på samme bil?', ['Ja', 'Nei', 'Bare med skillevegg', 'Bare under 1000 poeng'], ''],
   ['lasting', 'i', 'ADR 7.5.2.1', 'Kan kolli med fareseddel 1 (ikke 1.4S) lastes sammen med kolli med fareseddel 3?', ['Nei', 'Ja', 'Ja, med skillevegg', 'Ja, under 1000 poeng'], ''],
   ['lasting', 'i', 'ADR 7.5.2.1', 'Hvilke eksplosiver kan samlastes med de andre klassene?', ['1.4S', '1.1D', '1.3G', 'Ingen'], ''],
@@ -529,7 +570,7 @@ const QS = [
   ['lasting', 'm', 'ADR 7.5.7.1', 'Hvilken standard for lastsikring viser ADR til?', ['EN 12195-1', 'EN 590', 'ISO 9001', 'EN 3-7'], ''],
   ['lasting', 'j', 'ADR 7.5.4', 'Kolli med fareseddel 6.1 skal på samme bil som matvarer. Hva gjelder?', ['De skal holdes atskilt, for eksempel med hele skillevegger', 'De kan stå oppå matvarene hvis de er godt pakket', 'Det er alltid forbudt å ha dem på samme bil', 'Det er ingen regler, så lenge kolliene er hele'], 'Gjelder også 6.2 og enkelte stoffer i klasse 9.'],
 
-  // 8 Ansvar og sikring
+  // 9 Ansvar og sikring
   ['ansvar', 'k', 'ADR 1.4.2.1.1', 'Hvem skal sørge for at det farlige godset er riktig klassifisert?', ['Avsenderen', 'Sjåføren', 'Mottakeren', 'Politiet'], ''],
   ['ansvar', 'k', 'ADR 1.4.2.2.1', 'Hva skal transportøren blant annet gjøre?', ['Sjekke at dokumentene er med og at bil og last ikke har feil', 'Klassifisere godset og velge riktig emballasje for hvert stoff', 'Pakke godset og sette faresedler og UN-nummer på kolliene', 'Lage sikkerhetsdatabladet for hvert stoff som skal fraktes'], ''],
   ['ansvar', 'k', 'ADR 1.4.2.2.1 e)', 'Hvem skal kontrollere at kjøretøyet ikke er overlastet?', ['Transportøren', 'Mottakeren', 'Avsenderen', 'Produsenten'], ''],
@@ -546,7 +587,7 @@ const QS = [
   ['ansvar', 'o', 'ADR 1.10.3.2.1', 'Hva må transportøren ha for farlig gods med høy risiko?', ['En sikringsplan', 'Ingenting ekstra', 'Politieskorte', 'Tillatelse til å kjøre bare om natten'], ''],
   ['ansvar', 'o', 'ADR 1.10.2.2', 'Du ser en ukjent person som undersøker bilen med farlig gods på en rasteplass. Hva gjør du?', ['Melder fra etter sikringsrutinene, til politiet ved mistanke', 'Ignorerer det, det er sikkert en kontrollør fra vegvesenet', 'Viser personen lasten og forklarer hva det farlige godset er', 'Kjører videre uten å si noe til noen, så det ikke blir bråk'], ''],
 
-  // 9 Ulykke, brann og tunnel
+  // 10 Ulykke, brann og tunnel
   ['ulykke', 'e', 'Skriftlige instruksjoner (5.4.3.4)', 'Hva gjør du først ved en ulykke med farlig gods, hvis det er trygt?', ['Setter på bremsene, stopper motoren og slår av hovedstrømbryteren', 'Åpner lasterommet for å se hvor lekkasjen er', 'Prøver å slukke en eventuell brann i lasten', 'Kjører videre til nærmeste verksted eller rasteplass'], ''],
   ['ulykke', 'e', 'Skriftlige instruksjoner (5.4.3.4)', 'Skal du prøve å slukke brann i lasterommet?', ['Nei, mannskapet skal ikke slukke brann i lasterommet', 'Ja, alltid, med alle brannslukkerne på bilen', 'Ja, med vann, siden det kjøler ned lasten', 'Ja, hvis lasten er brannfarlig væske i klasse 3'], ''],
   ['ulykke', 'e', 'Skriftlige instruksjoner (5.4.3.4)', 'Hvilke branner kan du prøve å slukke?', ['Mindre branner i dekk, bremser og motorrom, hvis det er trygt', 'Alle branner, så lenge du har nok slukkemiddel', 'Bare brann i lasterommet, der det farlige godset er', 'Ingen, alle branner skal brannvesenet slukke'], ''],
@@ -596,7 +637,7 @@ const QS = [
   ['bok', 'a', 'ADR 8.2.1.3', 'Hvem må i tillegg ha spesialiseringskurs for tank?', ['Førere av tankbiler eller løstanker over 1 m³', 'Alle som har ADR-kompetansebevis for grunnkurs', 'Bare førere som frakter eksplosiver i klasse 1', 'Førere av alle biler over 7,5 tonn totalvekt'], ''],
   ['bok', 'l', 'Forordet i ADR/RID', 'Hvilket regelverk gjelder for farlig gods med fly?', ['ICAO-TI', 'IMDG-koden', 'RID', 'ADN'], ''],
 
-  // 2 Fareklassene og farene
+  // 3 Fareklassene og farene
   ['farer', 'b', 'ADR 2.2.3.1.1', 'Hva er den øvre grensen for flammepunkt for at en væske skal være klasse 3?', ['60 °C', '23 °C', '100 °C', '35 °C'], 'Væsker med høyere flammepunkt kan likevel være klasse 3 når de fraktes oppvarmet til flammepunktet eller over.'],
   ['farer', 'b', 'ADR 2.2.3.1.3', 'En brannfarlig væske har flammepunkt under 23 °C og kokepunkt over 35 °C. Hvilken emballasjegruppe får den?', ['II', 'I', 'III', 'Ingen'], ''],
   ['farer', 'b', 'ADR 2.2.3.1.3', 'Hvilke brannfarlige væsker får emballasjegruppe I?', ['De med begynnende kokepunkt på 35 °C eller lavere', 'De med flammepunkt over 60 °C, fraktet oppvarmet', 'Alle væsker med flammepunkt under 23 °C', 'De som i tillegg er giftige eller etsende'], ''],
@@ -625,7 +666,7 @@ const QS = [
   ['farer', 'c', 'ADR 5.2.1.8.3', 'Hva betyr merket med død fisk og tre?', ['At stoffet er miljøfarlig og farlig for vannmiljøet', 'At stoffet er giftig å spise', 'At stoffet skal leveres til gjenvinning', 'At stoffet er laget av naturprodukter'], ''],
   ['farer', 'c', 'ADR 5.2.1.8.1', 'Trenger et kolli med innerbeholdere på 4 liter miljøfarlig væske miljømerket?', ['Nei, ikke når innerbeholderne har 5 liter eller mindre', 'Ja, alle kolli med miljøfarlige stoffer skal ha det', 'Ja, men bare når lasten er over 1000 poeng', 'Nei, miljømerket brukes bare på tankbiler'], ''],
 
-  // 3 Forebygging og sikkerhet
+  // 4 Forebygging og sikkerhet
   ['forebygg', 'd', 'Forskriften § 4', 'Hva sier forskriften om fylling og tømming av farlig gods?', ['Det skal skje under kontinuerlig tilsyn', 'Det kan skje uten tilsyn om natten', 'Det skal alltid gjøres av brannvesenet', 'Det er ingen regler for dette'], ''],
   ['forebygg', 'd', 'Forskriften § 4', 'Kan farlig gods overlates til en transportør som åpenbart mangler kunnskap eller utstyr?', ['Nei', 'Ja, hvis prisen er lav', 'Ja, under 1000 poeng', 'Ja, hvis mottakeren godtar det'], ''],
   ['forebygg', 'd', 'Forskriften § 4', 'Hvem skal hindre at farlig gods kommer på avveie eller i urette hender?', ['Alle som har befatning med farlig gods', 'Bare politiet og tollvesenet', 'Bare sjåføren som har godset på bilen', 'Bare avsenderen som eier godset'], ''],
@@ -641,7 +682,7 @@ const QS = [
   ['forebygg', 'd', 'ADR 8.3.6', 'Hvorfor skal motoren være stoppet under lasting og lossing?', ['For å unngå tennkilder', 'For å spare drivstoff', 'For å høre bedre', 'For at bilen ikke skal rulle'], ''],
   ['forebygg', 'd', 'ADR 1.3.2.3', 'Hva skal sikkerhetsopplæringen gjøre personell kjent med?', ['Farene ved farlig gods, og hva som er sikker håndtering', 'Bare reglene for kjøre- og hviletid med farlig gods', 'Bare førstehjelp og bruk av hjertestarter', 'Bare lastsikring med stropper og kjetting'], ''],
 
-  // 4 Merking og oransje skilt
+  // 5 Merking og oransje skilt
   ['merking', 'f', 'ADR 5.2.1.1', 'Hvordan skal hvert kolli med farlig gods merkes?', ['Med bokstavene «UN» og UN-nummeret', 'Med klassen alene', 'Med avsenderens telefonnummer', 'Med farenummeret'], ''],
   ['merking', 'f', 'ADR 5.2.1.1', 'Hvor høye skal «UN» og UN-nummeret minst være på et kolli over 30 liter eller 30 kg?', ['12 mm', '6 mm', '25 mm', '100 mm'], 'På kolli på 30 liter eller 30 kg og mindre er kravet 6 mm.'],
   ['merking', 'f', 'ADR 5.2.2.2.1.1.2', 'Hvor store skal faresedlene på kolli normalt minst være?', ['100 × 100 mm', '250 × 250 mm', '50 × 50 mm', '40 × 30 cm'], 'De kan gjøres mindre hvis kolliet er lite.'],
@@ -672,7 +713,7 @@ const QS = [
   ['merking', 'f', 'ADR 6.1.3.1', 'Emballasjen er merket med Y. Hvilke emballasjegrupper er den godkjent for?', ['II og III', 'I, II og III', 'Bare III', 'Bare I'], 'X gjelder I, II og III, og Z bare III.'],
   ['merking', 'f', 'ADR 6.1.3.1', 'Kan en emballasje merket Z brukes for gods i emballasjegruppe II?', ['Nei, Z er bare for emballasjegruppe III', 'Ja, Z er godkjent for alle emballasjegrupper', 'Ja, når lasten er innenfor 1000 poeng', 'Bare for faste stoffer, ikke for væsker'], ''],
 
-  // 5 Unntak og 1000 poeng
+  // 6 Unntak og 1000 poeng
   ['unntak', 'a', 'ADR 1.1.3.6.4', '10 kanner à 20 liter bensin (transportkategori 2). Hvor mange poeng?', ['600', '200', '1000', '60'], '200 liter × 3 = 600 poeng.'],
   ['unntak', 'a', 'ADR 1.1.3.6.4', '4 fat à 200 liter diesel (transportkategori 3). Hvor mange poeng?', ['800', '2400', '200', '4'], '800 liter × 1 = 800 poeng.'],
   ['unntak', 'a', 'ADR 1.1.3.6.4', '2 bokser à 5 kg natrium (transportkategori 1). Hvor mange poeng?', ['500', '30', '10', '100'], '10 kg × 50 = 500 poeng.'],
@@ -693,7 +734,7 @@ const QS = [
   ['unntak', 'a', 'ADR 1.1.3.2 a)', 'Gjelder ADR for gassen i en flaske som driver kjøleaggregatet på bilen under transporten?', ['Nei, den er unntatt', 'Ja, alltid', 'Ja, over 11 kg', 'Bare i tunnel'], ''],
   ['unntak', 'a', 'ADR 1.1.3.7 b)', 'Gjelder ADR for litiumbatteriet i en bærbar PC du bruker på turen?', ['Nei, batterier i utstyr som brukes på turen er unntatt', 'Ja, alltid – litiumbatterier er klasse 9', 'Ja, og PC-en skal merkes med fareseddel 9A', 'Bare når PC-en ligger i lasterommet'], ''],
   ['unntak', 'a', 'Forskriften § 3', 'Når regnes en tank som tom, ikke rengjort etter forskriften?', ['Under 15 % av volumet og høyst 1500 kg igjen', 'Når den er helt tom, men ikke er spylt', 'Når den har mindre enn halvparten igjen', 'Under 25 % av volumet og høyst 5000 kg igjen'], ''],
-  // 6 Dokumenter og utstyr
+  // 7 Dokumenter og utstyr
   ['forer', 'g', 'ADR 5.4.1.1.1', 'I hvilken rekkefølge skal opplysningene stå i transportdokumentet?', ['UN-nummer, navn, fareseddel, emballasjegruppe, tunnelkode', 'Navn, UN-nummer, tunnelkode, fareseddel, emballasjegruppe', 'Fareseddel, navn, UN-nummer, emballasjegruppe', 'Valgfri rekkefølge'], 'Bokstavene a, b, c, d og k skal stå i denne rekkefølgen uten annen informasjon imellom.'],
   ['forer', 'g', 'ADR 5.4.1.1.1', 'Hva er riktig skrevet i transportdokumentet?', ['UN 1203 BENSIN, 3, II, (D/E)', 'BENSIN UN 1203 (D/E) II 3', 'Bensin, klasse 3, 33/1203', 'UN 1203, farenummer 33, bensin'], ''],
   ['forer', 'g', 'ADR 5.4.1.1.6.2.1', 'Hvordan kan tomme, ikke rengjorte kolli beskrives i transportdokumentet?', ['For eksempel som «TOMT KOLLI» eller «TOM BEHOLDER»', 'De trenger ikke stå i transportdokumentet', 'Som «AVFALL» foran varenavnet', 'Som «UFARLIG» med klassen i parentes'], ''],
@@ -713,7 +754,7 @@ const QS = [
   ['forer', 'g', 'Forskriften § 6', 'Skal et nestenuhell rapporteres?', ['Ja, når det kunne fått følger for liv, helse eller miljø', 'Nei, bare uhell der noe faktisk har skjedd', 'Bare hvis politiet eller brannvesenet kom til stedet', 'Bare hvis noen ble skadet og måtte til lege'], 'Et eksempel er et branntilløp i kjøretøyet.'],
   ['forer', 'g', 'Forskriften § 6', 'Hvem har plikten til å rapportere uhell til DSB?', ['Virksomheten', 'Sjåføren personlig', 'Politiet', 'Brannvesenet'], 'Virksomheten bestemmer selv hvem som gjør det.'],
 
-  // 7 Lasting, samlasting og stuing
+  // 8 Lasting, samlasting og stuing
   ['lasting', 'i', 'ADR 7.5.2.1', 'Kan kolli med fareseddel 2.1 og kolli med fareseddel 3 lastes på samme bil?', ['Ja', 'Nei', 'Bare med skillevegg', 'Bare under 1000 poeng'], ''],
   ['lasting', 'i', 'ADR 7.5.2.1', 'Kan kolli med fareseddel 6.1 og kolli med fareseddel 8 lastes på samme bil?', ['Ja', 'Nei', 'Bare med skillevegg', 'Bare i tankbil'], ''],
   ['lasting', 'i', 'ADR 7.5.2.1', 'Kan kolli med fareseddel 1.4S og kolli med fareseddel 3 lastes på samme bil?', ['Ja', 'Nei', 'Bare under 333 poeng', 'Bare med eskorte'], ''],
@@ -733,7 +774,7 @@ const QS = [
   ['lasting', 'm', 'ADR 5.1.2.1 b)', 'En overpakning inneholder kolli med orienteringspiler. Hvor skal pilene vises på overpakningen?', ['På to motsatte sider', 'Bare på toppen', 'På alle fire sider og toppen', 'De trengs ikke'], ''],
   ['lasting', 'm', 'ADR 7.5.7.1', 'Farlig gods lastes sammen med tunge stålkasser. Hva gjelder?', ['Alt godset skal sikres så det ikke kan skade kolliene med farlig gods', 'Bare stålkassene sikres, det farlige godset står støtt', 'Bare det farlige godset sikres, stålkassene er tunge nok', 'Det er forbudt å laste farlig gods sammen med stål'], ''],
 
-  // 8 Ansvar og sikring
+  // 9 Ansvar og sikring
   ['ansvar', 'k', 'ADR 1.4.3.3', 'Hva skal den som fyller en tank sjekke før fyllingen?', ['At tank og utstyr er i orden og at prøvefristen ikke er passert', 'At sjåføren har betalt og har ADR-bevis med seg', 'Bare at tanken er tom, resten er transportørens ansvar', 'Ingenting, tanken er kontrollert av verkstedet'], ''],
   ['ansvar', 'k', 'ADR 1.8.5.1', 'Hvem skal sende rapport til myndighetene om en alvorlig ulykke etter ADR 1.8.5?', ['Laster, fyller, transportør eller mottaker', 'Bare politiet, som har vært på stedet', 'Bare sjåføren, som var der da det skjedde', 'Forsikringsselskapet, som skal dekke skaden'], ''],
   ['ansvar', 'k', 'Forskriften § 10', 'Hvem skal virksomheten melde fra til om hvem som er sikkerhetsrådgiver?', ['DSB', 'Statens vegvesen', 'Arbeidstilsynet', 'Kommunen'], 'Meldingen sendes via Altinn.'],
@@ -752,7 +793,7 @@ const QS = [
   ['ansvar', 'o', 'ADR 1.10.2.2', 'Hva skal opplæringen i sikring handle om?', ['Å kjenne igjen og redusere sikringsrisiko', 'Bare lastsikring med stropper og lastebjelker', 'Bare brannslukking og bruk av pulverapparat', 'Bare førstehjelp og varsling av nødetatene'], ''],
   ['ansvar', 'o', 'Forskriften § 1', 'Forskriften skal også verne mot «uønskede tilsiktede hendelser». Hva er det?', ['Hendelser som noen gjør med vilje, som tyveri eller terror', 'Uhell som skjer på glatt føre om vinteren', 'Feil i transportdokumentene som ingen har sett', 'Motorstopp og andre tekniske feil på bilen'], ''],
 
-  // 9 Ulykke, brann og tunnel
+  // 10 Ulykke, brann og tunnel
   ['ulykke', 'e', 'Skriftlige instruksjoner (5.4.3.4)', 'Hva gjør du med elektrisk utstyr på bilen ved en ulykke med farlig gods?', ['Slår det ikke på', 'Slår på alt lys', 'Starter motoren for å lade', 'Lader mobilen i bilen'], ''],
   ['ulykke', 'e', 'Skriftlige instruksjoner (5.4.3.4)', 'Hva sier de skriftlige instruksjonene om å gå bort fra stedet?', ['Gå vekk, få andre med deg og følg rådene fra nødetatene', 'Bli ved bilen hele tiden, så du kan passe på lasten', 'Gå bare bort hvis det begynner å brenne', 'Gå hjem når brannvesenet har kommet'], ''],
   ['ulykke', 'e', 'Skriftlige instruksjoner (5.4.3.4)', 'Hvorfor skal du unngå lavtliggende områder ved lekkasje av brannfarlig gass eller væske?', ['Gass og damp kan samle seg der', 'Det er glatt der', 'Det er vanskelig å se der', 'Brannvesenet finner deg ikke'], ''],
@@ -848,6 +889,17 @@ const FACTS = [
   { st: 'bok', em: 'a', title: 'Tabell A – kolonnene du bruker mest', pts: ['(1) UN-nummer · (2) navn og beskrivelse', '(3a) klasse · (4) emballasjegruppe', '(5) faresedler', '(7a) begrensede mengder · (7b) unntatte mengder', '(15) transportkategori, med tunnelkode i parentes under', '(20) farenummer til det oransje skiltet', 'Tabell B er alfabetisk og gir deg UN-nummeret når du bare vet navnet'] },
   { st: 'bok', em: 'a', title: 'Kurs, eksamen og bevis', pts: ['Grunnkurset har minst 18 undervisningstimer à 45 minutter, høyst 8 per dag (8.2.2.4)', 'I tillegg kommer praktiske øvelser i førstehjelp, brannslukking og opptreden ved uhell (8.2.2.3.8)', 'Eksamen har minst 25 spørsmål og varer minst 45 minutter (8.2.2.7.1.6)', 'Statens vegvesen er eksamensadministrator (forskriften § 33)', 'Ikke bestått innen 1 år etter kurset: kurset må tas på nytt (§ 11a)', 'Beviset gjelder i 5 år og fornyes med oppfriskningskurs og eksamen (8.2.2.8.2)'] },
   { st: 'bok', em: 'l', title: 'Multimodal transport', pts: ['Mye farlig gods går med flere transportformer: bil, tog, båt og fly', 'Kolli merket etter IMDG-koden eller ICAO-TI godtas på vegen når transporten er del av en kjede med sjø- eller lufttransport (1.1.4.2)', 'Containere med farlig gods skal ha store faresedler på alle fire sider', 'Reglene er harmonisert, så faresedlene og UN-numrene er de samme overalt'] },
+  { st: 'kapitler', em: 'a', title: 'Forord og forskriften', pts: ['{forord}: hva som er nytt i denne utgaven', '{finn}: hvordan ADR og RID er flettet sammen, og en kort omtale av hver del', '{forskrift}: forskrift om landtransport av farlig gods med veiledning. De norske reglene, blant annet kompetansebevis, farlig avfall (§ 12) og eksamen (§ 33)', 'Så kommer ADR og RID, del 1 til 9'] },
+  { st: 'kapitler', em: 'a', title: '{del 1}', pts: ['{1.1}: hva ADR gjelder for, og unntakene, blant annet 1000 poeng (1.1.3.6)', '{1.2}: definisjonene, bokas ordliste fra A til Å', '{1.3}: opplæring av alle andre enn sjåføren som har med farlig gods å gjøre', '{1.4}: pliktene til avsender, transportør, laster, mottaker og de andre', '{1.8}: kontroller og sikkerhetsrådgiveren', '{1.10}: sikring mot tyveri og misbruk (security)'] },
+  { st: 'kapitler', em: 'a', title: '{del 2}', pts: ['{2.1}: hvordan farlig gods deles inn i klasser, og emballasjegruppene', '{2.2}: kriteriene for hver klasse, fra 2.2.1 (klasse 1) til 2.2.9 (klasse 9)', 'Klassifiseringen er avsenderens jobb. Sjåføren bruker resultatet: klassen og faresedlene'] },
+  { st: 'kapitler', em: 'a', title: '{del 3}', pts: ['{3.2}: Tabell A, sortert etter UN-nummer. Tabell B, den alfabetiske listen, begynner på side {s:3.2.2}', '{3.3}: de spesielle bestemmelsene i kolonne (6)', '{3.4}: begrensede mengder (LQ)', '{3.5}: unntatte mengder (EQ)', 'Dette er delen du slår mest opp i'] },
+  { st: 'kapitler', em: 'a', title: '{del 4}', pts: ['{4.1}: hvilken emballasje stoffene kan pakkes i', '{4.3}: bruk av tankbiler og tankcontainere', 'Mest for avsendere og pakkere. Kolonne (8) til (12) i Tabell A viser hit'] },
+  { st: 'kapitler', em: 'a', title: '{del 5}', pts: ['{5.1}: alminnelige bestemmelser om forsendelsen', '{5.2}: merking og faresedler på kolliene', '{5.3}: store faresedler og oransje skilt på kjøretøy og containere', '{5.4}: transportdokumentet (5.4.1) og de skriftlige instruksjonene (5.4.3)', '{5.5}: spesielle bestemmelser, for eksempel for lasteenheter som er desinfisert med gass'] },
+  { st: 'kapitler', em: 'a', title: '{del 6}', pts: ['Hvordan emballasje, gassflasker, IBCer og tanker skal lages, prøves og godkjennes', '{6.1}: emballasje, med UN-merket som viser at den er godkjent', 'Mest for produsenter. Sjåføren skal kjenne igjen UN-merket'] },
+  { st: 'kapitler', em: 'a', title: '{del 7}', pts: ['{7.1}–{7.4}: transport i kolli, i bulk og i tanker', '{7.5}: lasting, lossing og håndtering, samlastingsforbud (7.5.2), matvarer (7.5.4) og lastsikring (7.5.7)'] },
+  { st: 'kapitler', em: 'a', title: '{del 8}', pts: ['{8.1}: dokumenter i førerhuset, brannslukkere og utstyr', '{8.2}: ADR-kompetansebevis, kurs og eksamen', '{8.3}: røykeforbud, passasjerer og andre regler for mannskapet', '{8.4}: parkering og tilsyn', '{8.5}: tilleggsbestemmelsene S1–S24 fra kolonne (19)', '{8.6}: tunneler', 'Delen sjåføren bruker mest sammen med del 3 og 5'] },
+  { st: 'kapitler', em: 'a', title: '{del 9}', pts: ['{9.1}: godkjenning av kjøretøyer og godkjenningsattesten', '{9.2}: krav til utførelsen, som bremser, elektrisk anlegg og brannsikring', '{9.3}–{9.8}: tilleggskrav for EX/II, EX/III, FL, AT og MEMU'] },
+  { st: 'kapitler', em: 'a', title: 'Slik leser du avsnittsnumrene', pts: ['Første tall er delen: 8.1.4.2 står i del 8', 'De to første tallene er kapittelet: 8.1', 'Hvert nytt tall går et nivå ned: avsnitt 8.1.4, punkt 8.1.4.2', 'Kapittelnummeret står øverst på hver side, så du finner fram ved å bla', 'Del 1–7 gjelder både veg og bane. Del 8 og 9 og tekst merket «ADR:» gjelder bare veg, «RID:» bare jernbane', 'ANM betyr anmerkning: en forklaring, ikke et eget krav'] },
   { st: 'farer', em: 'b', title: 'Fareklassene', pts: ['1 Eksplosive stoffer og gjenstander', '2 Gasser: 2.1 brannfarlig, 2.2 ikke-brannfarlig og ikke-giftig, 2.3 giftig', '3 Brannfarlige væsker', '4.1 Brannfarlige faste stoffer · 4.2 Selvantennende · 4.3 Utvikler brannfarlig gass med vann', '5.1 Oksiderende · 5.2 Organiske peroksider', '6.1 Giftige · 6.2 Infeksjonsfremmende', '7 Radioaktivt · 8 Etsende · 9 Forskjellige, for eksempel litiumbatterier og miljøfarlige stoffer'] },
   { st: 'farer', em: 'b', title: 'Faresedlene – fargene', pts: ['Oransje: eksplosiver (1)', 'Rød: brannfarlig gass (2.1) og væske (3)', 'Grønn: ikke-brannfarlig, ikke-giftig gass (2.2)', 'Hvit med hodeskalle: giftig (2.3 og 6.1)', 'Rød-hvite striper: 4.1 · hvit over rød: 4.2 · blå: 4.3', 'Gul: oksiderende (5.1) · rød over gul: organisk peroksid (5.2)', 'Gul over hvit: radioaktiv (7) · hvit over svart: etsende (8) · svarte striper: 9'] },
   { st: 'farer', em: 'b', title: 'Emballasjegrupper og tilleggsfare', pts: ['I – stor fare · II – middels fare · III – liten fare', 'Står i kolonne (4) og i transportdokumentet', 'Gasser, gjenstander og noen klasser har ikke emballasjegruppe', 'Flere faresedler: den første er hovedfaren, de neste er tilleggsfarer. Metanol har 3 og 6.1'] },
@@ -887,7 +939,10 @@ const FACTS = [
 ];
 
 // Koble sammen
+// Delene i boka med korte navn, som i forordet
+const DELKORT = { 1: 'Alminnelige bestemmelser', 2: 'Klassifisering', 3: 'Liste over farlig gods og unntak', 4: 'Emballasje og tanker – bruk', 5: 'Klargjøring for forsendelse', 6: 'Emballasje og tanker – konstruksjon og prøving', 7: 'Transport, lasting og lossing', 8: 'Mannskap, utstyr, drift og dokumenter', 9: 'Bygging og godkjenning av kjøretøyer' };
 const SETS = {
+  deler: { name: 'Delene i boka', pairs: Object.entries(DELKORT).map(([d, n]) => ['Del ' + d, n]) },
   kolonner: { name: 'Kolonnene i Tabell A', pairs: [['(1)', 'UN-nummer'], ['(2)', 'Navn og beskrivelse'], ['(3a)', 'Klasse'], ['(4)', 'Emballasjegruppe'], ['(5)', 'Faresedler'], ['(7a)', 'Begrensede mengder'], ['(7b)', 'Unntatte mengder'], ['(15)', 'Transportkategori og tunnelkode'], ['(20)', 'Farenummer']] },
   klasser: { name: 'Fareklassene', pairs: [['Klasse 1', 'Eksplosive stoffer og gjenstander'], ['Klasse 2', 'Gasser'], ['Klasse 3', 'Brannfarlige væsker'], ['Klasse 4.1', 'Brannfarlige faste stoffer'], ['Klasse 4.2', 'Selvantennende stoffer'], ['Klasse 4.3', 'Utvikler brannfarlig gass med vann'], ['Klasse 5.1', 'Oksiderende stoffer'], ['Klasse 5.2', 'Organiske peroksider'], ['Klasse 6.1', 'Giftige stoffer'], ['Klasse 6.2', 'Infeksjonsfremmende stoffer'], ['Klasse 7', 'Radioaktivt materiale'], ['Klasse 8', 'Etsende stoffer'], ['Klasse 9', 'Forskjellige farlige stoffer og gjenstander']] },
   farenr: { name: 'Farenummer', pairs: [['20', 'Kvelende gass'], ['23', 'Brannfarlig gass'], ['25', 'Oksiderende gass'], ['268', 'Giftig gass, etsende'], ['30', 'Brannfarlig væske'], ['33', 'Meget brannfarlig væske'], ['336', 'Meget brannfarlig væske, giftig'], ['X423', 'Fast stoff som reagerer farlig med vann'], ['50', 'Oksiderende stoff'], ['606', 'Infeksjonsfremmende stoff'], ['80', 'Etsende stoff'], ['90', 'Miljøfarlig stoff'], ['99', 'Farlig stoff ved høy temperatur']] },
@@ -984,12 +1039,13 @@ function renderHome() {
   $('#cont').textContent = nx ? `Fortsett: ${ST[nx.id].n}. ${nx.title}` : 'Ta prøven';
   let html = '';
   for (const d of [1, 2, 3]) {
-    html += `<div class="day"><h3>${DAYS[d]}</h3><ol class="path">`;
+    html += `<div class="day"><h3>${DAYS[d]}</h3>${bokLine(kapSort(STATIONS.filter(x => x.day === d).flatMap(x => x.kap || []).filter(k => k !== 'del')), 'Boka i dag:')}<ol class="path">`;
     for (const s of STATIONS.filter(x => x.day === d)) {
       const p = stProgress(s.id), status = stDone(s.id) ? 'done' : p.m ? 'started' : '';
       html += `<li class="stn ${status} ${nx && nx.id === s.id ? 'next' : ''}"><span class="dot">${stDone(s.id) ? '✓' : ST[s.id].n}</span>
         <article class="card"><div class="hd"><h3>${esc(s.title)}</h3><div class="emner">${s.emner.map(e => `<span class="em" title="${esc(EMNER[e])}">Emne ${e}: ${esc(EMNER[e])}</span>`).join('')}</div></div>
         <p>${esc(s.desc)}</p>
+        ${bokLine(s.kap || [], 'I boka:')}
         <div class="prog"><div class="bar"><i style="width:${p.pct}%"></i></div><span>${p.m}/${p.n} mestret</span></div>
         <div class="row"><button class="btn" data-go="facts" data-st="${s.id}">Fagstoff</button><button class="btn primary" data-go="ov" data-st="${s.id}">Øv</button>${labBtns(s, 'data-go="lab" data-st="' + s.id + '"', true)}${s.match ? `<button class="btn" data-go="match" data-st="${s.id}">Koble: ${esc(SETS[s.match].name)}</button>` : ''}</div></article></li>`;
     }
@@ -1051,8 +1107,11 @@ function optsHTML(q) {
   return `<div class="opts${q.pics ? ' pics' : ''}">` + q._order.map((o, n) => `<button class="opt" data-i="${o.i}"><span class="k">${LETTERS[n]}</span><span>${q.html ? q.html[o.i] : esc(o.x)}</span></button>`).join('') + '</div>';
 }
 // BOK-START (lages av verktoy/bokreferanser.py – ikke rediger for hånd)
-const BOK = {"1.1.3.1": 48, "1.1.3.2": 50, "1.1.3.3": 51, "1.1.3.6": 52, "1.1.3.6.1": 52, "1.1.3.6.2": 52, "1.1.3.6.3": 52, "1.1.3.6.4": 54, "1.1.3.7": 54, "1.1.4.2": 56, "1.10.1.2": 154, "1.10.1.3": 154, "1.10.1.4": 154, "1.10.2.2": 154, "1.10.2.3": 154, "1.10.3.1.1": 155, "1.10.3.2.1": 157, "1.10.3.3": 157, "1.2.1": 60, "1.3.2.3": 87, "1.3.3": 88, "1.4.1.1": 89, "1.4.1.2": 89, "1.4.2.1.1": 89, "1.4.2.2.1": 90, "1.4.2.2.2": 91, "1.4.2.2.3": 91, "1.4.2.2.4": 91, "1.4.2.3.1": 92, "1.4.3.1.1": 92, "1.4.3.2": 92, "1.4.3.3": 92, "1.4.3.7.1": 94, "1.8.3.1": 124, "1.8.3.3": 124, "1.8.3.7": 125, "1.8.5.1": 129, "2.1.1.3": 163, "2.2.2": 197, "2.2.2.1.2": 197, "2.2.2.1.3": 198, "2.2.3": 206, "2.2.3.1.1": 206, "2.2.3.1.3": 207, "2.2.41": 212, "2.2.43": 227, "2.2.51": 231, "2.2.52": 236, "2.2.62": 269, "2.2.8": 301, "2.2.9": 311, "2.2.9.1.10": 313, "3.1.2": 338, "3.2.1": 342, "3.2.2": 812, "3.4.1": 946, "3.4.12": 948, "3.4.13": 948, "3.4.14": 949, "3.4.15": 949, "3.4.2": 946, "3.4.7": 946, "3.5": 950, "3.5.4.2": 952, "5.1.2.1": 1182, "5.2.1.1": 1189, "5.2.1.10.1": 1193, "5.2.1.8": 1192, "5.2.1.8.1": 1192, "5.2.1.8.3": 1192, "5.2.2.1": 1194, "5.2.2.1.6": 1194, "5.2.2.2": 1196, "5.2.2.2.1.1": 1197, "5.3.1": 1204, "5.3.1.4.1": 1206, "5.3.1.5": 1206, "5.3.1.7.1": 1207, "5.3.2": 1208, "5.3.2.1": 1208, "5.3.2.1.1": 1209, "5.3.2.1.2": 1209, "5.3.2.1.8": 1210, "5.3.2.2.1": 1210, "5.3.2.2.2": 1211, "5.3.2.3": 1212, "5.3.2.3.1": 1212, "5.3.2.3.2": 1212, "5.3.6": 1216, "5.4.0.2": 1217, "5.4.1.1.1": 1217, "5.4.1.1.3.1": 1219, "5.4.1.1.6.2": 1221, "5.4.3.1": 1231, "5.4.3.2": 1231, "5.4.3.3": 1231, "5.4.3.4": 1231, "6.1.2.5": 1258, "6.1.2.6": 1258, "6.1.3.1": 1261, "7.5.1.2": 1583, "7.5.1.5": 1584, "7.5.10": 1590, "7.5.2.1": 1584, "7.5.4": 1587, "7.5.7.1": 1588, "7.5.8.1": 1589, "8.1.2.1": 1604, "8.1.2.2": 1604, "8.1.4.1": 1604, "8.1.4.2": 1605, "8.1.4.3": 1605, "8.1.4.4": 1605, "8.1.5.2": 1605, "8.1.5.3": 1606, "8.2.1.3": 1607, "8.2.2.3": 1608, "8.2.2.3.8": 1609, "8.2.2.4": 1609, "8.2.2.5": 1609, "8.2.2.7.1.6": 1610, "8.2.2.8.2": 1611, "8.2.3": 1613, "8.3.1": 1614, "8.3.2": 1614, "8.3.3": 1614, "8.3.4": 1614, "8.3.5": 1614, "8.3.6": 1614, "8.3.7": 1614, "8.3.8": 1614, "8.4.1": 1615, "8.6.2": 1620, "8.6.3": 1620, "8.6.3.2": 1620, "8.6.3.3": 1620, "8.6.4": 1620, "9.1.1.2": 1625, "9.1.2.1": 1626, "9.1.3": 1627, "9.1.3.4": 1627, "9.2.6": 1632, "§1": 16, "§10": 22, "§11a": 23, "§12": 24, "§15": 27, "§17": 28, "§18": 28, "§19": 30, "§2": 16, "§3": 17, "§30": 33, "§31": 33, "§33": 43, "§34": 43, "§35": 43, "§4": 19, "§5": 19, "§6": 19, "§7": 20, "§8": 21, "§9": 22};
-const KAP = {"1.1": "Omfang og anvendelse", "1.10": "Bestemmelser om sikring (security)", "1.2": "Definisjoner, måleenheter og forkortelser", "1.3": "Opplæring av personale som er involvert i transport av farlig gods", "1.4": "Aktørenes plikter", "1.8": "Kontroller og andre støttetiltak for å sikre at sikkerhetsbestemmelsene blir fulgt", "2.1": "Alminnelige bestemmelser", "2.2": "Spesielle bestemmelser for de enkelte klasser", "3.1": "Generelt", "3.2": "Liste over farlig gods", "3.4": "Farlig gods pakket i begrensede mengder", "3.5": "Farlig gods pakket i unntatte mengder", "5.1": "Alminnelige bestemmelser", "5.2": "Merking og faresedler", "5.3": "Store faresedler og merking på containere, bulkcontainere, MEGCer, MEMUer, tankcontainere, multimodale tanker, jernbanevogner og kjøretøyer", "5.4": "Dokumentasjon", "6.1": "Bestemmelser om konstruksjon og prøving av emballasje", "7.5": "Bestemmelser om lasting, lossing og håndtering", "8.1": "Alminnelige bestemmelser om transportenheter og medfølgende utstyr", "8.2": "Bestemmelser om opplæring av kjøretøymannskaper", "8.3": "Forskjellige bestemmelser som kjøretøymannskapene må holde seg til", "8.4": "Bestemmelser om tilsyn med kjøretøyer", "8.6": "Begrensninger på transport av farlig gods i vegtunneler", "9.1": "Omfang, definisjoner og krav for godkjenning av kjøretøyer", "9.2": "Bestemmelser om kjøretøyers utførelse"};
+const BOK = {"1.1": 47, "1.1.3.1": 48, "1.1.3.2": 50, "1.1.3.3": 51, "1.1.3.6": 52, "1.1.3.6.1": 52, "1.1.3.6.2": 52, "1.1.3.6.3": 52, "1.1.3.6.4": 54, "1.1.3.7": 54, "1.1.4.2": 56, "1.10": 154, "1.10.1.2": 154, "1.10.1.3": 154, "1.10.1.4": 154, "1.10.2.2": 154, "1.10.2.3": 154, "1.10.3.1.1": 155, "1.10.3.2.1": 157, "1.10.3.3": 157, "1.2": 60, "1.2.1": 60, "1.3": 86, "1.3.2.3": 87, "1.3.3": 88, "1.4": 89, "1.4.1.1": 89, "1.4.1.2": 89, "1.4.2.1.1": 89, "1.4.2.2.1": 90, "1.4.2.2.2": 91, "1.4.2.2.3": 91, "1.4.2.2.4": 91, "1.4.2.3.1": 92, "1.4.3.1.1": 92, "1.4.3.2": 92, "1.4.3.3": 92, "1.4.3.7.1": 94, "1.8.3.1": 124, "1.8.3.3": 124, "1.8.3.7": 125, "1.8.5.1": 129, "2.1.1.3": 163, "2.2": 172, "2.2.2": 197, "2.2.2.1.2": 197, "2.2.2.1.3": 198, "2.2.3": 206, "2.2.3.1.1": 206, "2.2.3.1.3": 207, "2.2.41": 212, "2.2.43": 227, "2.2.51": 231, "2.2.52": 236, "2.2.62": 269, "2.2.8": 301, "2.2.9": 311, "2.2.9.1.10": 313, "3.1.2": 338, "3.2": 342, "3.2.1": 342, "3.2.2": 812, "3.3": 890, "3.4.1": 946, "3.4.12": 948, "3.4.13": 948, "3.4.14": 949, "3.4.15": 949, "3.4.2": 946, "3.4.7": 946, "3.5": 950, "3.5.4.2": 952, "4.1": 957, "5.1.2.1": 1182, "5.2": 1189, "5.2.1.1": 1189, "5.2.1.10.1": 1193, "5.2.1.8": 1192, "5.2.1.8.1": 1192, "5.2.1.8.3": 1192, "5.2.2.1": 1194, "5.2.2.1.6": 1194, "5.2.2.2": 1196, "5.2.2.2.1.1": 1197, "5.3": 1204, "5.3.1": 1204, "5.3.1.4.1": 1206, "5.3.1.5": 1206, "5.3.1.7.1": 1207, "5.3.2": 1208, "5.3.2.1": 1208, "5.3.2.1.1": 1209, "5.3.2.1.2": 1209, "5.3.2.1.8": 1210, "5.3.2.2.1": 1210, "5.3.2.2.2": 1211, "5.3.2.3": 1212, "5.3.2.3.1": 1212, "5.3.2.3.2": 1212, "5.3.6": 1216, "5.4": 1217, "5.4.0.2": 1217, "5.4.1.1.1": 1217, "5.4.1.1.3.1": 1219, "5.4.1.1.6.2": 1221, "5.4.3.1": 1231, "5.4.3.2": 1231, "5.4.3.3": 1231, "5.4.3.4": 1231, "6.1": 1257, "6.1.2.5": 1258, "6.1.2.6": 1258, "6.1.3.1": 1261, "7.5": 1583, "7.5.1.2": 1583, "7.5.1.5": 1584, "7.5.10": 1590, "7.5.2.1": 1584, "7.5.4": 1587, "7.5.7.1": 1588, "7.5.8.1": 1589, "8.1": 1604, "8.1.2.1": 1604, "8.1.2.2": 1604, "8.1.4.1": 1604, "8.1.4.2": 1605, "8.1.4.3": 1605, "8.1.4.4": 1605, "8.1.5.2": 1605, "8.1.5.3": 1606, "8.2": 1607, "8.2.1.3": 1607, "8.2.2.3": 1608, "8.2.2.3.8": 1609, "8.2.2.4": 1609, "8.2.2.5": 1609, "8.2.2.7.1.6": 1610, "8.2.2.8.2": 1611, "8.2.3": 1613, "8.3.1": 1614, "8.3.2": 1614, "8.3.3": 1614, "8.3.4": 1614, "8.3.5": 1614, "8.3.6": 1614, "8.3.7": 1614, "8.3.8": 1614, "8.4.1": 1615, "8.5": 1616, "8.6": 1620, "8.6.2": 1620, "8.6.3": 1620, "8.6.3.2": 1620, "8.6.3.3": 1620, "8.6.4": 1620, "9.1": 1625, "9.1.1.2": 1625, "9.1.2.1": 1626, "9.1.3": 1627, "9.1.3.4": 1627, "9.2.6": 1632, "§1": 16, "§10": 22, "§11a": 23, "§12": 24, "§15": 27, "§17": 28, "§18": 28, "§19": 30, "§2": 16, "§3": 17, "§30": 33, "§31": 33, "§33": 43, "§34": 43, "§35": 43, "§4": 19, "§5": 19, "§6": 19, "§7": 20, "§8": 21, "§9": 22};
+const KAP = {"1.1": "Omfang og anvendelse", "1.10": "Bestemmelser om sikring (security)", "1.2": "Definisjoner, måleenheter og forkortelser", "1.3": "Opplæring av personale som er involvert i transport av farlig gods", "1.4": "Aktørenes plikter", "1.8": "Kontroller og andre støttetiltak for å sikre at sikkerhetsbestemmelsene blir fulgt", "2.1": "Alminnelige bestemmelser", "2.2": "Spesielle bestemmelser for de enkelte klasser", "3.1": "Generelt", "3.2": "Liste over farlig gods", "3.3": "Spesielle bestemmelser som gjelder visse gjenstander eller stoffer", "3.4": "Farlig gods pakket i begrensede mengder", "3.5": "Farlig gods pakket i unntatte mengder", "4.1": "Bruk av emballasje, inklusive mellomstore bulkcontainere (IBCer) og storemballasje", "5.1": "Alminnelige bestemmelser", "5.2": "Merking og faresedler", "5.3": "Store faresedler og merking på containere, bulkcontainere, MEGCer, MEMUer, tankcontainere, multimodale tanker, jernbanevogner og kjøretøyer", "5.4": "Dokumentasjon", "6.1": "Bestemmelser om konstruksjon og prøving av emballasje", "7.5": "Bestemmelser om lasting, lossing og håndtering", "8.1": "Alminnelige bestemmelser om transportenheter og medfølgende utstyr", "8.2": "Bestemmelser om opplæring av kjøretøymannskaper", "8.3": "Forskjellige bestemmelser som kjøretøymannskapene må holde seg til", "8.4": "Bestemmelser om tilsyn med kjøretøyer", "8.5": "Tilleggsbestemmelser som gjelder visse klasser eller stoffer", "8.6": "Begrensninger på transport av farlig gods i vegtunneler", "9.1": "Omfang, definisjoner og krav for godkjenning av kjøretøyer", "9.2": "Bestemmelser om kjøretøyers utførelse"};
+// Alle delene og kapitlene i boka med tittel og startside
+const DELER = {"1": ["Alminnelige bestemmelser", 45], "2": ["Klassifisering", 161], "3": ["Liste over farlig gods, spesielle bestemmelser og unntak relatert til begrensede og unntatte mengder", 337], "4": ["Bestemmelser om emballering og tanker", 955], "5": ["Klargjøring for forsendelse", 1181], "6": ["Bestemmelser om konstruksjon og prøving av emballasje, mellomstore bulkcontainere (IBCer), storemballasje, tanker og bulkcontainere", 1253], "7": ["Bestemmelser om transport, lasting, lossing og håndtering", 1565], "8": ["ADR: Bestemmelser om kjøretøyenes mannskaper og utstyr samt drift og dokumentasjon", 1603], "9": ["ADR: Bestemmelser om bygging og godkjenning av kjøretøyer", 1623]};
+const KAPITLER = {"1.1": ["Omfang og anvendelse", 47], "1.2": ["Definisjoner, måleenheter og forkortelser", 60], "1.3": ["Opplæring av personale som er involvert i transport av farlig gods", 86], "1.4": ["Aktørenes plikter", 89], "1.5": ["Avvik", 96], "1.6": ["Overgangsbestemmelser", 97], "1.7": ["Generelle bestemmelser vedrørende radioaktivt materiale", 119], "1.8": ["Kontroller og andre støttetiltak for å sikre at sikkerhetsbestemmelsene blir fulgt", 123], "1.9": ["Transportrestriksjoner pålagt av vedkommende myndigheter", 148], "1.10": ["Bestemmelser om sikring (security)", 154], "1.11": ["RID: Interne beredskapsplaner for skiftestasjoner", 159], "2.1": ["Alminnelige bestemmelser", 162], "2.2": ["Spesielle bestemmelser for de enkelte klasser", 172], "2.3": ["Testmetoder", 329], "3.1": ["Generelt", 338], "3.2": ["Liste over farlig gods", 342], "3.3": ["Spesielle bestemmelser som gjelder visse gjenstander eller stoffer", 890], "3.4": ["Farlig gods pakket i begrensede mengder", 946], "3.5": ["Farlig gods pakket i unntatte mengder", 950], "4.1": ["Bruk av emballasje, inklusive mellomstore bulkcontainere (IBCer) og storemballasje", 957], "4.2": ["Bruk av multimodale tanker og multielement gasscontainere som er i henhold til UN-bestemmelser (UN-MEGC)", 1120], "4.3": ["Bruk av faste tanker (tankkjøretøyer, tankvogner), løstanker, vekseltanker og tankcontainere med skall fremstilt av metalliske materialer, samt batterikjøretøyer, batterivogner og multi-element gasscontainere (MEGCer)", 1145], "4.4": ["RID: (Slettet) ADR: Bruk av faste tanker (tankkjøretøyer) og løstanker av fiberarmert plast (FRP)", 1177], "4.5": ["Bruk av slamsugere", 1178], "4.6": ["(reservert)", 1179], "4.7": ["ADR: Bruk av mobile enheter for tilvirkning av eksplosiver (MEMUer)", 1180], "5.1": ["Alminnelige bestemmelser", 1182], "5.2": ["Merking og faresedler", 1189], "5.3": ["Store faresedler og merking på containere, bulkcontainere, MEGCer, MEMUer, tankcontainere, multimodale tanker, jernbanevogner og kjøretøyer", 1204], "5.4": ["Dokumentasjon", 1217], "5.5": ["Spesielle bestemmelser", 1246], "6.1": ["Bestemmelser om konstruksjon og prøving av emballasje", 1257], "6.2": ["Bestemmelser for konstruksjon og prøving av trykkbeholdere for gasser, aerosolbeholdere og små gassbeholdere (engangsbeholdere med gass) og brenselcellepatroner som inneholder brannfarlig flytende gass", 1287], "6.3": ["Bestemmelser om konstruksjon og prøving av emballasje for infeksjonsfremmende stoffer av kategori A i klasse 6.2 (UN 2814 og 2900)", 1343], "6.4": ["Bestemmelser om konstruksjon, prøving og godkjenning av kolli for radioaktivt materiale og for godkjenningen av slikt materiale", 1350], "6.5": ["Bestemmelser for kontruksjon og prøving av mellomstore bulkcontainere (IBCer)", 1375], "6.6": ["Bestemmelser for konstruksjon og prøving av storemballasje", 1401], "6.7": ["Bestemmelser om design, konstruksjon, kontroll og prøving av multimodale tanker og multielement gasscontainere som er i henhold til UN-bestemmelser (UN-MEGC)", 1411], "6.8": ["Bestemmelser om konstruksjon, utstyr, typegodkjenning, kontroll og prøving samt merking for faste tanker (tankkjøretøyer, tankvogner) løstanker, tankcontainere og vekseltanker med tankskall av metallisk materiale samt batterikjøretøyer, batterivogner og multielement gasscontainere (MEGCer)", 1468], "6.9": ["Bestemmelser for design, konstruksjon, kontroll og prøving av multimodale tanker av fiberarmert plast (FRP)", 1529], "6.10": ["Bestemmelser for design, utstyr, typegodkjenning, prøving og merking av slamsugere", 1542], "6.11": ["Bestemmelser om design, konstruksjon, kontroll og prøving av bulkcontainere", 1546], "6.12": ["ADR: Bestemmelser for design, utstyr, typegodkjenning, kontroll og prøving, samt merking av tanker, bulkcontainere og spesielle lasterom for eksplosiver på mobile enheter for tilvirkning av eksplosiver (MEMUer)", 1554], "6.13": ["ADR: Bestemmelser for design, konstruksjon, utstyr, typegodkjenning, prøving og merking av faste tanker (tankkjøretøyer) av fiberarmert plast (FRP) og løstanker", 1557], "7.1": ["Alminnelige bestemmelser", 1566], "7.2": ["Bestemmelser om transport i kolli", 1570], "7.3": ["Bestemmelser om transport i bulk", 1572], "7.4": ["Bestemmelser om transport i tanker", 1582], "7.5": ["Bestemmelser om lasting, lossing og håndtering", 1583], "7.6": ["RID: Bestemmelser for forsendelse som ekspresspakker", 1599], "7.7": ["RID: Piggybacktransport i kombinert passasjer- og godstransport", 1601], "8.1": ["Alminnelige bestemmelser om transportenheter og medfølgende utstyr", 1604], "8.2": ["Bestemmelser om opplæring av kjøretøymannskaper", 1607], "8.3": ["Forskjellige bestemmelser som kjøretøymannskapene må holde seg til", 1614], "8.4": ["Bestemmelser om tilsyn med kjøretøyer", 1615], "8.5": ["Tilleggsbestemmelser som gjelder visse klasser eller stoffer", 1616], "8.6": ["Begrensninger på transport av farlig gods i vegtunneler", 1620], "9.1": ["Omfang, definisjoner og krav for godkjenning av kjøretøyer", 1625], "9.2": ["Bestemmelser om kjøretøyers utførelse", 1630], "9.3": ["Tilleggsbestemmelser for komplette eller ferdigstilte EX/II eller EX/III kjøretøyer beregnet for transport av eksplosive stoffer og gjenstander (klasse 1) i kolli", 1641], "9.4": ["Tilleggsbestemmelser vedrørende bygging av karosserier for komplette eller ferdigstilte kjøretøyer beregnet for transport av farlig gods i kolli (andre enn EX/II og EX/III kjøretøyer)", 1643], "9.5": ["Tilleggsbestemmelser vedrørende bygging av karosserier for komplette eller ferdigstilte kjøretøyer beregnet for transport av farlige faste stoffer i bulk", 1644], "9.6": ["Tilleggsbestemmelser vedrørende komplette eller ferdigstilte kjøretøyer beregnet for transport av stoffer under temperaturkontroll", 1645], "9.7": ["Tilleggsbestemmelser for tankkjøretøyer (faste tanker) batterikjøretøyer og komplette eller ferdigstilte kjøretøyer brukt for transport av farlig gods i løstank med volum over 1 m3 eller i tankcontainere, multimodale tanker eller MEGCer med volum over 3 m3 (EX/III, FL og AT kjøretøyer)", 1646], "9.8": ["Tilleggsbestemmelser vedrørende komplette eller ferdigstilte MEMUer", 1650]};
 // BOK-SLUTT
 // Henvisning til ADR/RID 2025 (DSB, 1. opplag). Ved feil svar vises side og kapittel, så eleven kan slå opp.
 function bokRefs(src) {
@@ -1060,12 +1119,44 @@ function bokRefs(src) {
   for (const m of src.matchAll(/§\s*(\d+a?)/g)) if (BOK['§' + m[1]]) out.push({ t: 'Forskriften § ' + m[1], p: BOK['§' + m[1]] });
   for (const m of src.replace(/§\s*\d+a?/g, '').matchAll(/\b\d{1,2}\.\d{1,2}(?:\.\d{1,2}){0,4}\b/g)) {
     const sec = m[0], ch = sec.split('.').slice(0, 2).join('.');
-    if (BOK[sec] && !out.some(r => r.t === 'ADR ' + sec)) out.push({ t: 'ADR ' + sec, p: BOK[sec], kt: KAP[ch] && `kapittel ${ch} ${KAP[ch]}` });
+    // Hele kapitler slås opp i innholdsfortegnelsen når de ikke er brukt som kilde ellers
+    const p = BOK[sec] || (sec === ch && KAPITLER[ch] && KAPITLER[ch][1]), kt = KAP[ch] || (KAPITLER[ch] && KAPITLER[ch][0]);
+    if (p && !out.some(r => r.t === 'ADR ' + sec)) out.push({ t: 'ADR ' + sec, p, kt: kt && `kapittel ${ch} ${kt}` });
   }
   // Kilder uten avsnittsnummer
   if (/Tabell A/.test(src) && !out.length && BOK['3.2.1']) out.push({ t: 'Tabell A, ADR 3.2.1', p: BOK['3.2.1'], kt: KAP['3.2'] && `kapittel 3.2 ${KAP['3.2']}` });
   if (/Forordet/.test(src)) out.push({ t: 'Forordet', p: 3 });
+  if (/Hvordan finne fram/.test(src)) out.push({ t: 'Hvordan finne fram i boka', p: 9 });
   return out;
+}
+// Kapitlene på stien. Nøklene er kapittelnumre, eller forord, forskrift og del (hele boka).
+const SIDE_FORORD = 3, SIDE_FINN = 9, SIDE_FORSKRIFT = 15;
+const kapOrder = k => k === 'forord' ? [0] : k === 'forskrift' ? [1] : k.split('.').map(n => 2 + +n);
+const kapSort = ks => [...new Set(ks)].sort((a, b) => { const x = kapOrder(a), y = kapOrder(b); for (let i = 0; i < 3; i++) if ((x[i] || 0) !== (y[i] || 0)) return (x[i] || 0) - (y[i] || 0); return 0; });
+function kapChip(k) {
+  if (k === 'forord') return `<span class="kp" title="Forord og Hvordan finne fram i boka">Forord · s. ${SIDE_FORORD}</span>`;
+  if (k === 'forskrift') return `<span class="kp" title="Forskrift om landtransport av farlig gods med veiledning">Forskriften · s. ${SIDE_FORSKRIFT}</span>`;
+  if (k === 'del') return `<span class="kp" title="Alle delene og kapitlene">Hele boka, del 1–9</span>`;
+  const c = KAPITLER[k];
+  return c ? `<span class="kp" title="${esc(k + ' ' + c[0])}">${k} · s. ${c[1]}</span>` : '';
+}
+const bokLine = (ks, lbl) => ks.length ? `<div class="bokline"><b>${lbl}</b>${ks.map(kapChip).join('')}</div>` : '';
+// Plassholdere i fagstoffet: {1.1} kapittel med side, {del 1} delen, {s:3.2.2} sidetall, {forord}, {finn}, {forskrift}
+function fillBok(t) {
+  return esc(t).replace(/\{([^}]+)\}/g, (m, k) => {
+    if (k === 'forord') return `Forord <span class="pg">s. ${SIDE_FORORD}</span>`;
+    if (k === 'finn') return `Hvordan finne fram i boka <span class="pg">s. ${SIDE_FINN}</span>`;
+    if (k === 'forskrift') return `Forskriften <span class="pg">fra s. ${SIDE_FORSKRIFT}</span>`;
+    if (k.startsWith('del ')) { const d = k.slice(4); return `Del ${d} ${esc(DELKORT[d])} · fra s. ${DELER[d][1]}`; }
+    if (k.startsWith('s:')) return String(BOK[k.slice(2)] || '?');
+    return KAPITLER[k] ? `<b>${k}</b> <span class="pg">s. ${KAPITLER[k][1]}</span>` : m;
+  });
+}
+// Hele innholdsfortegnelsen, med kapitlene kurset bruker uthevet
+function tocHTML() {
+  const used = new Set(STATIONS.flatMap(s => s.kap || []));
+  return `<div class="toc">${Object.entries(DELER).map(([d, [t, p]]) => `<details${+d === 1 ? ' open' : ''}><summary>Del ${d} ${esc(DELKORT[d])}<span>fra side ${p}</span></summary>
+    <ol>${Object.entries(KAPITLER).filter(([k]) => k.split('.')[0] === d).map(([k, [kt, kp]]) => `<li class="${used.has(k) ? 'kurs' : ''}"><b>${k}</b><span>${esc(kt)}</span><span class="p">s. ${kp}</span></li>`).join('')}</ol></details>`).join('')}</div>`;
 }
 function kildeHTML(src, wrong) {
   if (!src) return '';
@@ -1089,7 +1180,9 @@ function showFacts(st) {
   const s = ST[st], list = FACTS.filter(f => f.st === st);
   goPlay(`<div class="quiz">
     <div class="qbar"><span>Fagstoff · <b>${s.n}. ${esc(s.title)}</b></span><div class="row"><button class="btn" onclick="window.print()">Skriv ut</button><button class="btn" id="quit">Tilbake</button></div></div>
-    <div class="facts">${list.map(f => `<article class="fact"><span class="em">Emne ${f.em}: ${esc(EMNER[f.em])}</span><h4>${esc(f.title)}</h4><ul>${f.pts.map(p => `<li>${esc(p)}</li>`).join('')}</ul></article>`).join('')}</div>
+    ${bokLine(s.kap || [], 'Ha boka oppe på:')}
+    <div class="facts">${list.map(f => `<article class="fact"><span class="em">Emne ${f.em}: ${esc(EMNER[f.em])}</span><h4>${fillBok(f.title)}</h4><ul>${f.pts.map(p => `<li>${fillBok(p)}</li>`).join('')}</ul></article>`).join('')}</div>
+    ${st === 'kapitler' ? `<h2 style="margin:6px 0 0">Alle kapitlene</h2><p class="muted" style="margin:0;font-size:14px">Innholdsfortegnelsen i ADR/RID 2025. Kapitlene som brukes på kurset, er merket.</p>${tocHTML()}` : ''}
     <div class="row noprint"><button class="btn primary" id="ovNow">Øv på denne stasjonen</button>${labBtns(s, 'data-lab-go')}</div></div>`);
   $('#quit').onclick = goHome;
   $('#ovNow').onclick = () => startPractice(st);
@@ -1278,7 +1371,31 @@ const tcTxt = s => s.tc === '-' ? '(-)' : `(${s.tc})`;
 const pgTxt = s => s.pg || '–';
 const labTxt = s => s.lab.join(' + ');
 
+// Emner og kapitlet de står i, til laben Finn kapittelet
+const KAPOPPG = [
+  ['Hva betyr «kolli» og «transportenhet»?', '1.2'], ['Unntaket for lass under 1000 poeng', '1.1'], ['Pliktene til avsender, transportør og laster', '1.4'],
+  ['Sikkerhetsrådgiveren', '1.8'], ['Sikring mot tyveri og misbruk', '1.10'], ['Opplæring av lagerarbeidere og andre som håndterer farlig gods', '1.3'],
+  ['Hvordan stoffene deles inn i fareklasser og emballasjegrupper', '2.1'], ['Kriteriene for klasse 3, brannfarlige væsker', '2.2'], ['Tabell A og Tabell B', '3.2'],
+  ['Hva nummeret i kolonne (6) i Tabell A betyr', '3.3'], ['Begrensede mengder (LQ)', '3.4'], ['Unntatte mengder (EQ)', '3.5'],
+  ['Hvilken emballasje et stoff kan pakkes i', '4.1'], ['Bruk av tankbiler', '4.3'], ['Faresedler og merking på kolli', '5.2'],
+  ['Oransje skilt og store faresedler på bilen', '5.3'], ['Transportdokumentet og de skriftlige instruksjonene', '5.4'], ['UN-merket på godkjent emballasje', '6.1'],
+  ['Samlastingsforbud og lastsikring', '7.5'], ['Brannslukkere og utstyr på transportenheten', '8.1'], ['ADR-kompetansebevis, kurs og eksamen', '8.2'],
+  ['Røykeforbud og forbud mot passasjerer', '8.3'], ['Parkering og tilsyn med bilen', '8.4'], ['Tilleggsbestemmelsene S1–S24 i kolonne (19)', '8.5'],
+  ['Tunnelkategorier og tunnelkoder', '8.6'], ['Godkjenning av kjøretøyer (FL, AT og EX)', '9.1']
+];
 const LABGEN = {
+  // Finn kapittelet eller delen et emne står i
+  kapittel() {
+    const [topic, ch] = pick(KAPOPPG), d = ch.split('.')[0], [kt, kp] = KAPITLER[ch];
+    const ex = `Kapittel ${ch}${kt.length <= 70 ? ' ' + kt : ''} begynner på side ${kp}, i del ${d} ${DELKORT[d]}.`;
+    if (Math.random() < .35) {
+      const r = `Del ${d} ${DELKORT[d]}`;
+      return { kind: 'del', tag: ch, q: `I hvilken del av boka står dette: ${topic}?`, o: four(r, [], Object.entries(DELKORT).map(([n, t]) => `Del ${n} ${t}`)), ex, src: 'ADR ' + ch };
+    }
+    // Nabokapitler først, så de blir vanskeligere å gjette
+    const near = KAPOPPG.map(x => x[1]).filter(k => k !== ch && k.split('.')[0] === d);
+    return { kind: 'kap', tag: ch, q: `Hvilket kapittel slår du opp i? ${topic}`, o: four(`Kapittel ${ch}`, shuffle(near).map(k => `Kapittel ${k}`), KAPOPPG.map(x => `Kapittel ${x[1]}`)), ex, src: 'ADR ' + ch };
+  },
   // Slå opp i et utdrag av Tabell A
   tabA() {
     const rows = shuffle(SUBST).slice(0, 6), s = pick(rows), others = rows.filter(r => r !== s);
