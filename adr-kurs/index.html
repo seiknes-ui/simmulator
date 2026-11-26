@@ -153,6 +153,9 @@ body.simple .opt{min-height:52px;font-size:17px}
 .si-sub{font-weight:600}
 .si-anm{font-size:12.5px!important;color:#444}
 .si{min-width:0}
+.si-look{border:1px solid var(--line);border-radius:4px;background:var(--bg)}
+.si-look>summary{cursor:pointer;padding:10px 14px;font-weight:600}
+.si-look .si{padding:0 10px 10px}
 .si-pg{min-width:0;overflow-wrap:anywhere;hyphens:auto}
 .si-tab{border-collapse:collapse;width:100%;font-size:13.5px;table-layout:fixed}
 .si-tab th,.si-tab td{border:1px solid #999;padding:6px 8px;vertical-align:top;text-align:left}
@@ -361,15 +364,16 @@ const STATIONS = [
   { id: 'forebygg', day: 1, title: 'Forebygging og sikkerhet', emner: ['d'], desc: 'Tennkilder, røykeforbud, verneutstyr og trygg drift av kjøretøyet.', labs: ['brann'], kap: ['7.5', '8.1', '8.3'] },
   { id: 'merking', day: 2, title: 'Merking og oransje skilt', emner: ['f'], desc: 'Oransje skilt, farenummer, store faresedler og LQ-merket.', labs: ['merk', 'skilt'], match: 'farenr', kap: ['5.2', '5.3', '3.4'] },
   { id: 'unntak', day: 2, title: 'Unntak og 1000 poeng', emner: ['a'], desc: 'Mengdeunntaket i 1.1.3.6, begrensede og unntatte mengder, og de andre unntakene.', labs: ['maaler', 'poeng'], kap: ['1.1', '3.4', '3.5'] },
-  { id: 'forer', day: 2, title: 'Dokumenter og utstyr', emner: ['g', 'h'], desc: 'Hva som skal være i førerhuset, skriftlige instruksjoner, brannslukkere og utstyr.', labs: ['utstyr'], kap: ['5.4', '8.1', '8.4'], si: true },
+  { id: 'forer', day: 2, title: 'Dokumenter og utstyr', emner: ['g', 'h'], desc: 'Hva som skal være i førerhuset, skriftlige instruksjoner, brannslukkere og utstyr.', labs: ['si', 'utstyr'], kap: ['5.4', '8.1', '8.4'], si: true },
   { id: 'lasting', day: 3, title: 'Lasting, samlasting og stuing', emner: ['i', 'j', 'm'], desc: 'Hva som kan lastes sammen, kontroll før lasting, matvarer og lastsikring.', labs: ['lasteplan', 'samlast'], kap: ['7.5'] },
   { id: 'ansvar', day: 3, title: 'Ansvar og sikring', emner: ['k', 'o'], desc: 'Pliktene til avsender, transportør, laster og sjåfør, og sikring mot misbruk.', match: 'aktor', kap: ['forskrift', '1.4', '1.8', '1.10'] },
-  { id: 'ulykke', day: 3, title: 'Ulykke, brann og tunnel', emner: ['e', 'n'], desc: 'De skriftlige instruksjonene, brann og førstehjelp, og tunnelkategoriene.', labs: ['ulykke', 'rute', 'tunnel'], kap: ['5.4', '8.6'], si: true }
+  { id: 'ulykke', day: 3, title: 'Ulykke, brann og tunnel', emner: ['e', 'n'], desc: 'De skriftlige instruksjonene, brann og førstehjelp, og tunnelkategoriene.', labs: ['si', 'ulykke', 'rute', 'tunnel'], kap: ['5.4', '8.6'], si: true }
 ];
 const ST = Object.fromEntries(STATIONS.map((s, i) => [s.id, { ...s, n: i + 1 }]));
 const DAYS = { 1: 'Dag 1', 2: 'Dag 2', 3: 'Dag 3' };
 const LABS = {
   veiviser: { name: 'Tabell A som veiviser', desc: 'Tabellhodet i Tabell A viser hvor i boka hver kolonne er forklart. Finn avsnittet for kodene i bensinraden.' },
+  si: { name: 'Bruk de skriftlige instruksjonene', desc: 'Slå opp i de skriftlige instruksjonene og finn hva du skal gjøre for lasten på bilen.' },
   kapittel: { name: 'Finn kapittelet', desc: 'Hvilket kapittel eller hvilken del av boka står det i? Svaret viser siden du slår opp på.' },
   tabA: { name: 'Slå opp i Tabell A', desc: 'Finn klasse, transportkategori, tunnelkode og farenummer i et utdrag av tabellen.' },
   sedler: { name: 'Kjenn igjen faresedlene', desc: 'Hvilken klasse viser faresedlen?' },
@@ -1547,7 +1551,7 @@ function runLab(run, keepScroll) {
   if (tk.multi) return runMulti(run, keepScroll);
   const p = goPlay(`<div class="quiz">
     <div class="qbar"><span>${esc(L.name)} · oppgave <b>${run.i + 1}</b> av <b>${LAB_N}</b></span><span>Riktig <b>${run.right}</b></span><button class="btn" id="quit">Avslutt</button></div>
-    ${tk.show || ''}<p class="qtext">${tk.qHTML || esc(tk.q)}</p>${optsHTML(tk)}<div id="fb"></div></div>`, keepScroll);
+    ${tk.show || ''}<p class="qtext">${tk.qHTML || esc(tk.q)}</p>${optsHTML(tk)}<div id="fb"></div>${tk.after || ''}</div>`, keepScroll);
   $('#quit').onclick = goHome;
   p.querySelector('.opts').addEventListener('click', e => {
     const b = e.target.closest('.opt'); if (!b || b.disabled) return;
@@ -1599,6 +1603,49 @@ const KAPOPPG = [
   ['Tunnelkategorier og tunnelkoder', '8.6'], ['Godkjenning av kjøretøyer (FL, AT og EX)', '9.1']
 ];
 const LABGEN = {
+  // Bruk de skriftlige instruksjonene: finn svaret i instruksjonene, som ligger åpne i oppgaven
+  si() {
+    const rowFor = l => SI_KLASSER.find(r => r[0].includes(l));
+    const acts = [...new Set(SI_KLASSER.map(r => r[4]).filter(Boolean))];
+    const NONE = 'Ingen egen tilleggsveiledning – følg tiltakene på side 1';
+    const look = `<details class="si-look"><summary>Slå opp i de skriftlige instruksjonene</summary>${siHTML()}</details>`;
+    const loadHTML = s => `<div class="load"><div class="li">${s.lab.map(l => labelSVG(l)).join('')}<span><b>UN ${s.un}</b> ${esc(lc(s.name))}</span></div></div>`;
+    const src = 'Skriftlige instruksjoner (5.4.3.4)';
+    const kind = pick(['tiltak', 'tiltak', 'flere', 'ingen', 'side', 'utstyr']);
+    if (kind === 'flere') {
+      const s = pick(SUBST.filter(x => x.lab.length > 1 && x.lab.every(l => rowFor(l))));
+      if (s) {
+        const parts = s.lab.map(l => rowFor(l)[4]).filter(Boolean);
+        const all = [...new Set(parts.join(' ').split(/(?<=\.)\s+/))].join(' ');
+        const o = four(all, [...parts, ...acts.filter(a => !parts.includes(a))], acts);
+        return { kind, tag: s.un, show: loadHTML(s), after: look, q: `Det lekker fra lasten. Den har faresedlene ${s.lab.join(' og ')}. Hvilke tiltak sier tilleggsveiledningen at du skal gjøre?`, o, src,
+          ex: `Ved flere farer skal alle relevante tiltak følges (ANM 1 i instruksjonene). ${s.lab.map(l => `${l}: ${rowFor(l)[4] || 'ingen egen veiledning'}`).join(' · ')}` };
+      }
+    }
+    if (kind === 'ingen') {
+      const r = pick(SI_KLASSER.filter(x => !x[4] && x[0].length));
+      return { kind, tag: r[1], show: `<div class="load"><div class="li">${r[0].map(l => labelSVG(l)).join('')}<span>Fareseddel ${r[1]}: ${esc(r[2].toLowerCase())}</span></div></div>`, after: look,
+        q: `Et kolli med fareseddel ${r[1]} er skadet. Hva står i kolonne (3) Tilleggsveiledning for denne fareseddelen?`, o: four(NONE, acts, acts), src,
+        ex: `Kolonne (3) er tom for ${r[1]}. Kolonne (2) sier: ${r[3]} Følg de generelle tiltakene på side 1.` };
+    }
+    if (kind === 'side') {
+      const t = pick([['tiltakene ved en ulykke, som å varsle nødetatene og sette ut varselsignalene', 'Side 1'], ['farene og tilleggsveiledningen for fareseddel 2.3', 'Side 2'], ['farene og tilleggsveiledningen for fareseddel 8', 'Side 3'], ['utstyret transportenheten skal ha med', 'Side 4'], ['hva du gjør ved lekkasje av et oppvarmet stoff', 'Side 4']]);
+      return { kind, tag: t[1], after: look, q: `Hvor i de skriftlige instruksjonene står ${t[0]}?`, o: four(t[1], ['Side 1', 'Side 2', 'Side 3', 'Side 4'], []), src,
+        ex: 'Side 1: tiltak ved ulykke · side 2–3: tabellen med faresedlene · side 4: merkene for miljøfarlige og oppvarmede stoffer, og utstyret.' };
+    }
+    if (kind === 'utstyr') {
+      const s = pick(SUBST.filter(x => x.lab.every(l => rowFor(l))));
+      const mask = s.lab.some(l => ['2.3', '6.1'].includes(l));
+      const r = mask ? 'Ja, ved fareseddel 2.3 eller 6.1 skal hver i mannskapet ha fluktmaske' : 'Nei, fluktmaske kreves bare ved fareseddel 2.3 eller 6.1';
+      return { kind: 'utstyr', tag: s.un, show: loadHTML(s), after: look, q: 'Står det i de skriftlige instruksjonene at mannskapet skal ha fluktmaske for denne lasten?', src,
+        o: four(r, [mask ? 'Nei, fluktmaske kreves bare ved fareseddel 2.3 eller 6.1' : 'Ja, ved fareseddel 2.3 eller 6.1 skal hver i mannskapet ha fluktmaske', 'Ja, fluktmaske skal alltid være med', 'Bare når lasten er over 1000 poeng'], []),
+        ex: 'Siste side i instruksjonene lister tilleggsutstyret for enkelte klasser.' };
+    }
+    const r = pick(SI_KLASSER.filter(x => x[4] && x[0].length));
+    return { kind: 'tiltak', tag: r[1], show: `<div class="load"><div class="li">${r[0].map(l => labelSVG(l)).join('')}<span>Fareseddel ${r[1]}: ${esc(r[2].toLowerCase())}</span></div></div>`, after: look,
+      q: `Det har skjedd en ulykke, og kolli med fareseddel ${r[1]} er skadet. Hva sier tilleggsveiledningen i kolonne (3)?`, o: four(r[4], acts.filter(a => a !== r[4]), [NONE]), src,
+      ex: `Kolonne (2) Farlige egenskaper: ${r[3]}` };
+  },
   // Tabellhodet i Tabell A viser hvor hver kolonne er forklart
   veiviser() {
     const e = pick(BENSIN), pg = KAPITLER[e.sec] ? KAPITLER[e.sec][1] : BOK[e.sec];
