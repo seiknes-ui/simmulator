@@ -179,6 +179,15 @@ body.simple .opt{min-height:52px;font-size:17px}
 .si-lab span{display:block;font-size:12px;font-weight:600;margin-top:2px}
 @media (max-width:560px){.si-tab{font-size:12.5px}.si-tab th,.si-tab td{padding:4px 5px}.si-tab th:first-child,.si-tab td.si-lab{width:52px}.si-lab svg{width:36px;height:36px}.si-tab td:last-child{width:30%}.si-pg{padding:12px}}
 @media print{.si-pg{break-after:page;border:none;padding:0}}
+.fact.wide{grid-column:1 / -1}
+.trapp{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.trapp li{border:1px solid var(--line);border-left:6px solid color-mix(in srgb,var(--ok) calc(100% - var(--i) * 25%),var(--bad));border-radius:4px;padding:8px 12px;margin-left:calc(var(--i) * 18px);background:var(--bg);display:grid;gap:2px}
+.trapp .tr-hd{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline}
+.trapp .tr-hd b{font-family:var(--f-display);font-size:22px}
+.trapp .tr-hd span{font-weight:700}
+.trapp .tr-hd em{font-style:normal;font-size:13px;color:var(--muted)}
+.trapp p{margin:0;font-size:14px}
+@media (max-width:560px){.trapp li{margin-left:calc(var(--i) * 6px)}}
 .toc{display:grid;gap:6px}
 .toc details{border:1px solid var(--line);border-radius:4px;background:var(--sheet)}
 .toc summary{cursor:pointer;padding:10px 14px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 12px;font-weight:600}
@@ -392,7 +401,7 @@ const STATIONS = [
   { id: 'farer', day: 1, title: 'Fareklassene og farene', emner: ['b', 'c'], desc: 'De ni hovedklassene, 13 med underklassene, faresedlene, emballasjegruppene og miljøfarlig gods og avfall.', labs: ['sedler'], match: 'klasser', kap: ['2.1', '2.2', '5.2'] },
   { id: 'forebygg', day: 1, title: 'Forebygging og sikkerhet', emner: ['d'], desc: 'Tennkilder, røykeforbud, verneutstyr og trygg drift av kjøretøyet.', labs: ['brann'], kap: ['7.5', '8.1', '8.3'] },
   { id: 'merking', day: 2, title: 'Merking og oransje skilt', emner: ['f'], desc: 'Oransje skilt, farenummer, store faresedler og LQ-merket.', labs: ['merk', 'skilt'], match: 'farenr', kap: ['5.2', '5.3', '3.4'] },
-  { id: 'unntak', day: 2, title: 'Unntak og 1000 poeng', emner: ['a'], desc: 'Mengdeunntaket i 1.1.3.6, begrensede og unntatte mengder, og de andre unntakene.', labs: ['maaler', 'poeng'], kap: ['1.1', '3.4', '3.5'] },
+  { id: 'unntak', day: 2, title: 'Unntak og 1000 poeng', emner: ['a'], desc: 'Mengdeunntaket i 1.1.3.6, begrensede og unntatte mengder, og de andre unntakene.', labs: ['trapp', 'maaler', 'poeng'], kap: ['1.1', '3.4', '3.5'] },
   { id: 'forer', day: 2, title: 'Dokumenter og utstyr', emner: ['g', 'h'], desc: 'Hva som skal være i førerhuset, skriftlige instruksjoner, brannslukkere og utstyr.', labs: ['si', 'utstyr'], kap: ['5.4', '8.1', '8.4'], si: true },
   { id: 'lasting', day: 3, title: 'Lasting, samlasting og stuing', emner: ['i', 'j', 'm'], desc: 'Hva som kan lastes sammen, kontroll før lasting, matvarer og lastsikring.', labs: ['lasteplan', 'samlast'], kap: ['7.5'] },
   { id: 'ansvar', day: 3, title: 'Ansvar og sikring', emner: ['k', 'o'], desc: 'Pliktene til avsender, transportør, laster og sjåfør, og sikring mot misbruk.', match: 'aktor', kap: ['forskrift', '1.4', '1.8', '1.10'] },
@@ -403,6 +412,7 @@ const DAYS = { 1: 'Dag 1', 2: 'Dag 2', 3: 'Dag 3' };
 const LABS = {
   veiviser: { name: 'Tabell A som veiviser', desc: 'Tabellhodet i Tabell A viser hvor i boka hver kolonne er forklart. Finn avsnittet for kodene i bensinraden.' },
   si: { name: 'Bruk de skriftlige instruksjonene', desc: 'Slå opp i de skriftlige instruksjonene og finn hva du skal gjøre for lasten på bilen.' },
+  trapp: { name: 'Hvor i hierarkiet?', desc: 'Plasser lasten på riktig trinn: forbrukeremballasje, unntatte mengder, begrensede mengder, 1000 poeng eller full ADR.' },
   kapittel: { name: 'Finn kapittelet', desc: 'Hvilket kapittel eller hvilken del av boka står det i? Svaret viser siden du slår opp på.' },
   tabA: { name: 'Slå opp i Tabell A', desc: 'Finn klasse, transportkategori, tunnelkode og farenummer i et utdrag av tabellen.' },
   sedler: { name: 'Kjenn igjen faresedlene', desc: 'Hvilken klasse viser faresedlen?' },
@@ -665,6 +675,9 @@ const QS = [
   ['unntak', 'a', 'ADR 1.1.3.5', 'Du skal frakte tomme, ikke rengjorte kanner som har hatt et stoff i klasse 4.3. Gjelder unntaket i 1.1.3.5?', ['Nei, klasse 4.3 er ikke med i unntaket', 'Ja, all tom emballasje er unntatt', 'Ja, hvis kannene er lukket', 'Bare under 1000 poeng'], 'Stoffer i 4.3 utvikler brannfarlig gass med vann, også fra rester.'],
   ['unntak', 'a', 'ADR 1.1.3.5, 1.1.3.6.1', 'Risikoen er ikke eliminert for de tomme fatene som har hatt bensin. Hvordan regnes de i 1000-poengsregelen?', ['Transportkategori 4, som ikke har noen grense', 'Som full last, transportkategori 2', 'De teller ikke, fordi de er tomme', 'Transportkategori 0'], 'Bare tom emballasje etter gods i transportkategori 0 beholder kategori 0.'],
   ['unntak', 'a', 'ADR 5.4.1.1.6.2.1', 'Hvordan kan tomme, ikke rengjorte kanner etter metanol (3 og 6.1) skrives i transportdokumentet?', ['«TOMT KOLLI, 3 (6.1)»', '«UN 1230 METANOL, 3 (6.1), II, (D/E)», med full mengde', '«TOMT KOLLI», uten mer', 'De skal ikke stå i dokumentet'], 'Etter «TOMT KOLLI» kommer fareseddelen for siste last, med tilleggsfaren i parentes.'],
+  ['unntak', 'a', 'ADR 1.1.3.1 a), 3.5, 3.4, 1.1.3.6', 'Hva er rekkefølgen fra minst til mest regulert?', ['Forbrukeremballasje, unntatte mengder (EQ), begrensede mengder (LQ), 1000 poeng, full ADR', 'Full ADR, 1000 poeng, LQ, EQ, forbrukeremballasje', 'LQ, EQ, forbrukeremballasje, 1000 poeng, full ADR', '1000 poeng, LQ, EQ, full ADR, forbrukeremballasje'], ''],
+  ['unntak', 'a', 'ADR 3.4.1, 1.1.3.6', 'Lasten er 1 tonn spylervæske som LQ og 300 liter bensin i kanner på 20 liter. Hvilket trinn havner bensinen på?', ['1000 poeng: 300 × 3 = 900 poeng, og LQ-godset teller ikke', 'Full ADR, fordi lasten er over 1000 kg', 'LQ, fordi resten av lasten er LQ', 'Forbrukeremballasje'], 'LQ-kolli teller ikke i 1000 poeng, så bensinen vurderes for seg.'],
+  ['unntak', 'a', 'ADR 1.1.3.6.2', 'Hva er det første kravet som kommer når du går fra 1000-poengsregelen til full ADR?', ['Oransje skilt, skriftlige instruksjoner, ADR-kompetansebevis og tunnelbegrensninger', 'Transportdokument', 'Faresedler på kolliene', 'Ett pulverapparat på 2 kg'], 'Transportdokument, faresedler og pulverapparat gjelder allerede innenfor 1000 poeng.'],
 
   // 7 Dokumenter og utstyr
   ['forer', 'g', 'ADR 8.1.2.1', 'Hvilke dokumenter skal være i førerhuset ved transport over 1000 poeng?', ['Transportdokument, skriftlige instruksjoner og ID med bilde', 'Fraktbrev, vognkort og forsikringsbevis for bilen', 'Sikkerhetsdatablad for alle stoffene på bilen', 'Kjøreseddel, timeliste og kopi av førerkortet'], 'Kompetansebeviset og eventuell godkjenningsattest kommer i tillegg (8.1.2.2).'],
@@ -1052,6 +1065,7 @@ const FACTS = [
   { st: 'merking', em: 'f', title: 'Store faresedler på kjøretøyet', pts: ['Stykkgods: bare ved klasse 1 (unntatt 1.4S) og klasse 7, på begge sider og bak (5.3.1.5)', 'Tankbiler: på begge sider og bak', 'Containere: på alle fire sider', 'Miljømerket kommer i tillegg når store faresedler kreves og lasten er miljøfarlig (5.3.6)'] },
   { st: 'merking', em: 'f', title: 'Merket for unntatte mengder (EQ)', img: () => eqMarkSVG('3', 'Avsender AS'), pts: ['Kolli med unntatte mengder skal ha merket i 3.5.4: et kvadrat med skravert kant og et rundt symbol med E', 'Kant og symbol har samme farge, svart eller rødt, på hvit bakgrunn. Minst 100 × 100 mm', 'Under symbolet står nummeret på den første eller eneste fareseddelen fra kolonne (5) i Tabell A', 'Navnet på avsender eller mottaker står også på merket, hvis det ikke står et annet sted på kolliet', 'Kolliet trenger ikke faresedler eller UN-nummer. For unntatte mengder gjelder bare kapittel 3.5, opplæringen i 1.3, klassifiseringen og noen få emballasjekrav (3.5.1.1)', 'Høyst 1000 kolli med unntatte mengder i ett kjøretøy (3.5.5)', 'Følger det fraktbrev eller andre dokumenter, skal minst ett ha ordene «FARLIG GODS I UNNTATTE MENGDER» og antall kolli (3.5.6)', 'Ikke forveksle med LQ-merket for begrensede mengder, som er en svart og hvit rombe'] },
   { st: 'merking', em: 'f', title: 'Begrensede mengder – LQ-merket', pts: ['Svart og hvitt kvadrat på høykant (3.4.7)', 'Kolli høyst 30 kg brutto, brett med krympefilm høyst 20 kg', 'Transportenhet over 12 tonn med over 8 tonn LQ brutto: LQ-merket foran og bak (3.4.13–3.4.14)'] },
+  { st: 'unntak', em: 'a', wide: true, title: 'Transporthierarkiet: fra forbrukeremballasje til full ADR', img: () => trappHTML(), pts: ['Finn det øverste trinnet lasten passer på. Passer den ikke, gå et trinn ned', 'Lasten kan blandes: LQ- og EQ-kolli teller ikke i 1000 poeng, så resten av lasten vurderes for seg'] },
   { st: 'unntak', em: 'a', title: '1000 poeng – slik regner du (1.1.3.6)', pts: ['Finn transportkategorien i kolonne (15)', 'Kategori 1 × 50 · kategori 2 × 3 · kategori 3 × 1', 'Kategori 4 teller ikke. Kategori 0 har aldri unntak', 'Summen må være 1000 eller mindre', 'Væsker: liter innhold · faste stoffer og flytende gasser: netto kg · komprimerte gasser: vannkapasitet i liter · gjenstander: kg uten emballasje', 'Gjelder bare gods i kolli, ikke tank'] },
   { st: 'unntak', em: 'a', title: '1.1.3.6.2: dette slipper du innenfor 1000 poeng', pts: ['Kapittel 1.10 sikring: gjelder ikke, unntatt klasse 1 med høy risiko og visse radioaktive unntakskolli', 'Kapittel 5.3: oransje skilt og store faresedler på bilen', 'Avsnitt 5.4.3: skriftlige instruksjoner', 'Kapittel 7.2 om transport i kolli, unntatt V5 (ikke i småcontainere) og V8 (temperaturkontroll, 7.1.7)', 'CV1 i 7.5.11: forbudet mot å laste og losse på offentlig sted uten tillatelse eller melding', 'Del 8, med de unntakene som står på neste kort. Du slipper blant annet ADR-kompetansebevis (8.2.1), utstyret i 8.1.5, forbudet mot passasjerer (8.3.1) og tunnelbegrensningene (8.6)', 'Del 9: krav til bygging og godkjenning av kjøretøyet'] },
   { st: 'unntak', em: 'a', title: '1.1.3.6.2: dette gjelder fortsatt innenfor 1000 poeng', pts: ['8.1.2.1 a): transportdokumentet skal være med i førerhuset', '8.1.4.2–8.1.4.5: ett pulverapparat for brannklasse A, B og C på minst 2 kg, egnet for kjøretøy, plombert og inspisert, og lett tilgjengelig', '8.2.3: alle som er med på transporten, skal ha opplæring etter 1.3', '8.3.3: ikke åpne kolli · 8.3.4: lommelykt uten metalloverflater som kan gi gnister · 8.3.5: røykeforbud', 'Kapittel 8.4: tilsyn med kjøretøyet, når en S-kode krever det', 'S-kodene i 8.5: S1 (3) og (6) røykeforbud og tilsyn for klasse 1 · S2 (1) lyskilder i lasterommet · S4 temperaturkontroll · S5 radioaktive unntakskolli · S14–S21 og S24 grensene for tilsyn', 'Alt som ikke står på listen over unntak, gjelder også: blant annet merking og faresedler på kolliene (5.2), samlasting og lastsikring (7.5), opplæring (1.3) og pliktene til aktørene (1.4)'] },
@@ -1253,6 +1267,20 @@ function showSI() {
   $('#quit').onclick = goHome;
 }
 
+// ---------- Transporthierarkiet: fra forbrukeremballasje til full ADR ----------
+const TRAPP = [
+  { n: 1, kort: 'Forbrukeremballasje', ref: '1.1.3.1 a', hva: 'Privatperson frakter gods i detaljsalgsemballasje til eget bruk', grense: 'Detaljsalgsemballasje. Kanner fylt selv: 60 L per beholder, 240 L per transportenhet', krav: 'ADR gjelder ikke. Forskriften §§ 4–6 gjelder: aktsomhet, sikring av lasten og rapportering av uhell' },
+  { n: 2, kort: 'Unntatte mengder (EQ)', ref: '3.5', hva: 'Svært små mengder, koden E1–E5 i kolonne (7b)', grense: 'Høyst 1–30 ml eller g per innerbeholder etter koden, og høyst 1000 kolli per kjøretøy', krav: 'EQ-merket på kolliet, ingen faresedler. Følger det dokumenter: «FARLIG GODS I UNNTATTE MENGDER». Opplæring etter 1.3' },
+  { n: 3, kort: 'Begrensede mengder (LQ)', ref: '3.4', hva: 'Små innerbeholdere, grensen står i kolonne (7a)', grense: 'Kolli høyst 30 kg brutto, brett med krympeplast høyst 20 kg. Teller ikke i 1000 poeng', krav: 'LQ-merket på kolliet, ingen faresedler og ikke transportdokument. Over 12 tonn bil og over 8 tonn LQ: LQ-merket foran og bak, og forbud i tunnel E' },
+  { n: 4, kort: '1000-poengsregelen', ref: '1.1.3.6', hva: 'Gods i kolli innenfor 1000 poeng', grense: 'Poeng = mengde × 50, 3 eller 1 etter transportkategori. Ikke tank, og ikke kategori 0', krav: 'Faresedler og merking på kolliene, transportdokument, ett pulverapparat på 2 kg, opplæring etter 1.3. Ikke oransje skilt, skriftlige instruksjoner, kompetansebevis eller tunnelforbud' },
+  { n: 5, kort: 'Full ADR', ref: 'ADR', hva: 'Over 1000 poeng, tank, bulk eller transportkategori 0', grense: 'Ingen lettelser', krav: 'Alt: oransje skilt, skriftlige instruksjoner, ADR-kompetansebevis, ID med bilde, brannslukkere og utstyr etter 8.1, tunnelbegrensninger, og godkjent kjøretøy for tank' }
+];
+function trappHTML() {
+  return `<ol class="trapp">${TRAPP.map(t => `<li style="--i:${t.n - 1}"><div class="tr-hd"><b>${t.n}</b><span>${esc(t.kort)}</span><em>${esc(t.ref)}</em></div>
+    <p><b>Hva:</b> ${esc(t.hva)}</p><p><b>Grense:</b> ${esc(t.grense)}</p><p><b>Krav:</b> ${esc(t.krav)}</p></li>`).join('')}</ol>
+    <p class="muted" style="margin:6px 0 0;font-size:13px">Jo lenger ned i trappen, jo flere regler gjelder. Ved siden av trappen finnes egne unntak, blant annet for håndverkere og firma (1.1.3.1 c) og tom emballasje (1.1.3.5).</p>`;
+}
+
 // ---------- Startsiden: kunnskapsstien ----------
 function nextStation() { return STATIONS.find(s => !stDone(s.id)) || null; }
 function renderHome() {
@@ -1425,7 +1453,7 @@ function showFacts(st) {
   goPlay(`<div class="quiz">
     <div class="qbar"><span>Fagstoff · <b>${s.n}. ${esc(s.title)}</b></span><div class="row"><button class="btn" onclick="window.print()">Skriv ut</button><button class="btn" id="quit">Tilbake</button></div></div>
     ${bokLine(s.kap || [], 'Ha boka oppe på:')}
-    <div class="facts">${list.map(f => `<article class="fact"><span class="em">Emne ${f.em}: ${esc(EMNER[f.em])}</span><h4>${fillBok(f.title)}</h4>${f.img ? `<div class="fact-img">${f.img()}</div>` : ''}<ul>${f.pts.map(p => `<li>${fillBok(p)}</li>`).join('')}</ul></article>`).join('')}</div>
+    <div class="facts">${list.map(f => `<article class="fact${f.wide ? ' wide' : ''}"><span class="em">Emne ${f.em}: ${esc(EMNER[f.em])}</span><h4>${fillBok(f.title)}</h4>${f.img ? `<div class="fact-img">${f.img()}</div>` : ''}<ul>${f.pts.map(p => `<li>${fillBok(p)}</li>`).join('')}</ul></article>`).join('')}</div>
     ${st === 'kapitler' ? `<h2 style="margin:6px 0 0">Alle kapitlene</h2><p class="muted" style="margin:0;font-size:14px">Innholdsfortegnelsen i ADR/RID 2025. Kapitlene som brukes på kurset, er merket.</p>${tocHTML()}` : ''}
     <div class="row noprint"><button class="btn primary" id="ovNow">Øv på denne stasjonen</button>${labBtns(s, 'data-lab-go')}${s.si ? '<button class="btn" id="siNow">Eksempel: skriftlige instruksjoner</button>' : ''}</div></div>`);
   $('#quit').onclick = goHome;
@@ -1649,6 +1677,25 @@ const KAPOPPG = [
   ['Tunnelkategorier og tunnelkoder', '8.6'], ['Godkjenning av kjøretøyer (FL, AT og EX)', '9.1']
 ];
 const LABGEN = {
+  // Hvor i hierarkiet? Riktig trinn for en last
+  trapp() {
+    const L = TRAPP.map(t => `${t.n}. ${t.kort} (${t.ref})`);
+    const C = [
+      [0, 'En privatperson har to kanner à 20 liter bensin til båten.', 'Privatperson, til eget bruk og innenfor 60 L per kanne og 240 L per transportenhet.'],
+      [0, 'En privatperson henter en propanflaske på 11 kg til gassgrillen.', 'DSB nevner propan til gassgrillen som eksempel på privatunntaket.'],
+      [1, 'Et laboratorium sender ti prøveflasker à 30 ml spylervæske-konsentrat (UN 1993, emballasjegruppe III) i én eske.', 'Kode E1: høyst 30 ml per innerbeholder og 1000 ml per ytteremballasje. Her er det 300 ml.'],
+      [1, 'Ti prøveflasker à 30 ml bensin (UN 1203) sendes i én eske.', 'Kode E2: høyst 30 ml per innerbeholder og 500 ml per ytteremballasje. Her er det 300 ml.'],
+      [2, 'En butikk kjører ut 2 tonn spylervæske-konsentrat (UN 1993, emballasjegruppe III) i kanner på 4 liter, fire kanner per kartong.', 'Kolonne (7a) viser 5 L, så 4-literskannene er innenfor. Kartongen veier under 30 kg.'],
+      [2, 'En grossist sender bensin i flasker på 1 liter, pakket i kartonger på under 30 kg.', 'LQ-grensen for bensin er 1 liter per innerbeholder.'],
+      [3, 'Et transportfirma kjører 4 fat à 200 liter diesel.', 'Transportkategori 3: 800 liter × 1 = 800 poeng. Diesel kan ikke sendes som LQ i fat.'],
+      [3, 'Et transportfirma kjører 20 propanflasker à 11 kg.', 'Transportkategori 2: 220 kg × 3 = 660 poeng. Propan kan ikke sendes som LQ eller EQ (0 og E0 i Tabell A).'],
+      [4, 'Et transportfirma kjører 20 kanner à 20 liter bensin.', 'Transportkategori 2: 400 liter × 3 = 1200 poeng. Over 1000 poeng.'],
+      [4, 'En tankbil leverer 3000 liter diesel.', '1000-poengsregelen gjelder bare kolli, ikke tank.'],
+      [4, 'Et transportfirma kjører 40 propanflasker à 11 kg.', 'Transportkategori 2: 440 kg × 3 = 1320 poeng. Over 1000 poeng.']
+    ];
+    const [i, q, ex] = pick(C);
+    return { kind: String(i + 1), tag: q.slice(0, 40), q: q + ' Hvor i hierarkiet hører transporten hjemme?', o: [L[i], ...L.filter((_, k) => k !== i)], ex, src: ['ADR 1.1.3.1 a)', 'ADR 3.5.1.2', 'ADR 3.4.1', 'ADR 1.1.3.6.4', 'ADR 1.1.3.6.2'][i] };
+  },
   // Bruk de skriftlige instruksjonene: finn svaret i instruksjonene, som ligger åpne i oppgaven
   si() {
     const rowFor = l => SI_KLASSER.find(r => r[0].includes(l));
