@@ -19,7 +19,7 @@ FIX = {'Alminnelig bestemmelser': 'Alminnelige bestemmelser'}
 # Avsnitt der overskriften i teksten ikke begynner med nummeret
 ALIAS = {'3.2.2': r'Tabell B: Alfabetisk'}
 SEC = re.compile(r'\b\d{1,2}\.\d{1,2}(?:\.\d{1,2}){0,4}\b')
-PAR = re.compile(r'§\s*(\d+a?)')
+PAR = re.compile(r'§\s*(\d+)(?:\s?(a)\b)?')
 
 
 def main(txt_path, html_path):
@@ -32,7 +32,7 @@ def main(txt_path, html_path):
     srcs |= set(re.findall(r"kildeHTML\('([^']*)'", html))
     # Avsnitt i fagstoffet, skrevet {3.2.1}, og paragrafer skrevet {§3} eller {p:§3}
     srcs |= set(re.findall(r"\{(\d{1,2}\.\d{1,2}(?:\.\d{1,2})*)\}", html))
-    srcs |= {'§' + m for m in re.findall(r"\{(?:p:)?§(\d+a?)\}", html)}
+    srcs |= {'§ ' + m for m in re.findall(r"\{(?:p:)?§(\d+a?)\}", html)}
 
     # Kapitler fra innholdsfortegnelsen: «Kapittel 8.3. Tittel......1614»
     chapters = {}
@@ -97,8 +97,10 @@ def main(txt_path, html_path):
                 bok[sec] = p
             else:
                 print('fant ikke', sec, 'i', src, file=sys.stderr)
-        for par in PAR.findall(src):
-            p = first_page(r'§ ' + re.escape(par) + r'\. ', 15, 46)
+        for num, suf in PAR.findall(src):
+            par = num + suf
+            # I boka står både «§ 11a.» og «§ 18 a.»
+            p = first_page(r'§ ' + num + (r' ?' + suf if suf else '') + r'\. ', 15, 46)
             if p:
                 bok['§' + par] = p
             else:
