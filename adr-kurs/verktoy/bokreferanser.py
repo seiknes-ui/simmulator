@@ -30,6 +30,9 @@ def main(txt_path, html_path):
     srcs = set(re.findall(r"^\s*\['\w+', '[a-o]', '([^']*)'", html, re.M))
     srcs |= set(re.findall(r"src: '([^']*)'", html))
     srcs |= set(re.findall(r"kildeHTML\('([^']*)'", html))
+    # Avsnitt i fagstoffet, skrevet {3.2.1}, og paragrafer skrevet {§3} eller {p:§3}
+    srcs |= set(re.findall(r"\{(\d{1,2}\.\d{1,2}(?:\.\d{1,2})*)\}", html))
+    srcs |= {'§' + m for m in re.findall(r"\{(?:p:)?§(\d+a?)\}", html)}
 
     # Kapitler fra innholdsfortegnelsen: «Kapittel 8.3. Tittel......1614»
     chapters = {}
