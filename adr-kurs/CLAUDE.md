@@ -48,5 +48,10 @@ Les alltid fotnotene under tabellene og merknadene (ANM) i avsnittet før en reg
 - 8.1.5.2 og 8.1.5.3 fotnotene: hvilke faresedler som krever øyeskyllemiddel, spade, tetning for sluk og oppsamlingsbeholder
 Kjør `verktoy/fotnoter.py`, som finner fotnoter i boka som nevner UN-numre og viser hvor kurset bruker de samme UN-numrene sammen med avsnittet. Les treffene og sjekk at fotnoten er tatt med. Fotnoter uten UN-nummer må sjekkes for hånd.
 
+## Entydige spørsmål og alternativer
+- Spørsmålet skal ha alle opplysningene som trengs for ett riktig svar, for eksempel at beholderen brukes til farlig gods, eller at lasten har flere transportkategorier.
+- Alternativene skal være av samme slag som det det spørres om: spørres det om poeng, skal alle alternativene være poeng, ikke blandet med liter og kg.
+- Et feilalternativ skal ikke være riktig i et unntak eller en fotnote (for eksempel 50 kg for dynamitt etter fotnote a) i 1.1.3.6.3). Bruk et annet tall, eller still spørsmålet slik at unntaket er med.
+
 ## Signalord
 Signalordene må, skal, alltid, aldri, påbudt og forbudt markeres automatisk med farge (funksjonen `sig()`), og sterkere når to står i samme setning. I fagstoffet vises markeringen hele tiden. I spørsmål og svaralternativer skal de ikke markeres før svaret er avslørt (`flaggSignal()` i `answer()`). Bruk dem bevisst i spørsmål og svar, og la ikke alternativer med «alltid» eller «aldri» alltid være de gale, så elevene må lese og tenke.
