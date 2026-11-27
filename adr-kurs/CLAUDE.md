@@ -32,5 +32,20 @@ Når noe nytt legges inn, skal du alltid se etter hvordan det henger sammen med 
 
 Skriv sammenhengene inn i fagstoffet («Henger sammen med …»), og lag gjerne spørsmål som krever at eleven bruker to kapitler.
 
+## Ordlyden fra boka i svaret
+Spørsmålene kan skrives om til situasjoner fra jobben, men når ordlyden er viktig for å finne riktig svar, skal svaret bruke nøyaktig samme ord som boka. Det gjelder særlig:
+- tall og grenser: «minst», «høyst», «over», «ikke over», «mer enn» skal stå slik boka sier det, med samme tall og enhet
+- plikt og valg: «skal», «får ikke», «kan» og «så vidt mulig» skal ikke byttes med hverandre eller med «må» og «bør»
+- faste uttrykk og definerte ord: «transportenhet», «kolli», «tom, ikke rengjort», «TOMT KOLLI», «OVERPAKNING», «MILJØFARLIG» og andre ord fra 1.2.1 eller teksten som skal stå på merker og i dokumenter
+Sjekk svaret mot avsnittet i boka før det skrives inn, og kjør `verktoy/ordlyd.py`, som finner grenser og tall i svarene som ikke står likt i boka. Feilalternativene kan gjerne ligge nær ordlyden, så eleven må lese nøye.
+
+## Fotnoter og merknader
+Les alltid fotnotene under tabellene og merknadene (ANM) i avsnittet før en regel skrives inn. De endrer ofte hovedregelen for bestemte UN-numre, klasser eller mengder. Fotnotehenvisningen kan stå i kolonneoverskriften (for eksempel «Tank (l)c» og «Bulk (kg)d» i 1.10.3.1.2), i selve cellene (for eksempel «a)» og «b)»), eller som et lite tall i teksten med fotnoten helt nederst på siden (for eksempel «Øyeskyllemiddel¹» og «spade²» i 8.1.5). I tekstutgaven av boka havner fotnotene fra bunnen av siden midt i teksten, rett før sidetallet, så se etter dem der. Eksempler:
+- 1.1.3.6.3 fotnote a): UN 0081, 0082, 0084, 0241, 0331, 0332, 0482, 1005 og 1017 har største samlede mengde 50 kg, og ganges med 20 ved blandet last (1.1.3.6.4)
+- 1.10.3.1.2: a) «Ikke relevant» og b) «Bestemmelsene i 1.10.3 gjelder ikke, uansett mengde» i cellene (for eksempel bensin og propan i kolli), c) og d) i overskriftene for tank og bulk: verdien gjelder bare når Tabell A tillater tank eller bulk
+- 7.5.2.1 fotnote 1/–4/: når klasse 1 likevel kan samlastes
+- 8.1.5.2 og 8.1.5.3 fotnotene: hvilke faresedler som krever øyeskyllemiddel, spade, tetning for sluk og oppsamlingsbeholder
+Kjør `verktoy/fotnoter.py`, som finner fotnoter i boka som nevner UN-numre og viser hvor kurset bruker de samme UN-numrene sammen med avsnittet. Les treffene og sjekk at fotnoten er tatt med. Fotnoter uten UN-nummer må sjekkes for hånd.
+
 ## Signalord
 Signalordene må, skal, alltid, aldri, påbudt og forbudt markeres automatisk med farge (funksjonen `sig()`), og sterkere når to står i samme setning. I fagstoffet vises markeringen hele tiden. I spørsmål og svaralternativer skal de ikke markeres før svaret er avslørt (`flaggSignal()` i `answer()`). Bruk dem bevisst i spørsmål og svar, og la ikke alternativer med «alltid» eller «aldri» alltid være de gale, så elevene må lese og tenke.
