@@ -1717,10 +1717,23 @@ function endPractice(run) {
 
 // ---------- Prøve: 25 spørsmål, 45 minutter (8.2.2.7.1.6) ----------
 const EXAM_N = 25, EXAM_MS = 45 * 60 * 1000;
+// Prøven: hver stasjon får minst 2 spørsmål, resten fordeles etter hvor mange spørsmål stasjonen har.
+// Innenfor stasjonen trekkes spørsmål eleven ikke har fått på prøve før, deretter de som er lengst siden.
 function startExam() {
   const by = {}; shuffle(QS).forEach(q => (by[q.st] = by[q.st] || []).push(q));
-  const picked = []; let k = 0; const ls = shuffle(Object.keys(by));
-  while (picked.length < EXAM_N) { const a = by[ls[k++ % ls.length]]; if (a.length) picked.push(a.pop()); }
+  const ls = Object.keys(by), total = QS.length;
+  const n = Object.fromEntries(ls.map(st => [st, 2]));
+  let rest = EXAM_N - 2 * ls.length;
+  const andel = ls.map(st => [st, (EXAM_N * by[st].length / total) - 2]).sort((x, y) => y[1] - x[1]);
+  for (let i = 0; rest > 0; i = (i + 1) % andel.length) if (andel[i][1] > 0 || i === 0) { n[andel[i][0]]++; andel[i][1]--; rest--; }
+  const sett = store.provSett || (store.provSett = {}), nr = store.provNr = (store.provNr || 0) + 1;
+  const picked = [];
+  for (const st of ls) {
+    // Ukjente først (sist sett = 0), deretter de som er lengst siden. Stokket rekkefølge avgjør likt.
+    const kand = by[st].map((q, i) => [q, sett[q.id] || 0, i]).sort((x, y) => x[1] - y[1] || x[2] - y[2]);
+    kand.slice(0, n[st]).forEach(([q]) => { picked.push(q); sett[q.id] = nr; });
+  }
+  save();
   picked.forEach(q => delete q._order);
   const run = { qs: shuffle(picked), ans: {}, i: 0, t0: Date.now() };
   run.timer = setInterval(() => {
