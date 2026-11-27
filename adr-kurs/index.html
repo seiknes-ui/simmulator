@@ -239,7 +239,7 @@ body.simple .opt{min-height:52px;font-size:17px}
 .eq.right{border-color:var(--ok);background:var(--ok-soft)}
 .eq.wrong{border-color:var(--bad);background:var(--bad-soft)}
 .calc{font-size:14px;display:grid;gap:2px}
-.navrow #hand{margin-left:auto}
+.navrow #hand{margin-left:auto;border-color:var(--accent)}
 /* Merk bilen */
 .views{display:grid;gap:10px;max-width:760px}
 .view{margin:0;background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:6px;display:grid;gap:2px}
@@ -319,7 +319,6 @@ body.simple .opt{min-height:52px;font-size:17px}
   .match{grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:6px}
   .m{padding:10px;font-size:14px}
   .m.code{font-size:16px}
-  .navrow #hand{margin-left:0}
   .qbar{font-size:13px}
   .pair svg{width:96px;height:96px}
 }
@@ -1747,7 +1746,7 @@ function showExam(run, keepScroll) {
 function finishExam(run, timeUp) {
   if (run.finished) return;
   const left = run.qs.length - Object.keys(run.ans).length;
-  if (!timeUp && left && !confirm(`Du har ${left} ubesvarte spørsmål. Levere likevel?`)) return;
+  if (!timeUp && !confirm(left ? `Du har ${left} ubesvarte spørsmål. Levere likevel?` : 'Vil du levere prøven nå?')) return;
   run.finished = true;
   clearInterval(run.timer);
   run.t1 = Date.now();
