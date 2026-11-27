@@ -43,3 +43,10 @@ Står svaret ikke i boka eller forskriften (for eksempel brannklasser fra EN 2, 
 **Henger sammen med:** andre avsnitt eleven bør kjenne (én linje).
 
 Er du usikker, si hva du er usikker på og hva som skal til for å avgjøre det. Foreslå til slutt, på én linje, om oppgaven bør legges inn i ADR-kurset (`adr-kurs/index.html`) og hvor.
+
+## Oppgaver elevene har sjekket (JSON fra lærersiden)
+Elevene kan sjekke oppgaver selv på https://black-coast-081791b1e.1.azurestaticapps.net/adr.html (koden ligger i repoet `seiknes-ui/takt`: `adr.html` og `api/src/functions/adr.js`). Læreren laster ned oppgavene som JSON fra `adr.html#laerer`. Når brukeren gir deg en slik fil og vil forbedre kurset:
+1. Les hver oppgave (`oppgave`, `alternativer`, `valgt`, `riktig_svar`, `vurdering`, `kilder`). Sjekk vurderingen mot boka selv med verktøyene over, særlig de som er `uklar`, `ikke_i_boka` eller har tynne kilder. Claude på serveren kan ta feil.
+2. Finn ut hva elevene sliter med: samme tema eller avsnitt som går igjen med `feil`, og oppgaver som avslører misforståelser.
+3. Sammenlign med `adr-kurs/index.html`: finnes temaet i fagstoffet og spørsmålene? Foreslå nye spørsmål, nye feilalternativer som ligner elevenes feil, eller rettelser i fagstoffet, og følg `adr-kurs/CLAUDE.md`. Skriv spørsmålene som situasjoner, ikke som kopier av oppgavesamlingen.
+4. Vis forslagene og vent på ja før du endrer kurset.
