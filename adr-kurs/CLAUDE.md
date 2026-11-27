@@ -49,6 +49,7 @@ Les alltid fotnotene under tabellene og merknadene (ANM) i avsnittet før en reg
 Kjør `verktoy/fotnoter.py`, som finner fotnoter i boka som nevner UN-numre og viser hvor kurset bruker de samme UN-numrene sammen med avsnittet. Les treffene og sjekk at fotnoten er tatt med. Fotnoter uten UN-nummer må sjekkes for hånd.
 
 ## Entydige spørsmål og alternativer
+- Spør du om en tabell, kolonne eller fotnote, skal spørsmålet si hvilken: for eksempel «tabell 1.10.3.1.2 (liste over farlig gods med høy risiko), kolonnen «Kolli (kg)»», «kolonne (15) i Tabell A» eller «fotnote 1 til «Øyeskyllemiddel» i 8.1.5.2». Bruk ordene fra fotnoten («ikke nødvendig», «bare nødvendig») i spørsmål og svar.
 - Spørsmålet skal ha alle opplysningene som trengs for ett riktig svar, for eksempel at beholderen brukes til farlig gods, eller at lasten har flere transportkategorier.
 - Alternativene skal være av samme slag som det det spørres om: spørres det om poeng, skal alle alternativene være poeng, ikke blandet med liter og kg.
 - Et feilalternativ skal ikke være riktig i et unntak eller en fotnote (for eksempel 50 kg for dynamitt etter fotnote a) i 1.1.3.6.3). Bruk et annet tall, eller still spørsmålet slik at unntaket er med.
