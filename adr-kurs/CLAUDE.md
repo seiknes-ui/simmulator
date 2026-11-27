@@ -17,6 +17,7 @@ Spørsmål i `QS` kan ha et sjuende felt for målgruppe:
 - `'sb'`: for både sjåfør og bedrift
 
 ## Kilder og sidetall
+- Står svaret ikke i ADR-boka eller forskriften, men i DSBs læreplan, på dsb.no, hos Statens vegvesen eller i en standard (for eksempel brannklassene i EN 2), skal spørsmålet merkes i `UTENFOR_BOKA` med kilden, for eksempel «Ikke i boka – fra DSBs læreplan (2.5)». Eleven skal se at svaret ikke kan slås opp i boka.
 - Alt skal bygge på ADR/RID 2025 og forskrift om landtransport av farlig gods fra DSB. Sjekk fakta i boka før de skrives inn.
 - Sidetall lages med `verktoy/bokreferanser.py`. Kjør den etter hver endring av kilder eller fagstoff, og ikke skriv sidetall for hånd.
 

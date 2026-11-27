@@ -159,6 +159,7 @@ body.simple .opt{min-height:52px;font-size:17px}
 .fact-img svg{width:auto;height:140px;max-width:100%;display:block}
 .fact .pg{font-weight:600;white-space:nowrap}
 .tag.aud{border-color:var(--accent);color:var(--ink)}
+.tag.ute{border-style:dashed;color:var(--ink)}
 .tabA td.hl{background:var(--accent-soft);outline:2px solid var(--accent);font-weight:700}
 .si{display:grid;gap:14px}
 .si-pg{background:#fff;color:#111;border:1px solid var(--line);border-radius:4px;padding:16px 18px;display:grid;gap:8px;align-content:start}
@@ -238,7 +239,7 @@ body.simple .opt{min-height:52px;font-size:17px}
 .eq.right{border-color:var(--ok);background:var(--ok-soft)}
 .eq.wrong{border-color:var(--bad);background:var(--bad-soft)}
 .calc{font-size:14px;display:grid;gap:2px}
-.navrow #hand{margin-left:auto}
+.navrow #hand{margin-left:auto;border-color:var(--accent)}
 /* Merk bilen */
 .views{display:grid;gap:10px;max-width:760px}
 .view{margin:0;background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:6px;display:grid;gap:2px}
@@ -318,7 +319,6 @@ body.simple .opt{min-height:52px;font-size:17px}
   .match{grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:6px}
   .m{padding:10px;font-size:14px}
   .m.code{font-size:16px}
-  .navrow #hand{margin-left:0}
   .qbar{font-size:13px}
   .pair svg{width:96px;height:96px}
 }
@@ -439,7 +439,7 @@ const LABS = {
   bygg: { name: 'Bygg farenummeret', desc: 'Sett sammen farenummeret siffer for siffer ut fra beskrivelsen av faren.', run: () => startBygg() },
   merk: { name: 'Merk bilen', desc: 'Sett oransje skilt, store faresedler og merker på riktig sted på bilen.', run: () => startMerk() },
   maaler: { name: 'Poengmåler', desc: 'Legg kolli på bilen og se måleren fylles opp mot 1000 poeng.', run: () => startMaaler() },
-  brann: { name: 'Branntrekanten', desc: 'Fjern én side av trekanten og se brannen slukne, og finn brannklassen.', run: () => startBrann() },
+  brann: { name: 'Branntrekanten', desc: 'Fjern én side av trekanten og se brannen slukne, og finn brannklassen. Ikke i boka – fra DSBs læreplan (2.5) og standarden EN 2.', run: () => startBrann() },
   lasteplan: { name: 'Last bilen', desc: 'Plasser kolliene på lasteplanet, la det som ikke kan være med stå igjen, og sikre lasten.', run: () => startLast() },
   rute: { name: 'Velg rute', desc: 'Finn den korteste ruta bilen får kjøre, med tunnelene på vegen.', run: () => startRute() },
   ulykke: { name: 'Ulykke på vegen', desc: 'Følg de skriftlige instruksjonene steg for steg når det lekker fra lasten.', run: () => startUlykke() }
@@ -1263,7 +1263,7 @@ const FACTS = [
   { st: 'ansvar', em: 'o', title: 'Farlig gods med høy risiko (1.10.3)', pts: ['Gods som kan misbrukes til terror og gi mange døde eller store ødeleggelser (1.10.3.1.1)', 'Tabell 1.10.3.1.2 avgjør. Eksempler: brannfarlige væsker i emballasjegruppe I og II, som bensin, over 3000 liter i tank · brannfarlige gasser, som propan, over 3000 liter i tank · de fleste eksplosiver i klasse 1 og giftige gasser uansett mengde · ammoniumnitrat over 3000 kg i tank eller bulk', 'Bensin og propan i kolli er ikke høy risiko, uansett mengde: fotnote b) til tabellen sier «Bestemmelsene i 1.10.3 gjelder ikke, uansett mengde». Diesel (emballasjegruppe III) er ikke høy risiko', 'Les alltid fotnotene under tabellen: a) «Ikke relevant», b) 1.10.3 gjelder ikke, c) og d) verdien for tank eller bulk gjelder bare når Tabell A tillater tank eller bulk', 'En vanlig tankbil med bensin er altså farlig gods med høy risiko', 'Transportør, avsender og de andre aktørene skal ha en sikringsplan (1.10.3.2): hvem som har ansvaret, hvilket gods det gjelder, vurdering av risikoen også ved stopp og parkering, tiltak, hvordan hendelser meldes, øving og oppdatering, og at informasjon om transporten bare gis til dem som trenger den', 'Kjøretøyet skal ha utstyr som hindrer tyveri av bil og last, og det skal virke. Sporingsutstyr som allerede er montert, skal brukes (1.10.3.3)'] },
   { st: 'ansvar', em: 'o', title: 'Når gjelder ikke 1.10?', pts: ['Kolli innenfor 1000 poeng: 1.10 gjelder ikke, unntatt eksplosiver i klasse 1 med høy risiko (1.1.3.6.2)', 'Tank eller bulk innenfor mengdene i 1.1.3.6.3: 1.10.1–1.10.3 og kravet om ID med bilde gjelder ikke (1.10.4). For bensin er grensen 333 liter', 'Begrensede og unntatte mengder (LQ og EQ) er heller ikke omfattet'] },
   { st: 'ulykke', em: 'e', title: 'Skriftlige instruksjoner – tiltak', pts: ['Sett på bremsene, stopp motoren og slå av hovedstrømbryteren', 'Unngå tennkilder, ikke røyk og ikke slå på elektrisk utstyr', 'Varsle nødetatene med så mye informasjon som mulig', 'Ta på varselvest og sett ut varselsignalene', 'Ha transportdokumentene klare til nødetatene', 'Ikke gå i utlekket stoff, og hold deg der vinden blåser fra', 'Slukk små branner i dekk, bremser og motorrom – aldri brann i lasterommet', 'Hindre lekkasje til vann og avløp hvis det er trygt'] },
-  { st: 'ulykke', em: 'e', title: 'Brann', pts: ['Branntrekanten: brennbart stoff, oksygen og varme', 'Brannklasse A faste stoffer, B væsker, C gasser', 'Pulverapparatet på bilen skal dekke A, B og C', 'Ring 110 ved brann og lekkasje av farlig gods'] },
+  { st: 'ulykke', em: 'e', title: 'Brann', pts: ['Branntrekanten: brennbart stoff, oksygen og varme', 'Brannklasse A faste stoffer, B væsker, C gasser. Dette står ikke i ADR-boka: 8.1.4.1 sier bare «brannklassene¹ A, B og C», og fotnote 1 viser til standarden EN 2. Det er pensum etter DSBs læreplan 2.5: «om mulige årsaker til brann, deres forløp og egnede slokkemetoder»', 'Pulverapparatet på bilen skal dekke A, B og C', 'Ring 110 ved brann og lekkasje av farlig gods'] },
   { st: 'ulykke', em: 'e', title: 'Førstehjelp', pts: ['Sikre deg selv og skadestedet først', '110 brann · 112 politi · 113 ambulanse', 'Etsende stoff på hud eller i øyne: skyll med mye vann lenge', 'Ta av tilsølte klær', 'HLR: 30 kompresjoner og 2 innblåsinger'] },
   { st: 'ulykke', em: 'n', title: 'Tunnelkategorier (8.6)', pts: ['Kategori A har ikke skilt og ingen begrensninger. B–E har skilt med bokstav på underskiltet', 'E er strengest', 'Tunnelkoden står i kolonne (15) og i transportdokumentet', 'Den mest restriktive koden gjelder for hele lasten', 'Gjelder når bilen skal ha oransje skilt, og i kategori E også når den skal ha LQ-merket foran og bak (8.6.4)', 'Innenfor 1000 poeng gjelder ikke tunnelbegrensningene (8.6.3.3)'] },
   { st: 'ulykke', em: 'n', title: 'Norske tunneler med restriksjoner for farlig gods', pts: ['Ålesund: Ellingsøytunnelen, Valderøytunnelen og Akslatunnelen er kategori D i gitte tidsrom. Klokkeslettene står på skiltet ved tunnelene', 'En tunnel kan ha mer enn én kategori, for eksempel etter tid på døgnet eller ukedag ({1.9.5.1})', 'Hvaler: i Hvalertunnelen er det krav om kontakt med Vegtrafikksentralen før du kjører gjennom med farlig gods', 'Kategorien står på skiltet ved tunnelen: forbudsskiltet for farlig gods med bokstaven B, C, D eller E på underskiltet', 'Planlegg turen: finn tunnelkategorien i Vegkart (vegkart.atlas.vegvesen.no) og sammenlign med tunnelkoden i transportdokumentet', 'Står det ikke skilt for farlig gods ved tunnelen, er den kategori A, uten begrensninger (8.6.2)', 'Er lasten innenfor 1000 poeng, gjelder ikke tunnelbegrensningene (8.6.3.3)'] },
@@ -1547,8 +1547,24 @@ function showSimpleHome() {
 }
 addEventListener('hashchange', goHome);
 function goPlay(html, keepScroll) { $('#home').hidden = true; const p = $('#play'); p.hidden = false; p.innerHTML = html; if (!keepScroll) scrollTo(0, 0); return p; }
+// Spørsmål der svaret ikke står i ADR-boka, men i DSBs læreplan eller andre kilder. Nøkkel: spørsmålsteksten
+const UTENFOR_BOKA = {
+  'Brannklasse B er brann i …': 'Ikke i boka – fra DSBs læreplan (2.5) og standarden EN 2',
+  'Hva trenger en brann?': 'Ikke i boka – fra DSBs læreplan (2.5)',
+  'Du har fått etsende stoff i øynene. Hva gjør du?': 'Ikke i boka – fra DSBs læreplan (2.5)',
+  'Det brenner i tunnelen foran deg. Hva gjør du?': 'Ikke i boka – fra Statens vegvesen og DSBs læreplan (2.5)',
+  'Hvordan bør propanflasker stå når de fraktes i bil?': 'Ikke i boka – fra DSB: Lempelser og fravik ADR/RID',
+  'En entreprenør lurer på om egen transport av drivstoff til anlegget er unntatt etter 1.1.3.1 c). Hvilket spørsmål foreslår DSB?': 'Ikke i boka – fra DSB: Lempelser og fravik ADR/RID',
+  'Servicebilen er lukket og har gassflasker i lasterommet. Hva anbefaler DSB om merking av døra til lasterommet?': 'Ikke i boka – fra DSB: Lempelser og fravik ADR/RID',
+  'Hvilket av disse er et eksempel på privatunntaket, ifølge DSB?': 'Ikke i boka – fra DSB: Lempelser og fravik ADR/RID',
+  'En kanne har et svart flammesymbol på hvit bakgrunn med rød ramme. Er dette en fareseddel etter ADR?': 'Ikke i boka – fra DSBs læreplan (2.4)',
+  'Hvordan skiller du en ADR-fareseddel fra et CLP-farepiktogram?': 'Ikke i boka – fra DSBs læreplan (2.4)',
+  'Et produkt har bare piktogrammet med utropstegn. Betyr det at produktet er farlig gods?': 'Ikke i boka – fra DSBs læreplan (2.4)',
+  'Hvor i sikkerhetsdatabladet finner avsenderen UN-nummer, klasse og emballasjegruppe for transport?': 'Ikke i boka – fra DSBs læreplan (2.3)'
+};
 const AUD = { b: 'For bedriften', sb: 'For sjåfør og bedrift' };
-const tagsHTML = q => `<div class="tags"><span class="tag">${ST[q.st].n}. ${esc(ST[q.st].title)}</span><span class="tag">Emne ${q.em}: ${esc(EMNER[q.em])}</span>${q.aud ? `<span class="tag aud">${AUD[q.aud]}</span>` : ''}</div>`;
+const utenforTag = q => UTENFOR_BOKA[q.q] ? `<span class="tag ute">${esc(UTENFOR_BOKA[q.q])}</span>` : '';
+const tagsHTML = q => `<div class="tags"><span class="tag">${ST[q.st].n}. ${esc(ST[q.st].title)}</span><span class="tag">Emne ${q.em}: ${esc(EMNER[q.em])}</span>${q.aud ? `<span class="tag aud">${AUD[q.aud]}</span>` : ''}${utenforTag(q)}</div>`;
 function optsHTML(q) {
   if (!q._order) q._order = shuffle(q.o.map((x, i) => ({ x, i })));
   return `<div class="opts${q.pics ? ' pics' : ''}">` + q._order.map((o, n) => `<button class="opt" data-i="${o.i}"><span class="k">${LETTERS[n]}</span><span>${q.html ? q.html[o.i] : esc(o.x)}</span></button>`).join('') + '</div>';
@@ -1717,7 +1733,7 @@ function showExam(run, keepScroll) {
   const q = run.qs[run.i], answered = Object.keys(run.ans).length;
   const p = goPlay(`<div class="quiz">
     <div class="qbar"><span>Spørsmål <b>${run.i + 1}</b> av <b>${run.qs.length}</b></span><span>Besvart <b>${answered}</b> · Tid igjen <b id="clock">${clock(EXAM_MS - (Date.now() - run.t0))}</b></span></div>
-    <div class="track"><i style="width:${100 * answered / run.qs.length}%"></i></div>
+    <div class="track"><i style="width:${100 * answered / run.qs.length}%"></i></div>${UTENFOR_BOKA[q.q] ? `<div class="tags">${utenforTag(q)}</div>` : ''}
     <p class="qtext">${esc(q.q)}</p>${optsHTML(q)}
     <div class="row navrow"><button class="btn" id="prev" ${run.i ? '' : 'disabled'}>Forrige</button><button class="btn primary" id="nxt">${run.i < run.qs.length - 1 ? 'Neste' : 'Lever'}</button><button class="btn" id="hand">Lever nå</button></div></div>`, keepScroll);
   const mark = () => p.querySelectorAll('.opt').forEach(x => x.classList.toggle('sel', run.ans[q.id] === +x.dataset.i));
@@ -1730,7 +1746,7 @@ function showExam(run, keepScroll) {
 function finishExam(run, timeUp) {
   if (run.finished) return;
   const left = run.qs.length - Object.keys(run.ans).length;
-  if (!timeUp && left && !confirm(`Du har ${left} ubesvarte spørsmål. Levere likevel?`)) return;
+  if (!timeUp && !confirm(left ? `Du har ${left} ubesvarte spørsmål. Levere likevel?` : 'Vil du levere prøven nå?')) return;
   run.finished = true;
   clearInterval(run.timer);
   run.t1 = Date.now();
