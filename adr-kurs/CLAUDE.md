@@ -6,8 +6,9 @@ Vurder alltid hva som er aktuelt for en sjåfør eller en bedrift når du lager 
 ## Hva som tas med
 - **Sjåføren:** det sjåføren møter på jobben: lasting og lossing, merking og skilt, dokumenter og utstyr i bilen, kjøring og parkering, tunneler, kontroll på vegen og ulykker.
 - **Bedriften:** det avsender, transportør, laster eller sikkerhetsrådgiver trenger: plikter, opplæring, emballasje, klassifisering, avfall, varsling og godkjenning av kjøretøy.
-- Skriv spørsmålene som situasjoner fra jobben («Du skal kjøre bensin i tank …»), ikke som rene oppslagsøvelser.
-- Kurset handler om transport i Norge. Ta ikke med internasjonale regler (transport over grensen, multilaterale avtaler, språk på merking over grensen, regler for sjø, fly og bane). Unntak: dokumenter, som språk i transportdokument og skriftlige instruksjoner. Emne l (multimodal transport) dekkes kort, med kjøring til og fra havna.
+- Skriv spørsmålene som situasjoner fra jobben («Du skal kjøre bensin i tank …»), ikke som rene oppslagsøvelser. Unntaket er oppslag av UN-numre i Tabell A (se under), men også de skal ha en situasjon.
+- Kurset handler mest om transport i Norge, men internasjonal transport skal være med slik den kommer på prøven: språk i transportdokument (5.4.1.4.1) og skriftlige instruksjoner (5.4.3.2) på tur til utlandet, transportkjeder med sjø eller fly (1.1.4.2, 5.4.1.1.7) og midlertidige avvik mellom land (1.5.1). Regler som bare gjelder RID, IMDG-koden eller ICAO tas ikke med i seg selv.
+- Prøven skal ha oppslag av UN-numre i Tabell A, slik som de offisielle prøvesettene: eleven får et UN-nummer og må finne faresedler, mengdegrense, LQ, tilsyn, tunnel, CV-koder, farenummer eller høy risiko. Radene ligger i `OPPSLAG` og spørsmålene lages av `oppslagMaler()`. Nye rader leses med `verktoy/tabell_a.py` og sjekkes mot boka. Bruk ikke spørsmål fra prøvesettene ordrett.
 - Ta ikke med boktrivia som verken sjåføren eller bedriften har praktisk nytte av, som hvordan et kapittel er nummerert innvendig eller koder for multimodale tanker og bulk.
 
 ## Merking av målgruppe
