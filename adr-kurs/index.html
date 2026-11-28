@@ -1880,13 +1880,13 @@ function endPractice(run) {
 
 // ---------- Prøve: 25 spørsmål, 45 minutter (8.2.2.7.1.6) ----------
 const EXAM_N = 25, EXAM_MS = 45 * 60 * 1000;
+// Den endelige prøven har noen oppslag av UN-numre, men færre enn prøvesettene. Høyst 3 per prøve, 2 av dem som kjerneemne.
+const MAKS_OPP = 3;
 // Kjerneemner som alltid skal være med på prøven, ett spørsmål hver. Testen ser på kilden og spørsmålsteksten.
 const KJERNE = [
   ['Regne poeng (1.1.3.6)', q => /1\.1\.3\.6\.[34]/.test(q.src) && /poeng|liter|kg|flasker|kanner|fat/.test(q.q) && /\d/.test(q.q)],
   ['Stoffenes farlige egenskaper', q => q.st === 'farer' && /Skriftlige instruksjoner|2\.2\.\d/.test(q.src)],
   ['Stoffenes farlige egenskaper', q => q.st === 'farer' && /Skriftlige instruksjoner|2\.2\.\d/.test(q.src)],
-  ['Slå opp et UN-nummer i Tabell A', q => q.opp],
-  ['Slå opp et UN-nummer i Tabell A', q => q.opp],
   ['Slå opp et UN-nummer i Tabell A', q => q.opp],
   ['Slå opp et UN-nummer i Tabell A', q => q.opp],
   ['Begrensede mengder (3.4)', q => /(^|[^\d.])3\.4(\.|\b)/.test(q.src)],
@@ -1910,13 +1910,15 @@ function startExam() {
   // Ukjente først (sist sett = 0), deretter de som er lengst siden. Stokket rekkefølge avgjør likt.
   const ferskest = liste => liste.map((q, i) => [q, sett[q.id] || 0, i]).sort((x, y) => x[1] - y[1] || x[2] - y[2]).map(x => x[0]);
   const picked = [], tatt = new Set(), per = {};
-  const ta = q => { picked.push(q); tatt.add(q.id); per[q.st] = (per[q.st] || 0) + 1; sett[q.id] = nr; };
+  let opp = 0;
+  const ta = q => { picked.push(q); tatt.add(q.id); per[q.st] = (per[q.st] || 0) + 1; sett[q.id] = nr; if (q.opp) opp++; };
+  const ledig = x => !tatt.has(x.id) && (!x.opp || opp < MAKS_OPP);
   // Kjerneemnene kommer alltid med, ett spørsmål hver.
-  for (const [, test] of KJERNE) { const q = ferskest(QS.filter(x => !tatt.has(x.id) && test(x)))[0]; if (q) ta(q); }
+  for (const [, test] of KJERNE) { const q = ferskest(QS.filter(x => ledig(x) && test(x)))[0]; if (q) ta(q); }
   // Alle stasjonene skal ha minst ett spørsmål, deretter fylles det opp per stasjon.
-  for (const st of shuffle(ls)) if (!per[st] && picked.length < EXAM_N) { const q = ferskest(by[st].filter(x => !tatt.has(x.id)))[0]; if (q) ta(q); }
-  for (const st of shuffle(ls)) for (const q of ferskest(by[st].filter(x => !tatt.has(x.id)))) { if ((per[st] || 0) >= n[st] || picked.length >= EXAM_N) break; ta(q); }
-  for (const q of ferskest(QS.filter(x => !tatt.has(x.id)))) { if (picked.length >= EXAM_N) break; ta(q); }
+  for (const st of shuffle(ls)) if (!per[st] && picked.length < EXAM_N) { const q = ferskest(by[st].filter(ledig))[0]; if (q) ta(q); }
+  for (const st of shuffle(ls)) for (const q of ferskest(by[st].filter(ledig))) { if ((per[st] || 0) >= n[st] || picked.length >= EXAM_N) break; if (ledig(q)) ta(q); }
+  for (const q of ferskest(QS.filter(ledig))) { if (picked.length >= EXAM_N) break; if (ledig(q)) ta(q); }
   save();
   picked.forEach(q => delete q._order);
   const run = { qs: shuffle(picked), ans: {}, i: 0, t0: Date.now() };
