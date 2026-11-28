@@ -32,7 +32,8 @@ bok2_ut = bok2.replace(' ', '')
 feil = 0
 for t, hvor in biter:
     if '${' in t or '<' in t or re.match(r'UN \d{4} |TOMT KOLLI, |Spesiell bestemmelse 640[A-H]$', t): continue  # linjer i transportdokumentet laget etter mønsteret i boka
-    n = norm(t.replace('…', '').replace('¹', '').replace('²', ''))
-    if n not in bok2 and n.replace(' ', '') not in bok2_ut:
+    # […] markerer at noe er utelatt: hver del skal stå i boka
+    deler = [norm(d.replace('…', '').replace('¹', '').replace('²', '')) for d in re.split(r'\[…\]|\[\.\.\.\]', t)]
+    if any(d and d not in bok2 and d.replace(' ', '') not in bok2_ut for d in deler):
         feil += 1; print(f'SITAT IKKE I BOKA: «{t}» | {hvor}')
 print(f'{feil} sitater i riktige svar og forklaringer som ikke står ordrett i boka')
